@@ -1,0 +1,348 @@
+P0 [Normal] UNIVERSIDAD NACIONAL DE HUANCAVELICA
+P1 [Normal] FACULTAD DE INGENIERÍA ELECTRÓNICA Y SISTEMAS
+P2 [Normal] ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS
+P4 [Normal] Plan de proyecto
+P5 [Normal] Plan de proyecto del sistema de información gerencial de Electrocentro
+P6 [Normal] Docente: Ing. Roly Alcides Cristóbal Lara
+P7 [Normal] Curso: Sistema de Información Gerencial
+P8 [Normal] Integrantes
+P9 [Normal] Sedano Huamani David
+P10 [Normal] Silva Choque Mariano Francisco
+P11 [Normal] Soto Boza Cristian Eduardo
+P12 [Normal] Prieto Hinojosa Christian Daniel
+P13 [Normal] Huancavelica, Perú
+P14 [Normal] Octubre de 2026
+P15 [Normal] Índice
+P16 [toc 1] Plan de proyecto del sistema de información gerencial de Electrocentro	3
+P17 [toc 1] Organización y diagnóstico documental	3
+P18 [toc 1] Problema y justificación	5
+P19 [toc 1] Objetivos y alineamiento estratégico	6
+P20 [toc 1] Alcance, entregables y limitaciones	8
+P21 [toc 1] Requisitos y prioridades	10
+P22 [toc 1] Gestión de datos y arquitectura	12
+P23 [toc 1] Diseño conceptual de la solución	13
+P24 [toc 1] Indicadores gerenciales	14
+P25 [toc 1] Metodología de trabajo	15
+P26 [toc 1] Organización y responsabilidades	16
+P27 [toc 1] Cronograma de tres semanas	17
+P28 [toc 1] Entregas y control semanal	19
+P29 [toc 1] Recursos y presupuesto	20
+P30 [toc 1] Riesgos y control de cambios	21
+P31 [toc 1] Calidad y validación	22
+P32 [toc 1] Cierre y transferencia	24
+P33 [toc 1] Referencias	25
+P34 [Heading 1] Plan de proyecto del sistema de información gerencial de Electrocentro
+P35 [Normal] Este proyecto construirá, en tres semanas, un prototipo de sistema de información gerencial para dar seguimiento a los proyectos de gobierno digital de Electrocentro S. A. El sistema reunirá la información de planificación y avance de cada proyecto y la convertirá en indicadores de supervisión. Al terminar se entregará una versión que se pueda demostrar, pruebas documentadas y un informe de cierre.
+P36 [Normal] La idea nace de dos documentos de la propia empresa. El Plan Estratégico Institucional 2022 a 2026 (PEI) incluye el objetivo de mejorar la gestión del portafolio y de los proyectos (OEI 12) y el de implementar proyectos de modernización y transformación digital (OEI 8). El Plan de Gobierno Digital 2023 a 2026 (PGD) reconoce que no existe una oficina de gestión de proyectos (PMO, por sus siglas en inglés) acorde con las buenas prácticas del PMBOK, y fija como meta contar con datos de calidad para decidir (OGD 05) (Electrocentro S. A., 2022, pp. 73, 76 y 77; Electrocentro S. A., 2023, pp. 13, 14 y 25).
+P37 [Normal] El trabajo sigue un enfoque iterativo e incremental, con una entrega verificable cada semana. La Tabla 1 resume las condiciones de ejecución. Las limitaciones del proyecto se explican en una sola sección, la de alcance, entregables y limitaciones.
+P38 [Normal] Tabla 1
+P39 [Normal] Condiciones generales de ejecución
+TABLE 40
+Variable | Definición
+Duración | Tres semanas (15 jornadas) con revisión al cierre de cada semana. Es el plazo fijado por el docente del curso.
+Producto | Prototipo web con registro de proyectos, seguimiento de hitos, tablero e informe exportable.
+Muestra de trabajo | Diez proyectos tomados de la cartera del PGD, con sus hitos asociados.
+Esfuerzo estimado | Alrededor de 120 horas persona (entre 110 y 130), ajustables según la disponibilidad real del equipo.
+Cierre | Entrega del prototipo, la documentación y las evidencias de prueba.
+P42 [Heading 1] Organización y diagnóstico documental
+P43 [Normal] Electrocentro S. A. forma parte del Grupo Distriluz, un conjunto de cuatro empresas de servicio público de electricidad que están bajo el ámbito del Fondo Nacional de Financiamiento de la Actividad Empresarial del Estado, FONAFE (Electrocentro S. A., 2023, p. 8). Dentro de la empresa, el área de Tecnologías de la Información y Comunicaciones (TIC) planifica, construye y ejecuta los proyectos tecnológicos, y reporta su avance al Comité de Gobierno Digital (Electrocentro S. A., 2023, pp. 13 y 14). La Figura 1 muestra cómo se relacionan los documentos, los responsables y el seguimiento que propone este proyecto.
+P44 [Normal] Figura 1
+P45 [Normal] Contexto del proceso de seguimiento
+P47 [Normal] Nota. Esquema elaborado por el equipo a partir de las funciones descritas en el PGD (Electrocentro S. A., 2023, pp. 13 y 14).
+P48 [Normal] La Tabla 2 reúne los hallazgos de los documentos que sustentan el proyecto y el uso que se les dará. Las frases entre comillas son citas textuales del PEI y del PGD.
+P49 [Normal] Tabla 2
+P50 [Normal] Hallazgos documentales y su uso en el proyecto
+TABLE 51
+Fuente | Hallazgo | Uso en el proyecto
+PGD, pp. 13 y 14 | “Inexistencia de una PMO acorde con las buenas prácticas del PMBOK”; la supervisión de estos proyectos la ejecuta solo el área de TIC. | Problema y justificación
+PGD, p. 13 | Los proyectos los administra TIC “dentro de las limitaciones de tiempo, recurso humano reducido y considerando el total de sus funciones”. | Justificación del sistema
+PGD, p. 14 | “Los procesos de gobierno digital no están documentados ni existe un manual que defina cómo debe operar el gobierno digital”. | Requisitos de trazabilidad y guía de uso
+PEI, p. 65 (FODA) | Debilidades: “Falta de método de priorización del Programa de Inversiones” y “Retraso en la ejecución de inversiones”. | Problema y cartera comparable
+PEI, pp. 73, 76 y 77 | OEI 8, transformación digital, y OEI 12, gestión del portafolio y de los proyectos. | Objetivo y alineamiento
+PEI, p. 78 | OEI 18, fortalecer los recursos para el gobierno digital. | Alineamiento
+PEI, p. 122 | Indicador “Grado de madurez de la gestión de portafolio de proyectos (PMO)”, con metas de 10 % en 2022 a 80 % en 2026. | Indicador oficial al que el sistema aporta
+PGD, pp. 25 y 27 | OGD 02, OGD 04 y OGD 05 con sus indicadores. | Alineamiento e indicadores
+PGD, p. 28 | Cartera de 19 proyectos de gobierno digital por S/ 10 819 550. | Muestra de diez proyectos
+P53 [Heading 1] Problema y justificación
+P54 [Normal] El problema es que Electrocentro no cuenta con un mecanismo formal para supervisar sus proyectos de gobierno digital. El PGD lo dice con claridad: la supervisión la ejecuta el área de TIC, que reporta periódicamente al Comité de Gobierno Digital, y “actualmente no se cuenta con mecanismos ni otros roles fuera de TIC que participen en la supervisión directa y formalmente establecida para estos proyectos, lo que se corrobora con la inexistencia de una PMO acorde con las buenas prácticas del PMBOK” (Electrocentro S. A., 2023, pp. 13 y 14). Dicho de otro modo, quien ejecuta los proyectos es también quien los supervisa.
+P55 [Normal] A esto se suman otros dos hallazgos. Los procesos de gobierno digital “no están documentados ni existe un manual que defina cómo debe operar el gobierno digital” (Electrocentro S. A., 2023, p. 14). Y el FODA del PEI registra, entre las debilidades, el retraso en la ejecución de inversiones y la falta de método de priorización del Programa de Inversiones (Electrocentro S. A., 2022, p. 65). La Figura 2 resume cómo estos hallazgos llevan a la necesidad que atiende el proyecto.
+P56 [Normal] Figura 2
+P57 [Normal] Del hallazgo a la respuesta del proyecto
+P59 [Normal] Nota. Hallazgos tomados del PGD (Electrocentro S. A., 2023, pp. 13 y 14) y del PEI (Electrocentro S. A., 2022, p. 65).
+P60 [Normal] La justificación gerencial es ofrecer una vista común de responsables, fechas, hitos y presupuesto de cada proyecto, para que el Comité de Gobierno Digital y la gerencia vean qué proyectos se atrasan, cuánto se desvía el gasto de lo previsto y cuáles requieren una decisión. El OEI 12 del PEI expresa el mismo propósito: que los proyectos se implementen “de acuerdo a lo planificado y presupuestado, en los tiempos previstos” (Electrocentro S. A., 2022, p. 77). Además, como el PGD indica que los proyectos tecnológicos se gestionan con recurso humano reducido, una herramienta que consolide el seguimiento apunta a aliviar el trabajo manual de armar reportes.
+P61 [Heading 1] Objetivos y alineamiento estratégico
+P62 [Heading 2] Objetivo general
+P63 [Normal] Desarrollar, en tres semanas, un prototipo de sistema de información gerencial que permita supervisar una cartera acotada de proyectos de gobierno digital de Electrocentro mediante registros trazables, indicadores y reportes.
+P64 [Heading 2] Objetivos específicos
+P65 [List Paragraph] Revisar el PEI y el PGD, seleccionar la muestra de diez proyectos y definir los requisitos prioritarios durante la primera semana.
+P66 [List Paragraph] Diseñar el modelo de datos, los indicadores y las pantallas, y dejar un registro inicial utilizable al finalizar la primera semana.
+P67 [List Paragraph] Integrar durante la segunda semana el control de acceso, el seguimiento de hitos, el tablero y el reporte exportable.
+P68 [List Paragraph] Validar el funcionamiento con casos de prueba, corregir defectos y documentar la entrega durante la tercera semana.
+P69 [Normal] La Tabla 3 muestra la cadena que une cada vacío detectado en los documentos con un objetivo del PEI o del PGD, la función del sistema que lo atiende y el indicador con el que se mide.
+P70 [Normal] Tabla 3
+P71 [Normal] Cadena de alineamiento entre los documentos, el sistema y los indicadores
+TABLE 72
+Vacío detectado | Objetivo del PEI o del PGD | Función del sistema | Indicador
+La supervisión de la cartera de proyectos digitales depende solo del área de TIC (PGD, p. 13). | OEI 8. Implementar proyectos de modernización y transformación digital (PEI, p. 76). | Cartera consolidada de proyectos digitales con su avance (RF02 y RF03). | Avance de hitos (%). Usa la lógica del indicador del PEI de actividades ejecutadas sobre programadas (PEI, p. 114).
+No existe una PMO acorde con el PMBOK (PGD, pp. 13 y 14). | OEI 12. Mejorar la gestión del portafolio y de los proyectos (PEI, pp. 73 y 77). | Registro único de proyectos, hitos y avances con responsable y fecha (RF02 y RF03). | Proyectos con retraso (%). Aporta evidencia al indicador oficial “Grado de madurez de la gestión de portafolio de proyectos (PMO)” (PEI, p. 122).
+Retraso en la ejecución de inversiones y falta de método de priorización (PEI, p. 65). | OEI 12. | Cartera comparable por objetivo asociado, monto y año, con filtros (RF02 y RF05). | Desviación presupuestal (%) y Proyectos por estado (n).
+Los procesos de gobierno digital no están documentados (PGD, p. 14). | OGD 02. Optimizar procesos, establecer políticas, procedimientos, metodologías y estándares (PGD, p. 25). | Registro del autor, la fecha y el cambio de cada dato, y guía de uso con el procedimiento de actualización (RF03). | Indicador del PGD “Adecuación de procesos a la normativa de Gobierno Digital” (PGD, p. 27). El prototipo aporta el registro, no lo calcula.
+Los ciberataques figuran como amenaza y falta personal capacitado en seguridad de la información (PEI, pp. 65 y 66). | OGD 04. Implementar y ejecutar mejora continua del Sistema de Seguridad de la Información (PGD, p. 25). | Tres perfiles de acceso y registro de cambios (RF01). | Indicador del PGD “Implementación de SGSI en base a la Norma NTP ISO 27001” (PGD, p. 27). El prototipo aporta controles de acceso, que se prueban en la validación.
+Se requieren datos de calidad y disponibles para tomar decisiones (PGD, p. 25). | OGD 05. Generar sistemas de información con datos de calidad para la toma de decisiones (PGD, p. 25). | Tablero con cuatro indicadores y reporte con fecha de corte (RF04 a RF06). | Indicador del PGD “Inteligencia de Negocios y Analítica”, medido en módulos de BI implementados (PGD, p. 27). El tablero equivale a un módulo.
+Los proyectos tecnológicos se ejecutan con recurso humano reducido (PGD, p. 13). | OEI 18. Fortalecer los recursos para el gobierno digital (PEI, p. 78). | Herramienta propia, hecha con herramientas gratuitas, que consolida el seguimiento. | Indicador del PEI “Nivel de implementación de Infraestructura TIC para la Transformación Digital” (PEI, p. 132). La contribución es indirecta.
+P73 [Normal] Nota. Elaboración propia a partir del PEI (Electrocentro S. A., 2022) y del PGD (Electrocentro S. A., 2023). RF significa requisito funcional y se detalla en la Tabla 5. SGSI significa Sistema de Gestión de Seguridad de la Información y BI, inteligencia de negocios.
+P74 [Heading 1] Alcance, entregables y limitaciones
+P75 [Normal] El alcance comprende una cartera de diez proyectos con sus responsables, fechas, hitos y registros de avance. El prototipo incorporará tres perfiles de acceso, cuatro indicadores gerenciales y un reporte exportable. La Figura 3 organiza el trabajo en una estructura de desglose (EDT) con cuatro entregables, que se pueden verificar al cierre de cada iteración.
+P76 [Normal] Figura 3
+P77 [Normal] Estructura de desglose del trabajo del proyecto
+P79 [Normal] Nota. Elaboración propia. E1 a E4 son los entregables de la Tabla 4; las tareas, jornadas y horas de cada paquete de trabajo están en la Tabla 12.
+P80 [Normal] Tabla 4
+P81 [Normal] Entregables y evidencia de finalización
+TABLE 82
+Código | Entregable | Evidencia
+E1 | Plan y diagnóstico documental. | Matriz de fuentes, problema, interesados y alcance definidos.
+E2 | Datos y diseño. | Requisitos, modelo de datos, fichas de indicadores y pantallas.
+E3 | Prototipo funcional. | Registro, perfiles, hitos, tablero y reporte integrados.
+E4 | Validación y cierre. | Resultados de prueba, guía de uso y paquete de entrega.
+P84 [Heading 2] Limitaciones
+P85 [Normal] Las limitaciones del proyecto se reúnen aquí, para no repetirlas en cada sección.
+P86 [List Paragraph] El desarrollo se hará en un entorno académico local. Quedan fuera del alcance la integración con los sistemas de la empresa, como SAP, la migración de información real, la analítica predictiva y el despliegue en producción.
+P87 [List Paragraph] Los nombres de los proyectos, sus objetivos, montos y años salen del PGD. Los hitos, los avances y el gasto acumulado son datos de demostración y se identifican como tales; por eso los resultados del tablero no describen el desempeño real de Electrocentro.
+P88 [List Paragraph] El OEI 12 abarca todo el portafolio de proyectos e inversiones de la empresa. Este prototipo atiende solo la cartera de gobierno digital, como primer caso de aplicación.
+P89 [List Paragraph] El indicador oficial de madurez de la gestión de portafolio (PMO) se mide mediante la evaluación de una consultoría de terceros (Electrocentro S. A., 2022, p. 122). El prototipo no lo calcula; aporta registros trazables que ese tipo de evaluación puede usar.
+P90 [List Paragraph] La consulta a personal de la empresa se hará cuando exista disponibilidad. Si no se concreta, la validación será académica y ninguna conformidad del equipo o del docente se presentará como aprobación de Electrocentro.
+P91 [List Paragraph] Los beneficios empresariales solo podrían medirse si el sistema se aplicara en la empresa durante un periodo de uso real.
+P92 [Heading 1] Requisitos y prioridades
+P93 [Normal] Los requisitos se priorizan según su aporte al ciclo de seguimiento. Los esenciales son lo necesario para demostrar el producto; los complementarios son mejoras que se incorporan solo cuando el núcleo esté completo y aprobado. La Tabla 5 establece la base verificable del desarrollo e incluye las horas estimadas para construir cada requisito.
+P94 [Normal] Tabla 5
+P95 [Normal] Requisitos funcionales del prototipo y esfuerzo estimado
+TABLE 96
+ID | Requisito | Prioridad | Criterio observable | Horas
+RF01 | Autenticar usuarios y aplicar tres perfiles. | Esencial | Cada perfil ejecuta solo sus acciones. | 6
+RF02 | Registrar y editar proyectos. | Esencial | Se conserva un identificador único. | 7
+RF03 | Registrar hitos y avances. | Esencial | Cada cambio tiene fecha y responsable. | 9
+RF04 | Calcular cuatro indicadores. | Esencial | Los valores coinciden con el cálculo de control. | 11
+RF05 | Filtrar por estado, responsable y corte. | Esencial | Tablero y detalle usan el mismo filtro. | 5
+RF06 | Exportar el reporte de seguimiento. | Esencial | El archivo incluye corte y datos consultados. | 4
+RF07 | Importar registros mediante CSV. | Complementaria | Se señalan filas inválidas sin duplicarlas. | 6
+RF08 | Mostrar alertas de actualización. | Complementaria | Se identifican registros sin actualización reciente. | 4
+ | Total de construcción |  | 42 esenciales y 10 complementarias | 52
+P98 [Heading 2] Regla de recorte
+P99 [Normal] Si el tiempo aprieta, el alcance se recorta en este orden: primero RF08, luego RF07 y, como último recurso, el filtro por fecha de corte de RF05 pasa a ser complementario, conservando los filtros por estado y por responsable. La decisión se toma con las horas reales registradas en las revisiones de las jornadas 5 y 10, y nunca amplía el plazo de tres semanas.
+P100 [Heading 2] Condiciones de calidad
+P101 [Normal] La interfaz usará etiquetas claras y permitirá completar el registro sin instrucciones técnicas. Los campos obligatorios, las fechas incompatibles y los importes negativos tendrán validación. El prototipo mantendrá control de permisos y copias recuperables de los datos de demostración. La consulta del tablero se probará con un tiempo objetivo de respuesta de hasta tres segundos en el equipo de ensayo, usando la muestra prevista.
+P102 [Heading 1] Gestión de datos y arquitectura
+P103 [Normal] La solución usará una aplicación web, una base de datos relacional y una capa de consulta. La información ingresará por registro manual y, como función complementaria, por un archivo CSV. La Figura 4 muestra el recorrido previsto desde las fuentes hasta el reporte.
+P104 [Normal] Figura 4
+P105 [Normal] Arquitectura conceptual y recorrido de la información
+P107 [Normal] Nota. Elaboración propia.
+P108 [Normal] Tabla 6
+P109 [Normal] Estructura mínima de los datos
+TABLE 110
+Entidad | Campos principales | Relación
+Proyecto | ID, código del PGD, nombre, objetivo asociado, responsable, años, monto estimado, estado y fuente. | Contiene hitos y registros de corte.
+Hito | ID, proyecto, fecha prevista, cierre y evidencia. | Pertenece a un proyecto.
+Corte de seguimiento | Fecha, presupuesto planificado y gasto acumulado. | Corresponde a un proyecto y a un periodo.
+Usuario y cambio | Perfil, autor, fecha y dato modificado. | Vincula acciones con responsables.
+P112 [Heading 2] Muestra de trabajo
+P113 [Normal] La muestra toma diez proyectos reales de la cartera del PGD, que en total tiene 19 proyectos por S/ 10 819 550. Se eligieron para cubrir los seis objetivos de gobierno digital (OGD 01 a OGD 06) y para combinar proyectos de distinta duración y monto. Juntos suman S/ 8 623 550, es decir, el 79,7 % de la cartera. La Tabla 7 los lista con los datos que se toman del PGD.
+P114 [Normal] Tabla 7
+P115 [Normal] Muestra de diez proyectos tomada de la cartera del PGD
+TABLE 116
+Código | Proyecto | Objetivo | Monto estimado (S/) | Años
+005 | Equipos de ciberseguridad. | OGD 04 | 500 000 | 2023 a 2024
+010 | Servicio Software Factory (FONAFE 5). | OGD 05 | 2 383 550 | 2023 a 2026
+011 | Enlaces de fibra óptica en subestaciones. | OGD 03 | 2 500 000 | 2023 a 2025
+013 | Implementación de SAP S/4 HANA. | OGD 06 | 2 000 000 | 2023 a 2026
+014 | Actualización del marco de gobierno e incorporación del Comité de Gobierno Digital. | OGD 02 | 120 000 | 2023
+017 | Fortalecimiento de las competencias digitales del personal. | OGD 01 | 300 000 | 2023 a 2026
+020 | Transición al protocolo IPv6. | OGD 03 | 400 000 | 2023 a 2025
+022 | Publicación de datos abiertos en la Plataforma Nacional de Datos Abiertos. | OGD 05 | 108 000 | 2023
+023 | Implementación y certificación del sistema de gestión de seguridad de la información (NTP ISO/IEC 27001:2014). | OGD 04 | 212 000 | 2023
+024 | Mesa de partes digital integrada al sistema de gestión documental. | OGD 05 | 100 000 | 2023
+ | Total de la muestra |  | 8 623 550 | 
+P117 [Normal] Nota. Código, nombre, objetivo, monto y años tomados de la cartera del PGD (Electrocentro S. A., 2023, p. 28). Los hitos, avances y gasto acumulado de cada proyecto serán datos de demostración.
+P118 [Normal] Los registros conservarán su origen y su fecha de actualización. La demostración identificará los datos simulados y usará identidades ficticias para los responsables. Un proyecto se cerrará cuando concluyan sus hitos requeridos. El tablero mostrará cuántos registros carecen de información suficiente para cada cálculo.
+P119 [Heading 1] Diseño conceptual de la solución
+P120 [Normal] La navegación se organizará en proyectos, seguimiento, tablero y reportes. La pantalla inicial mostrará una síntesis de la cartera y permitirá llegar al detalle que explica cada resultado. La Figura 5 presenta la distribución prevista de esa vista; los valores se incorporarán al construir el prototipo.
+P121 [Normal] Figura 5
+P122 [Normal] Distribución prevista del tablero gerencial
+P124 [Normal] Nota. Diseño conceptual del proyecto. La figura no representa una aplicación institucional existente ni resultados de Electrocentro.
+P125 [Normal] La persona responsable actualizará los hitos desde la ficha de cada proyecto. El perfil de consulta visualizará los indicadores y descargará reportes; el perfil administrador gestionará usuarios y catálogos. La fecha de corte permanecerá visible para evitar comparaciones entre periodos distintos.
+P126 [Normal] Las alertas mostrarán su motivo: un hito vencido, un dato incompleto o una actualización pendiente. Desde el tablero se podrá revisar el registro que originó la alerta. El reporte conservará los filtros aplicados, la fecha de emisión y la identificación del conjunto de datos utilizado. Así, una cifra resumida podrá relacionarse con su evidencia de origen.
+P127 [Heading 1] Indicadores gerenciales
+P128 [Normal] Los cuatro indicadores de la Tabla 8 convierten los registros del prototipo en información de supervisión. Se calculan sobre el mismo conjunto de proyectos y la misma fecha de corte. El avance de hitos sigue la misma lógica que los indicadores del PEI para los OEI 8 y 18, actividades ejecutadas sobre actividades programadas (Electrocentro S. A., 2022, pp. 114 y 132), pero aplicada a cada proyecto de la cartera. Sus definiciones corresponden al proyecto académico y no sustituyen las fichas institucionales del PEI.
+P129 [Normal] Tabla 8
+P130 [Normal] Definición operativa de los indicadores
+TABLE 131
+Indicador | Cálculo y fuente | Lectura gerencial
+Avance de hitos (%) | Hitos concluidos al corte / hitos de la línea base × 100. Fuente: hitos del proyecto. | Permite revisar el cumplimiento del alcance registrado.
+Proyectos con retraso (%) | Proyectos activos con al menos un hito vencido sin concluir / proyectos activos evaluables × 100. Fuente: fechas y cierres. | Identifica dónde concentrar el seguimiento.
+Desviación presupuestal (%) | (Gasto acumulado menos presupuesto acumulado planificado) / presupuesto acumulado planificado × 100. Fuente: corte financiero. | Un valor positivo señala gasto superior a lo planificado al mismo corte.
+Proyectos por estado (n) | Conteo de proyectos por estado: pendiente, en curso o cerrado. Fuente: cartera registrada. | Muestra la composición de la cartera y su evolución.
+P133 [Heading 2] Reglas de interpretación
+P134 [Normal] Los hitos tendrán el mismo peso dentro de la demostración; este porcentaje no se interpretará como avance físico certificado. Los proyectos activos comprenderán los estados pendiente y en curso. Un hito estará vencido cuando su fecha prevista sea anterior al corte y no tenga cierre registrado.
+P135 [Normal] La variación financiera comparará importes de igual periodo y moneda de los proyectos registrados; se distingue del presupuesto del proyecto académico, que es de S/ 0,00. Si el denominador es cero o faltan datos, se mostrará “No aplica” o “Sin datos”. Los resultados se actualizarán semanalmente y se contrastarán con el detalle exportado.
+P136 [Heading 1] Metodología de trabajo
+P137 [Normal] El desarrollo seguirá un enfoque iterativo e incremental. La dimensión iterativa permite revisar las decisiones a partir de las pruebas; la incremental agrega funciones utilizables sobre la versión anterior. Este criterio recoge la distinción descrita por Agile Alliance (s. f.-a, s. f.-b) y se ajusta al plazo de tres semanas porque permite comprobar el producto antes de la entrega final.
+P138 [Normal] Cada semana comenzará con la selección de tareas y un resultado esperado. El equipo diseñará, construirá y probará la parte seleccionada, y cerrará con una demostración y un registro de observaciones. El tablero de trabajo tendrá las columnas pendiente, en curso, en revisión y terminado. Las tareas esenciales se atenderán primero y cada responsable mantendrá una sola tarea principal en ejecución. La coordinación se hará con un intercambio breve por jornada y una revisión semanal de los entregables.
+P139 [Normal] Una función se considerará terminada cuando cumpla su criterio de aceptación, supere las pruebas asociadas y tenga documentado su uso. Las observaciones se incorporarán a la lista priorizada; su aceptación dependerá de la capacidad restante y del efecto sobre el objetivo de las tres semanas. Al cierre de cada semana también se registrarán las horas reales dedicadas, para compararlas con las estimadas.
+P140 [Heading 1] Organización y responsabilidades
+P141 [Normal] El equipo distribuye el trabajo por funciones. Una persona puede asumir más de una, según su disponibilidad, manteniendo una revisión cruzada de los productos críticos. La Tabla 9 define quién ejecuta y quién verifica cada resultado.
+P142 [Normal] Tabla 9
+P143 [Normal] Responsabilidades sobre los entregables
+TABLE 144
+Actividad | Responsable de ejecución | Verificación
+Plan y control del alcance | Coordinación del proyecto | Análisis funcional
+Diagnóstico y requisitos | Análisis funcional | Coordinación del proyecto
+Diseño y construcción | Desarrollo | Análisis funcional
+Datos e indicadores | Análisis y desarrollo | Calidad
+Pruebas y defectos | Calidad | Desarrollo y coordinación
+Documentación y entrega | Coordinación y calidad | Revisión conjunta del equipo
+P146 [Normal] La Tabla 10 identifica a los interesados de Electrocentro que aparecen en el PGD y en el PEI, su interés en el sistema y el perfil de acceso que tendrían. Son interlocutores de contraste y no integrantes comprometidos del equipo.
+P147 [Normal] Tabla 10
+P148 [Normal] Interesados de Electrocentro y perfil de acceso previsto
+TABLE 149
+Interesado | Rol según los documentos | Interés en el sistema | Perfil
+Jefe de TIC | Responsable de informática del Comité de Gobierno Digital; su área planifica, construye y ejecuta los proyectos (PGD, pp. 13 y 14). | Usuario principal; actualiza y reporta el avance. | Administrador y responsable
+Comité de Gobierno Digital | Recibe los reportes periódicos de TIC (PGD, p. 13). | Supervisar la cartera con datos comparables. | Consulta
+Gerente Regional y Gerente General | Líder de Gobierno Digital y titular de la entidad (PGD, p. 13). | Decidir prioridades y recursos. | Consulta
+Área de Administración de Proyectos | Responsable del indicador de madurez de la gestión de portafolio (PEI, p. 122). | Contar con registros trazables del portafolio. | Consulta
+Jefe de Planeamiento | Responsable del área de planificación en el Comité (PGD, p. 13). | Verificar el vínculo de los proyectos con el PEI. | Consulta
+Jefe de Calidad y Fiscalización | Oficial de seguridad de la información (PGD, p. 13). | Revisar permisos y trazabilidad. | Consulta
+Responsables de proyecto | Áreas indicadas como responsables en la cartera del PGD (pp. 29 a 31). | Registrar hitos y avances. | Responsable
+P151 [Normal] La Tabla 11 indica los actores a quienes se consultará y en qué momento. Si no se concreta una consulta institucional, se deja constancia y la revisión se hace con escenarios de prueba académicos.
+P152 [Normal] Tabla 11
+P153 [Normal] Actores de consulta y propósito de la interacción
+TABLE 154
+Actor | Aporte previsto | Momento
+Área TIC o informante disponible | Explicar el seguimiento actual y contrastar campos. | Semanas 1 y 3
+Responsable de supervisión | Revisar la utilidad de indicadores y reportes. | Semanas 1 y 3
+Docente de la asignatura | Revisar la coherencia académica y los entregables. | Revisiones semanales
+P156 [Heading 1] Cronograma de tres semanas
+P157 [Normal] El plazo de tres semanas es una condición fijada por el docente, por lo que el cronograma lo toma como límite y organiza el trabajo en tres iteraciones de cinco jornadas, una por día hábil. Se usan jornadas relativas (D01 a D15), de modo que la duración se conserva sin atribuir fechas de inicio no establecidas.
+P158 [Normal] Frente a la versión anterior, la primera semana dedica dos jornadas completas a revisar el PEI y el PGD, porque de esa revisión salen la justificación, los indicadores y la muestra de proyectos. También se deja un margen de holgura de dos jornadas (D13 y D14) con 8 horas para correcciones y ajustes. La Figura 6 muestra la programación y la Tabla 12 detalla las jornadas, las horas estimadas y el responsable principal de cada tarea.
+P159 [Normal] Figura 6
+P160 [Normal] Programación de tareas, dependencias e hitos en tres semanas
+P162 [Normal] Nota. D01 a D15 son jornadas relativas. Las barras negras agrupan las tres iteraciones; los rombos identifican las entregas de las jornadas 5, 10 y 15; las flechas señalan dependencias y Pred. es el número de la tarea predecesora.
+P163 [Normal] Tabla 12
+P164 [Normal] Tareas, jornadas y horas estimadas
+TABLE 165
+ID | Tarea | Jornadas | Horas | Responsable principal
+ | Iteración 1: Diagnóstico, diseño y base |  |  | 
+3 | Revisión del PEI y del PGD | D01 a D02 | 10 | Análisis funcional
+4 | Alcance, interesados y muestra de diez proyectos | D03 | 4 | Coordinación
+5 | Requisitos e indicadores | D03 | 8 | Análisis funcional
+6 | Modelo de datos y pantallas | D04 | 12 | Desarrollo y análisis
+7 | Registro inicial y carga de la muestra | D05 | 7 | Desarrollo
+ | Subtotal de la semana 1 |  | 41 | 
+ | Iteración 2: Seguimiento, indicadores y tablero |  |  | 
+10 | Perfiles y control de acceso | D06 | 6 | Desarrollo
+11 | Hitos y avances | D06 a D07 | 9 | Desarrollo
+12 | Indicadores | D08 a D09 | 11 | Análisis y desarrollo
+13 | Tablero con filtros | D08 a D09 | 5 | Desarrollo
+14 | Reporte exportable | D09 | 4 | Desarrollo
+15 | Integración y pruebas de la iteración | D10 | 6 | Calidad
+ | Subtotal de la semana 2 |  | 41 | 
+ | Iteración 3: Validación y cierre |  |  | 
+18 | Funciones complementarias (RF07 y RF08) | D11 a D12 | 10 | Desarrollo
+19 | Pruebas integrales y de aceptación | D11 a D12 | 10 | Calidad
+20 | Correcciones y margen de holgura | D13 a D14 | 8 | Desarrollo y calidad
+21 | Documentación y guía de entrega | D11 a D14 | 7 | Coordinación y calidad
+22 | Validación y presentación final | D15 | 3 | Coordinación
+ | Subtotal de la semana 3 |  | 38 | 
+ | Total estimado |  | 120 | 
+P166 [Normal] Nota. Los números de tarea coinciden con los de la Figura 6. Las tareas 8, 16 y 23 son hitos de entrega y no consumen horas.
+P167 [Heading 1] Entregas y control semanal
+P168 [Normal] El proyecto se organiza en tres iteraciones de cinco jornadas. La primera establece la base documental y el registro inicial; la segunda integra el seguimiento, los indicadores y los reportes; la tercera concentra la validación integral y el cierre. Cada entrega tiene un resultado verificable y una estimación de esfuerzo, que la Tabla 13 distribuye por semana.
+P169 [Normal] Tabla 13
+P170 [Normal] Resultados y esfuerzo por semana
+TABLE 171
+Semana | Resultado verificable | Horas estimadas | Horas reales
+1 | Plan, diagnóstico, diseño y registro inicial utilizable. | 41 | 
+2 | Acceso por perfiles, hitos, indicadores, tablero y reportes integrados. | 41 | 
+3 | Funciones complementarias, validación, correcciones y entrega documentada. | 38 | 
+Total | Proyecto académico completo. | 120 | 
+P172 [Normal] Nota. La columna de horas reales se completa al cierre de cada semana.
+P173 [Normal] Las 120 horas son una estimación de referencia, con un rango de 110 a 130 horas persona, equivalente a unas 40 horas semanales de dedicación conjunta del equipo. Al cierre de las jornadas 5, 10 y 15 se comparan las horas reales con las estimadas. Si el equipo dispone de menos horas de las previstas, se recorta el alcance complementario según el orden de la sección de requisitos; el plazo de tres semanas no cambia.
+P174 [Heading 2] Dependencias y revisión del avance
+P175 [Normal] La ruta principal comprende los requisitos, el modelo de datos, el registro, el seguimiento, los indicadores, la integración y la validación. En el cronograma, el número de predecesora identifica la tarea que habilita a la siguiente. La documentación final avanza en paralelo con las pruebas, una vez disponible la versión integrada. Los hitos de las jornadas 5, 10 y 15 marcan la revisión de cada entrega.
+P176 [Normal] Al cerrar cada semana se registran las tareas terminadas, los defectos, las horas reales y la capacidad restante. Las funciones complementarias se incorporan únicamente cuando el núcleo esencial esté completo. La jornada 15 se reserva para la validación y la presentación final.
+P177 [Heading 1] Recursos y presupuesto
+P178 [Normal] Se estiman 120 horas persona, equivalentes a unas 40 horas semanales de dedicación conjunta y a unas 10 horas por semana para cada integrante. Se utilizarán equipos disponibles, un entorno web local, una base de datos relacional y control de versiones. La Tabla 14 distribuye el esfuerzo por componente de trabajo.
+P179 [Normal] Tabla 14
+P180 [Normal] Distribución del esfuerzo estimado
+TABLE 181
+Componente de trabajo | Horas | Participación
+Planificación y diagnóstico | 14 | 11,7 %
+Requisitos, datos y diseño | 20 | 16,7 %
+Construcción de funciones esenciales | 42 | 35,0 %
+Construcción de funciones complementarias | 10 | 8,3 %
+Pruebas | 16 | 13,3 %
+Correcciones y margen de holgura | 8 | 6,7 %
+Documentación y sustentación | 10 | 8,3 %
+Total | 120 | 100,0 %
+P183 [Normal] El presupuesto financiero total es de S/ 0,00. La Tabla 15 establece la cobertura con recursos disponibles y trabajo académico no remunerado, sin adquisiciones, pagos ni reserva monetaria.
+P184 [Normal] Tabla 15
+P185 [Normal] Presupuesto del proyecto en soles
+TABLE 186
+Recurso o concepto | Cobertura prevista | Importe
+Equipos y conectividad | Equipos e Internet ya disponibles. | 0,00
+Software y almacenamiento | Herramientas gratuitas y recursos existentes. | 0,00
+Trabajo del equipo | Participación académica no remunerada. | 0,00
+Materiales y presentación | Entrega y documentación digitales. | 0,00
+Reserva monetaria | No se asignan fondos adicionales. | 0,00
+Presupuesto total | Proyecto completo de tres semanas. | 0,00
+P188 [Normal] Las horas registran dedicación académica y no se convierten en un importe monetario. Los montos de la Tabla 7 son los estimados del PGD para los proyectos de la empresa y no forman parte del presupuesto de este proyecto.
+P189 [Heading 1] Riesgos y control de cambios
+P190 [Normal] La Tabla 16 describe los riesgos iniciales y sus respuestas. La probabilidad y el impacto se valoran del 1 al 3, y su producto define el nivel: bajo (1 a 2), medio (3 a 4) o alto (6 a 9). Las estimaciones corresponden al proyecto académico.
+P191 [Normal] Tabla 16
+P192 [Normal] Riesgos y respuestas previstas
+TABLE 193
+ID y riesgo | Prob. | Imp. | Nivel | Respuesta y responsable
+R1 Acceso limitado a datos reales de seguimiento | 3 | 2 | 6 Alto | Usar la cartera del PGD como base y marcar como simulados los hitos, avances y gastos. Análisis funcional.
+R2 Aumento del alcance | 2 | 2 | 4 Medio | Congelar las funciones esenciales y registrar los cambios. Coordinación.
+R3 Horas disponibles menores a las estimadas | 2 | 3 | 6 Alto | Comparar horas reales y estimadas en las jornadas 5 y 10, usar la holgura y recortar funciones complementarias en el orden definido. Coordinación.
+R4 Cálculos inconsistentes de los indicadores | 3 | 2 | 6 Alto | Contrastar las fórmulas con casos de control. Calidad.
+R5 Pérdida de archivos | 1 | 3 | 3 Medio | Versionar y respaldar al cierre de cada jornada. Desarrollo.
+P195 [Normal] Todo cambio registrará su motivo, su esfuerzo y su efecto sobre los entregables. La coordinación resolverá con el equipo si el cambio se incorpora, sustituye a una tarea de valor equivalente o queda fuera de esta entrega. Los cambios que alteren el objetivo académico se consultarán con el docente. No se ampliará el plazo de tres semanas ni el presupuesto de S/ 0,00 para incorporar funciones complementarias; lo que varía, si hace falta, es el alcance complementario.
+P196 [Heading 1] Calidad y validación
+P197 [Normal] La validación comprobará que el prototipo gestiona información consistente y permite responder preguntas de supervisión. La Tabla 17 define los escenarios de prueba; cada ejecución conservará los datos de entrada, el resultado esperado, el resultado obtenido y la evidencia. Los defectos críticos se corregirán antes del cierre.
+P198 [Normal] Tabla 17
+P199 [Normal] Escenarios de validación y aceptación
+TABLE 200
+Escenario | Criterio de aceptación
+Registro de proyectos e hitos | Se guardan los campos válidos y se rechazan duplicados o fechas incompatibles.
+Perfiles de acceso | La consulta no modifica datos y la actualización no administra usuarios.
+Cálculo de indicadores | Los valores coinciden con el control independiente; tolerancia de 0,01 puntos porcentuales en porcentajes y coincidencia exacta en conteos.
+Casos sin datos | Un denominador cero o un dato faltante genera la etiqueta definida y no un resultado engañoso.
+Filtros y reporte | La exportación coincide con la selección y conserva la fecha de corte.
+Respuesta del tablero | La consulta responde en hasta tres segundos con la muestra prevista y el equipo de ensayo documentado.
+Uso y recuperación | El escenario principal se completa y una copia de respaldo puede restaurarse.
+P202 [Heading 2] Condiciones para aceptar el producto
+P203 [Normal] El cierre exigirá la aprobación de todos los escenarios asociados a requisitos esenciales, la ausencia de defectos críticos y la disponibilidad del paquete de entrega. Se considerará crítico un fallo que impida el registro o la consulta principal, produzca un indicador incorrecto o permita una acción no autorizada.
+P204 [Heading 2] Medición del éxito
+P205 [Normal] Más allá de la entrega, el plan se considerará logrado si una persona de supervisión, sin ayuda del equipo, puede responder con el tablero estas cuatro preguntas:
+P206 [List Paragraph] ¿Qué proyectos tienen hitos vencidos al corte y quién responde por ellos?
+P207 [List Paragraph] ¿Qué porcentaje de los hitos previstos se ha cumplido?
+P208 [List Paragraph] ¿Cuánto se aparta el gasto acumulado de lo planificado en el mismo corte?
+P209 [List Paragraph] ¿Cuántos proyectos hay en cada estado y de qué objetivo de gobierno digital dependen?
+P210 [Normal] Las respuestas deben coincidir con el cálculo de control y obtenerse localizando un proyecto con retraso, explicando el indicador y descargando el reporte. Se registrarán las dificultades observadas y sus correcciones. Si el sistema se aplicara en la empresa, un indicador razonable de adopción sería el porcentaje de proyectos con hitos actualizados en los últimos 15 días.
+P211 [Heading 1] Cierre y transferencia
+P212 [Normal] La tercera semana concluirá con una demostración del recorrido completo: registrar un proyecto, actualizar sus hitos, consultar indicadores y exportar un reporte. La entrega incluirá los archivos necesarios para reproducir ese escenario y una explicación breve de las decisiones de diseño. La Tabla 18 establece los componentes del paquete final.
+P213 [Normal] Tabla 18
+P214 [Normal] Contenido y comprobación del paquete de entrega
+TABLE 215
+Componente | Comprobación de entrega
+Código y versión del prototipo | Versión identificada y ejecución reproducible en el entorno académico.
+Base de datos y muestra | Estructura documentada, datos de demostración identificados y copia recuperable.
+Guía de uso | Pasos para registro, seguimiento, filtros y exportación.
+Informe de validación | Casos ejecutados, resultados y tratamiento de defectos.
+Informe de cierre | Alcance logrado, esfuerzo utilizado frente al estimado, limitaciones y evidencia del producto.
+P217 [Normal] La aceptación se registrará mediante una lista de verificación del equipo y las observaciones académicas recibidas. El informe de cierre comparará lo entregado con los objetivos, las horas reales con las estimadas, y explicará cualquier función complementaria que no se haya incorporado. Los pendientes se distinguirán de los defectos que impidan cumplir un requisito esencial.
+P218 [Normal] El resultado esperado es un prototipo que haga visible la relación entre los objetivos del PEI y del PGD, los proyectos y los datos de seguimiento. Su utilidad se sustentará en la claridad de los indicadores y en la posibilidad de verificar su origen. La entrega académica no implica puesta en producción, aprobación institucional ni resultados de mejora empresarial comprobados.
+P219 [Heading 1] Referencias
+P220 [Normal] Agile Alliance. (s. f.-a). What is incremental development? https://agilealliance.org/glossary/incremental-development/
+P221 [Normal] Agile Alliance. (s. f.-b). What is iterative development? https://agilealliance.org/glossary/iterative-development/
+P222 [Normal] Electrocentro S. A. (2022). Proyecto de plan estratégico institucional Electrocentro 2022 a 2026. https://www.distriluz.com.pe/transp/ftp/elcto/transp3/PEI2022-2026ELECTROCENTRO.pdf
+P223 [Normal] Electrocentro S. A. (2023). Plan de gobierno digital Electrocentro S. A. 2023 a 2026. https://www.distriluz.com.pe/transp/ftp/elcto/transp3/Plan%20de%20Gobierno%20Digital%20ELCTO_2023-2026_vf_01.pdf

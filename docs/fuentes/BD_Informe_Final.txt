@@ -1,0 +1,862 @@
+P0 [Normal] UNIVERSIDAD NACIONAL DE HUANCAVELICA
+P1 [Normal] FACULTAD DE INGENIERÍA ELECTRÓNICA Y SISTEMAS
+P2 [Normal] ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS
+P4 [Normal] Actividad de base de datos
+P5 [Normal] Normalización, modelo entidad relación, diseño lógico y físico de la base de datos, y alcances de Data Warehouse, Data Mart y Business Intelligence
+P6 [Normal] Sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A.
+P7 [Normal] Informe final
+P8 [Normal] Docente: Ing. Roly Alcides Cristóbal Lara
+P9 [Normal] Curso: Sistema de Información Gerencial
+P10 [Normal] Integrantes
+P11 [Normal] Sedano Huamani David
+P12 [Normal] Silva Choque Mariano Francisco
+P13 [Normal] Soto Boza Cristian Eduardo
+P14 [Normal] Prieto Hinojosa Christian Daniel
+P15 [Normal] Huancavelica, Perú
+P16 [Normal] Octubre de 2026
+P17 [Normal] Índice
+P19 [Heading 1] Introducción
+P20 [Normal] Electrocentro S. A., empresa de distribución eléctrica del Grupo Distriluz, cuenta con un Plan de Gobierno Digital 2023 a 2026 que reúne una cartera de proyectos de transformación digital. El plan de proyecto del curso propone un prototipo de sistema de información gerencial para supervisar esa cartera mediante registros trazables, cuatro indicadores y reportes. Este informe desarrolla la base de datos de ese sistema, desde el ordenamiento de los datos hasta su uso para la toma de decisiones.
+P21 [Normal] El trabajo se organiza en cinco capítulos, que siguen el orden natural del diseño de una base de datos. Cada capítulo toma como entrada el resultado del anterior:
+P22 [List Paragraph] Normalización. Parte de un registro sin normalizar y lo lleva hasta la tercera forma normal, con seis relaciones finales.
+P23 [List Paragraph] Modelo entidad relación. Representa esas relaciones como entidades, atributos y relaciones en un modelo conceptual.
+P24 [List Paragraph] Diseño lógico. Convierte el modelo en tablas con llaves primarias, llaves foráneas, dominios y restricciones.
+P25 [List Paragraph] Diseño físico. Implementa la base en MySQL con tipos de dato, índices, reglas programadas, permisos y una carga de diez proyectos.
+P26 [List Paragraph] Alcances de Data Warehouse, Data Mart y Business Intelligence. Define y construye el almacén de datos, su primer Data Mart y el tablero de indicadores.
+P27 [Normal] Los códigos, nombres, objetivos, montos y años de los proyectos provienen de la cartera del Plan de Gobierno Digital (Electrocentro S. A., 2023, p. 28). Los responsables, hitos, avances presupuestales y cambios registrados son datos de demostración y se identifican como tales, por lo que los resultados no describen el desempeño real de la empresa. Todo el código SQL se ejecutó y probó en MariaDB 10.11, compatible con MySQL y con XAMPP, y los archivos que acompañan a este informe se listan en el anexo.
+P28 [Heading 1] Capítulo 1. Normalización
+P29 [Normal] Este capítulo desarrolla la normalización. Normalizar significa ordenar los datos para que cada hecho se guarde una sola vez y en el lugar que le corresponde. Así se evitan las repeticiones, las contradicciones y los errores al insertar, modificar o borrar información.
+P30 [Normal] El trabajo se aplica al sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A., definido en el plan de proyecto. Los códigos, nombres, montos y plazos de los proyectos provienen de la cartera del Plan de Gobierno Digital (Electrocentro S. A., 2023, p. 28). Los responsables, los hitos y los avances presupuestales son datos de demostración, porque el prototipo no usa información real de gestión de la empresa.
+P31 [Normal] Una aclaración de nombres: en el plan de proyecto el momento en que se mide el avance se llama corte de seguimiento. En la base de datos se usa un nombre más claro: cada medición es un avance presupuestal y la fecha en que se toma es la fecha de reporte.
+P32 [Normal] El proceso tiene cuatro pasos. Primero se presenta una tabla sin normalizar y se identifican sus problemas. Después se identifican las dependencias funcionales. Luego se lleva la tabla a la primera, la segunda y la tercera forma normal, explicando en cada paso la regla, el cambio realizado y el resultado.
+P33 [Heading 2] Situación de partida: tabla sin normalizar
+P34 [Normal] La Tabla 1 muestra cómo se registraría la información en una hoja de cálculo, con todos los datos juntos en un solo registro por proyecto. Se presentan dos proyectos reales de la cartera del PGD, con sus datos de demostración.
+P35 [Normal] Tabla 1
+P36 [Normal] Registro de seguimiento sin normalizar
+TABLE 37
+Campo | Proyecto 005 | Proyecto 011
+cod_proyecto | 005 | 011
+nombre_proyecto | Equipos de ciberseguridad | Enlaces de fibra óptica en subestaciones
+cod_objetivo | OGD 04 | OGD 03
+desc_objetivo | Mejora continua del Sistema de Seguridad de la Información | Fortalecer y modernizar la infraestructura tecnológica
+monto | 500 000 | 2 500 000
+año_inicio | 2023 | 2023
+año_fin | 2024 | 2025
+estado | En curso | En curso
+responsable | Ana Quispe | Luis Rojas
+área_responsable | TIC | TIC
+perfil | Responsable | Responsable
+hitos | H1 Compra, prevista 15/03, cerrada 15/03 / H2 Instalación, prevista 15/09, pendiente | H1 Estudio, prevista 20/04, cerrada 20/04
+avances_presup. | 31/03: plan 200 000, gasto 150 000 / 30/06: plan 400 000, gasto 380 000 / 30/09: plan 480 000, gasto 450 000 | 31/03: plan 500 000, gasto 450 000
+P38 [Normal] Nota. Elaboración propia. Proyectos, objetivos, montos y años tomados del PGD (Electrocentro S. A., 2023, pp. 25 y 28). Responsables, hitos y avances son datos de demostración.
+P39 [Normal] Esta forma de registrar los datos genera varios problemas:
+P40 [List Paragraph] Las columnas hitos y avances_presupuestales guardan varios valores en una sola celda, por lo que no se pueden consultar ni calcular con facilidad.
+P41 [List Paragraph] La descripción del objetivo se repetiría en cada proyecto que pertenezca a él.
+P42 [List Paragraph] El área y el perfil del responsable se repetirían en cada uno de sus proyectos.
+P43 [List Paragraph] Si cambia el nombre de un área o la descripción de un objetivo, habría que corregirlo en muchas filas y podrían aparecer contradicciones.
+P44 [List Paragraph] No se podría registrar un responsable o un objetivo mientras no tenga un proyecto, ni borrar un proyecto sin perder los datos de su responsable.
+P45 [Heading 2] Dependencias funcionales
+P46 [Normal] Una dependencia funcional indica que el valor de un atributo, o de un grupo de atributos, determina el valor de otros. Identificarlas es el paso previo a normalizar, porque cada forma normal se verifica contra ellas. La Tabla 2 reúne las que existen en el registro de seguimiento.
+P47 [Normal] Tabla 2
+P48 [Normal] Dependencias funcionales del registro de seguimiento
+TABLE 49
+N.º | Dependencia | Significado
+DF1 | cod_proyecto → nombre_proyecto, cod_objetivo, monto, año_inicio, año_fin, estado, responsable | Cada proyecto tiene un solo nombre, objetivo, monto, plazo, estado y responsable.
+DF2 | cod_objetivo → desc_objetivo | Cada objetivo tiene una sola descripción.
+DF3 | responsable → área_responsable, perfil | Cada responsable pertenece a un área y tiene un perfil de acceso.
+DF4 | (cod_proyecto, nro_hito) → descripción, fecha_prevista, fecha_cierre | Un hito se identifica dentro de su proyecto.
+DF5 | (cod_proyecto, fecha_reporte) → presupuesto_planificado, gasto_acumulado | Un proyecto tiene un solo valor de presupuesto y de gasto por cada fecha de reporte (la fecha en que se corta el seguimiento).
+P50 [Normal] Nota. Elaboración propia a partir de las reglas del sistema descritas en el plan de proyecto.
+P51 [Heading 2] Primera forma normal (1FN)
+P52 [Heading 3] Regla
+P53 [Normal] Una relación está en primera forma normal cuando todos sus atributos guardan valores atómicos, es decir, un solo valor por celda, y no existen grupos repetidos.
+P54 [Heading 3] Cambio realizado
+P55 [Normal] Los hitos y los avances presupuestales se repiten dentro de cada proyecto, por lo que se llevaron a relaciones propias. Cada una incluye la llave del proyecto para saber a cuál pertenece. La Tabla 3 muestra las relaciones resultantes y las Tablas 4 y 5 muestran cómo quedan los datos de ejemplo.
+P56 [Normal] Tabla 3
+P57 [Normal] Relaciones obtenidas en primera forma normal
+TABLE 58
+Relación | Llave primaria | Atributos
+PROYECTO | cod_proyecto | nombre_proyecto, cod_objetivo, desc_objetivo, monto, año_inicio, año_fin, estado, responsable, área_responsable, perfil
+HITO | cod_proyecto, nro_hito | descripción, fecha_prevista, fecha_cierre
+AVANCE_PRESUPUESTAL | cod_proyecto, fecha_reporte | presupuesto_planificado, gasto_acumulado
+P59 [Normal] Nota. Elaboración propia.
+P60 [Normal] Tabla 4
+P61 [Normal] Datos de ejemplo de la relación HITO
+TABLE 62
+cod_proyecto | nro_hito | descripción | fecha_prevista | fecha_cierre
+005 | 1 | Compra | 15/03 | 15/03
+005 | 2 | Instalación | 15/09 | (sin fecha)
+011 | 1 | Estudio | 20/04 | 20/04
+P63 [Normal] Nota. Datos de demostración.
+P64 [Normal] Tabla 5
+P65 [Normal] Datos de ejemplo de la relación AVANCE_PRESUPUESTAL
+TABLE 66
+cod_proyecto | fecha_reporte | presupuesto_planificado | gasto_acumulado
+005 | 31/03 | 200 000 | 150 000
+005 | 30/06 | 400 000 | 380 000
+005 | 30/09 | 480 000 | 450 000
+011 | 31/03 | 500 000 | 450 000
+P67 [Normal] Nota. Datos de demostración.
+P68 [Normal] Ya no hay listas dentro de una celda y cada hito y cada avance presupuestal ocupa su propia fila. En la relación PROYECTO todavía permanecen los datos del objetivo y del responsable; eso se corrige en la tercera forma normal.
+P69 [Heading 2] Segunda forma normal (2FN)
+P70 [Heading 3] Regla
+P71 [Normal] Una relación está en segunda forma normal cuando está en 1FN y todos sus atributos dependen de la llave completa, no de una parte de ella. Esta regla solo aplica a las relaciones con llave compuesta.
+P72 [Heading 3] Revisión
+P73 [Normal] La Tabla 6 revisa cada relación frente a las dependencias funcionales de la Tabla 2.
+P74 [Normal] Tabla 6
+P75 [Normal] Verificación de la segunda forma normal
+TABLE 76
+Relación | Llave | ¿Llave compuesta? | Resultado
+PROYECTO | cod_proyecto | No | Cumple. Con llave simple no puede haber dependencia parcial (DF1).
+HITO | cod_proyecto, nro_hito | Sí | Cumple. Descripción y fechas dependen del hito completo (DF4).
+AVANCE_PRESUPUESTAL | cod_proyecto, fecha_reporte | Sí | Cumple. Presupuesto y gasto dependen del proyecto en esa fecha (DF5).
+P77 [Normal] Nota. Elaboración propia.
+P78 [Normal] Un ejemplo de lo que esta forma normal evita: si el nombre del proyecto se hubiera dejado en la relación HITO, dependería solo de cod_proyecto, que es una parte de la llave (cod_proyecto, nro_hito). Se repetiría en cada hito del proyecto y habría que moverlo a PROYECTO. Como los grupos repetidos se separaron bien en el paso anterior, esa situación no ocurre y las tres relaciones ya cumplen 2FN.
+P79 [Heading 2] Tercera forma normal (3FN)
+P80 [Heading 3] Regla
+P81 [Normal] Una relación está en tercera forma normal cuando está en 2FN y ningún atributo que no es llave depende de otro atributo que tampoco es llave. En otras palabras, cada dato depende de la llave, de toda la llave y de nada más que la llave.
+P82 [Heading 3] Dependencias transitivas encontradas
+P83 [Normal] En la relación PROYECTO aparecen dos dependencias transitivas, que se resumen en la Tabla 7.
+P84 [Normal] Tabla 7
+P85 [Normal] Dependencias transitivas y su corrección
+TABLE 86
+Cadena de dependencia | Problema | Corrección
+cod_proyecto → cod_objetivo → desc_objetivo (DF1 y DF2) | La descripción depende del objetivo, no del proyecto, y se repite en cada proyecto del mismo objetivo. | Se crea la relación OBJETIVO_GD.
+cod_proyecto → responsable → área_responsable, perfil (DF1 y DF3) | El área y el perfil dependen del responsable, no del proyecto, y se repiten en cada uno de sus proyectos. | Se crea la relación RESPONSABLE.
+P87 [Normal] Nota. Elaboración propia.
+P88 [Heading 3] Cambio realizado
+P89 [Normal] Se crearon las relaciones OBJETIVO_GD y RESPONSABLE. En PROYECTO se conservan solo las llaves foráneas id_objetivo e id_responsable. También se reemplazaron los nombres y códigos por identificadores numéricos (id), porque un nombre puede repetirse o cambiar, mientras que un identificador permanece estable. Las Tablas 8, 9 y 10 muestran los datos de ejemplo.
+P90 [Normal] Tabla 8
+P91 [Normal] Datos de ejemplo de la relación OBJETIVO_GD
+TABLE 92
+id_objetivo | codigo | descripcion
+1 | OGD 03 | Fortalecer y modernizar la infraestructura tecnológica
+2 | OGD 04 | Mejora continua del Sistema de Seguridad de la Información
+3 | OGD 05 | Sistemas de información con datos de calidad para decidir
+4 | OGD 02 | Optimizar procesos, establecer políticas, procedimientos, metodologías y estándares
+P93 [Normal] Nota. Descripciones resumidas de los objetivos del PGD (Electrocentro S. A., 2023, p. 25).
+P94 [Normal] Tabla 9
+P95 [Normal] Datos de ejemplo de la relación RESPONSABLE
+TABLE 96
+id_responsable | nombre | area | perfil
+1 | Ana Quispe | TIC | Responsable
+2 | Luis Rojas | TIC | Responsable
+3 | Marta Salas | Planeamiento | Administrador
+P97 [Normal] Nota. Datos de demostración.
+P98 [Normal] Tabla 10
+P99 [Normal] Datos de ejemplo de la relación PROYECTO en 3FN
+TABLE 100
+id_proyecto | codigo_pgd | nombre | monto | id_objetivo | id_responsable
+1 | 005 | Equipos de ciberseguridad | 500 000 | 2 | 1
+2 | 010 | Servicio Software Factory (FONAFE) | 2 383 550 | 3 | 1
+3 | 011 | Enlaces de fibra óptica en subestaciones | 2 500 000 | 1 | 2
+P101 [Normal] Nota. Se omiten año_inicio, año_fin y estado por espacio. Proyectos, códigos y montos tomados del PGD (Electrocentro S. A., 2023, p. 28). El responsable de cada proyecto es dato de demostración.
+P102 [Normal] Ahora el área de Ana Quispe se guarda una sola vez, aunque dirija dos proyectos, y la descripción de cada objetivo se guarda una sola vez, aunque tenga muchos proyectos. Si cambia alguno de esos datos, se corrige en un solo lugar.
+P103 [Heading 3] Relación adicional: bitácora de cambios
+P104 [Normal] El plan de proyecto exige que cada modificación de un dato quede registrada con su autor y su fecha (requisito RF03). Para ello se agrega la relación BITACORA_CAMBIO, que guarda qué dato se cambió, su valor anterior, su valor nuevo, quién lo hizo y cuándo. No repite datos del proyecto y se relaciona con RESPONSABLE mediante id_responsable, por lo que también cumple 3FN.
+P105 [Heading 2] Atributos incorporados tras revisar el plan
+P106 [Normal] Al contrastar el diseño con los requisitos del plan de proyecto se incorporaron siete atributos que el plan exige y que el diseño inicial no tenía. La Tabla 11 los resume.
+P107 [Normal] Tabla 11
+P108 [Normal] Atributos incorporados tras revisar el plan de proyecto
+TABLE 109
+Atributo | Relación | Motivo según el plan
+usuario, clave_hash, activo | RESPONSABLE | Autenticar usuarios y aplicar tres perfiles de acceso (RF01).
+fuente | PROYECTO | Los registros conservan su origen, por ejemplo la cartera del PGD.
+fecha_actualizacion | PROYECTO | Mostrar alertas de registros sin actualización reciente (RF08).
+evidencia | HITO | El plan incluye la evidencia que respalda el cierre de un hito.
+en_linea_base | HITO | El avance de hitos se calcula sobre los hitos de la línea base.
+P110 [Normal] Nota. Elaboración propia a partir del plan de proyecto.
+P111 [Normal] Cada uno de estos siete atributos depende directamente de la llave de su relación y de ningún otro atributo, por lo que las seis relaciones siguen en tercera forma normal. Todos los importes se expresan en soles (S/), por lo que la moneda no se guarda como atributo.
+P112 [Heading 2] Resultado final
+P113 [Normal] Después de los tres pasos, la base de datos queda con seis relaciones en tercera forma normal, como muestra la Tabla 12.
+P114 [Normal] Tabla 12
+P115 [Normal] Relaciones finales de la base de datos en 3FN
+TABLE 116
+Relación | Llave primaria | Atributos | Llaves foráneas
+OBJETIVO_GD | id_objetivo | codigo, descripcion | Ninguna
+RESPONSABLE | id_responsable | nombre, area, perfil, usuario, clave_hash, activo | Ninguna
+PROYECTO | id_proyecto | codigo_pgd, nombre, monto, anio_inicio, anio_fin, estado, fuente, fecha_actualizacion | id_objetivo, id_responsable
+HITO | id_hito | descripcion, fecha_prevista, fecha_cierre, evidencia, en_linea_base | id_proyecto
+AVANCE_PRESUPUESTAL | id_avance | fecha_reporte, presupuesto_planificado, gasto_acumulado | id_proyecto
+BITACORA_CAMBIO | id_cambio | tabla_afectada, id_registro, campo, valor_anterior, valor_nuevo, fecha_hora | id_responsable
+P117 [Normal] Nota. Elaboración propia. Los nombres de los atributos se escriben sin tildes ni eñes para su uso en el diseño físico.
+P118 [Heading 3] Decisiones de diseño
+P119 [List Paragraph] En HITO y AVANCE_PRESUPUESTAL se usan llaves artificiales (id_hito, id_avance) en lugar de llaves compuestas, porque simplifican las relaciones y las consultas. La unicidad de un avance por proyecto y fecha de reporte se conservará en el diseño físico con una restricción de valor único.
+P120 [List Paragraph] El estado del proyecto queda como atributo con valores controlados (pendiente, en curso y cerrado). Si se necesitara más rigor, puede convertirse en una relación catálogo.
+P121 [List Paragraph] RESPONSABLE cumple también el papel de usuario del sistema, con su perfil de acceso (administrador, responsable o consulta).
+P122 [List Paragraph] Los indicadores, como el porcentaje de avance de hitos o la desviación presupuestal, no se guardan en la base. Se calculan al consultar, para no almacenar datos derivados que podrían quedar desactualizados.
+P123 [Heading 2] Conclusión de este capítulo
+P124 [Normal] La tabla inicial, con grupos repetidos y datos duplicados, se transformó en seis relaciones en tercera forma normal, sin repeticiones innecesarias y con un solo lugar para cada dato. Este resultado es la base del modelo entidad relación, que se desarrolla en el siguiente capítulo.
+P125 [Heading 1] Capítulo 2. Modelo entidad relación
+P126 [Normal] Este capítulo presenta el modelo entidad relación (MER) de la base de datos del sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A. El MER es el dibujo que muestra de qué cosas guarda información el sistema (entidades), qué datos guarda de cada una (atributos) y cómo se conectan entre sí (relaciones y cardinalidades).
+P127 [Normal] El modelo parte de las seis relaciones en tercera forma normal obtenidas en el capítulo 1. Como el MER es un modelo conceptual, no incluye llaves foráneas ni tipos de dato; esos se definen en el diseño lógico y en el físico. El diagrama usa la notación clásica del modelo entidad relación: las entidades son rectángulos, los atributos son óvalos unidos a su entidad y las relaciones son rombos. El identificador va subrayado y los atributos opcionales van con borde punteado.
+P128 [Heading 2] Entidades
+P129 [Normal] La Tabla 13 describe las entidades del modelo, qué representa cada una y cómo se identifica.
+P130 [Normal] Tabla 13
+P131 [Normal] Entidades del modelo
+TABLE 132
+Entidad | Qué representa | Identificador | Atributos
+OBJETIVO_GD | Objetivo de gobierno digital del PGD, de OGD 01 a OGD 06 (Electrocentro S. A., 2023, p. 25). | id_objetivo | 3
+RESPONSABLE | Persona que dirige proyectos y usa el sistema, con su área, perfil y credenciales. | id_responsable | 7
+PROYECTO | Proyecto de la cartera del PGD, con su monto, plazo, estado y fuente. | id_proyecto | 9
+HITO | Entrega verificable de un proyecto, con sus fechas y su evidencia. | id_hito | 6
+AVANCE_PRESUPUESTAL | Registro periódico del presupuesto planificado y del gasto acumulado de un proyecto. | id_avance | 4
+BITACORA_CAMBIO | Registro de cada modificación de un dato, con su autor y su fecha. | id_cambio | 7
+P133 [Normal] Nota. Elaboración propia a partir de las relaciones en 3FN del capítulo 1 y del plan de proyecto.
+P135 [Heading 2] Diagrama entidad relación
+P136 [Normal] La Figura 1 muestra el diagrama completo del modelo.
+P137 [Normal] Figura 1
+P138 [Normal] Modelo entidad relación del sistema de seguimiento
+P140 [Normal] Nota. Elaboración propia. Modelo conceptual: sin llaves foráneas ni tipos de dato. Subrayado: identificador. Borde punteado: atributo opcional. Cada proyecto tiene como máximo un avance presupuestal por fecha de reporte.
+P142 [Heading 2] Relaciones y cardinalidades
+P143 [Normal] Las cinco relaciones del modelo son de uno a muchos. En cada una, el lado "uno" es la entidad que se consulta primero y el lado "muchos" es la que contiene varios registros relacionados con uno solo del lado "uno". La Tabla 14 las resume con su lectura en lenguaje natural.
+P144 [Normal] Los números del diagrama indican la cardinalidad. El 1 se coloca junto a la entidad que aporta un solo registro y la N junto a la entidad que puede tener varios. Por ejemplo, en la relación agrupa, cada proyecto tiene un solo objetivo (1), mientras que un objetivo puede agrupar varios proyectos (N).
+P145 [Normal] Tabla 14
+P146 [Normal] Relaciones y cardinalidades
+TABLE 147
+Relación | Entidades | Cardinalidad | Lectura
+agrupa | OBJETIVO_GD y PROYECTO | 1 a N | Un objetivo agrupa cero o muchos proyectos. Cada proyecto pertenece a un solo objetivo.
+dirige | RESPONSABLE y PROYECTO | 1 a N | Un responsable dirige cero o muchos proyectos. Cada proyecto tiene un solo responsable.
+tiene | PROYECTO y HITO | 1 a N | Un proyecto tiene cero o muchos hitos. Cada hito pertenece a un solo proyecto.
+registra | PROYECTO y AVANCE_PRESUPUESTAL | 1 a N | Un proyecto registra cero o muchos avances presupuestales. Cada avance pertenece a un solo proyecto.
+realiza | RESPONSABLE y BITACORA_CAMBIO | 1 a N | Un responsable realiza cero o muchos cambios. Cada cambio lo realiza un solo responsable.
+P148 [Normal] Nota. Elaboración propia.
+P149 [Normal] En todas las relaciones el lado "muchos" tiene participación obligatoria: un proyecto no puede existir sin objetivo ni responsable, y un hito, un avance presupuestal o un cambio no pueden existir sin su proyecto o su responsable. El lado "uno" tiene participación opcional, porque un objetivo o un responsable pueden registrarse antes de tener proyectos. Por eso la cardinalidad del lado "muchos" se escribe como 0..N.
+P150 [Heading 2] Reglas de negocio representadas
+P151 [Normal] El modelo recoge las siguientes reglas, derivadas de los requisitos del plan de proyecto:
+P152 [List Paragraph] Todo proyecto pertenece a un objetivo de gobierno digital y no puede registrarse sin él.
+P153 [List Paragraph] Todo proyecto tiene un responsable principal.
+P154 [List Paragraph] Un objetivo o un responsable puede existir sin proyectos asociados.
+P155 [List Paragraph] Un hito o un avance presupuestal no puede registrarse sin su proyecto.
+P156 [List Paragraph] Un proyecto no puede tener dos avances presupuestales con la misma fecha de reporte.
+P157 [List Paragraph] Un hito está pendiente mientras no tenga fecha de cierre y se considera cerrado cuando la tiene.
+P158 [List Paragraph] Todo cambio de un dato se guarda en la bitácora con su autor y su fecha.
+P159 [List Paragraph] El estado de un proyecto solo puede ser pendiente, en curso o cerrado.
+P160 [Heading 2] Verificación del modelo
+P161 [Normal] Antes de pasar al diseño lógico se revisó la coherencia del modelo. La Tabla 15 resume los criterios revisados. Los atributos y su obligatoriedad se compararon, uno por uno, con el diccionario de datos del Excel y con el script SQL del diseño físico, y no se encontraron diferencias.
+P162 [Normal] Tabla 15
+P163 [Normal] Criterios de verificación del modelo
+TABLE 164
+Criterio | Resultado
+Toda entidad tiene llave primaria | Cumple. Las 6 entidades tienen una llave primaria simple.
+No hay relaciones de muchos a muchos | Cumple. Las 5 relaciones son de uno a muchos.
+Las entidades están en tercera forma normal | Cumple, según el capítulo 1.
+Atributos y obligatoriedad coinciden con el diccionario y el script SQL | Cumple. 36 atributos del MER, 4 de ellos opcionales. Las 5 llaves foráneas se agregan en el diseño lógico.
+Los valores únicos están identificados | Cumple. Código del objetivo, código del PGD y la combinación proyecto y fecha de reporte.
+P165 [Normal] Nota. Elaboración propia.
+P166 [Heading 2] Del modelo entidad relación al diseño lógico
+P167 [Normal] En el diseño lógico, cada relación de uno a muchos de la Tabla 14 se convertirá en una llave foránea en la tabla del lado "muchos". Como el modelo no tiene relaciones de muchos a muchos, no hacen falta tablas intermedias, y el diseño lógico tendrá exactamente seis tablas.
+P168 [Normal] La bitácora tiene un caso particular. Los atributos tabla_afectada e id_registro señalan de manera lógica a cualquier registro del sistema, ya sea un proyecto, un hito u otro. Como apuntan a tablas distintas, no podrán declararse como llaves foráneas en el diseño lógico.
+P169 [Heading 2] Supuestos y alternativas
+P170 [List Paragraph] Cada proyecto tiene un solo responsable principal. Si el Comité de Gobierno Digital necesitara varios responsables por proyecto, la relación dirige pasaría a ser de muchos a muchos y requeriría una tabla intermedia entre PROYECTO y RESPONSABLE.
+P171 [List Paragraph] El estado del proyecto se guarda como atributo con valores controlados. Si se quisiera administrar los estados desde el sistema, podría convertirse en una entidad ESTADO relacionada de uno a muchos con PROYECTO.
+P172 [List Paragraph] Lo que el plan de proyecto llama corte de seguimiento se guarda como avance presupuestal, y la fecha de corte es la fecha de reporte.
+P173 [List Paragraph] Los indicadores gerenciales no son entidades ni atributos. Se calculan al consultar, a partir de los hitos y los avances presupuestales.
+P174 [Heading 2] Conclusión de este capítulo
+P175 [Normal] El MER muestra seis entidades y cinco relaciones de uno a muchos, coherentes con la tercera forma normal. Ya se sabe qué información guarda el sistema y cómo se relaciona, lo que permite pasar al diseño lógico, que se desarrolla en el siguiente capítulo.
+P176 [Heading 1] Capítulo 3. Diseño lógico
+P177 [Normal] Este capítulo presenta el diseño lógico de la base de datos del sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A. El diseño lógico traduce el modelo entidad relación a tablas: define qué tablas existen, qué columnas tiene cada una, cómo se identifican sus filas y cómo se conectan entre sí. Todavía no depende de un programa de base de datos en particular; eso se resuelve en el diseño físico.
+P178 [Normal] El punto de partida es el MER del capítulo 2, que ya está en tercera forma normal. Por eso la traducción es directa y no cambia la estructura: seis entidades pasan a ser seis tablas y cinco relaciones de uno a muchos pasan a ser cinco llaves foráneas.
+P179 [Heading 2] Reglas de transformación
+P180 [Normal] La Tabla 16 resume las reglas que se aplicaron para pasar del MER al modelo relacional.
+P181 [Normal] Tabla 16
+P182 [Normal] Reglas de transformación del MER al modelo relacional
+TABLE 183
+Elemento del MER | Se convierte en | Ejemplo en el sistema
+Entidad | Una tabla | La entidad HITO pasa a ser la tabla HITO.
+Atributo | Una columna con un dominio (tipo de valor) | fecha_prevista pasa a ser una columna de dominio FECHA.
+Identificador | Llave primaria (PK) | id_proyecto identifica cada fila de PROYECTO.
+Relación de uno a muchos | Llave foránea (FK) en la tabla del lado muchos | HITO guarda id_proyecto para saber a qué proyecto pertenece.
+Atributo opcional | Columna que admite valor vacío | fecha_cierre queda vacía mientras el hito está pendiente.
+Valor que no puede repetirse | Restricción de valor único (UQ) | codigo_pgd no se repite entre proyectos.
+Relación de muchos a muchos | Tabla intermedia | No aplica: el modelo no tiene relaciones de muchos a muchos.
+P184 [Normal] Nota. Elaboración propia.
+P185 [Heading 2] Esquema relacional
+P186 [Normal] El esquema relacional escribe cada tabla con sus columnas entre paréntesis. La llave primaria va subrayada y las llaves foráneas van en cursiva.
+P187 [Normal] OBJETIVO_GD (id_objetivo, codigo, descripcion)
+P188 [Normal] RESPONSABLE (id_responsable, nombre, area, perfil, usuario, clave_hash, activo)
+P189 [Normal] PROYECTO (id_proyecto, codigo_pgd, nombre, monto, anio_inicio, anio_fin, estado, id_objetivo, id_responsable, fuente, fecha_actualizacion)
+P190 [Normal] HITO (id_hito, id_proyecto, descripcion, fecha_prevista, fecha_cierre, evidencia, en_linea_base)
+P191 [Normal] AVANCE_PRESUPUESTAL (id_avance, id_proyecto, fecha_reporte, presupuesto_planificado, gasto_acumulado)
+P192 [Normal] BITACORA_CAMBIO (id_cambio, tabla_afectada, id_registro, campo, valor_anterior, valor_nuevo, fecha_hora, id_responsable)
+P193 [Normal] Los nombres de las columnas se escriben sin tildes ni eñes (anio_inicio en lugar de año_inicio) para que funcionen sin problemas en cualquier programa de base de datos.
+P194 [Heading 2] Tablas, columnas y dominios
+P195 [Normal] La Tabla 17 detalla cada columna con su dominio, si es obligatoria y las restricciones que la gobiernan. Los dominios son lógicos: ENTERO, TEXTO(n) con una longitud máxima n, DECIMAL(p,s) con p dígitos en total y s decimales, FECHA, FECHA Y HORA y BOOLEANO (verdadero o falso, guardado como 1 o 0).
+P196 [Normal] Tabla 17
+P197 [Normal] Columnas y dominios de las seis tablas
+TABLE 198
+Tabla | Columna | Dominio | Obligatoria | Restricción
+OBJETIVO_GD | id_objetivo | ENTERO | Sí | Llave primaria
+ | codigo | TEXTO(10) | Sí | Valor único
+ | descripcion | TEXTO(200) | Sí | 
+RESPONSABLE | id_responsable | ENTERO | Sí | Llave primaria
+ | nombre | TEXTO(100) | Sí | 
+ | area | TEXTO(80) | Sí | 
+ | perfil | TEXTO(20) | Sí | Administrador, Responsable o Consulta
+ | usuario | TEXTO(30) | Sí | Valor único
+ | clave_hash | TEXTO(255) | Sí | Se guarda cifrada, nunca en texto claro
+ | activo | BOOLEANO | Sí | 0 o 1; inicia en 1
+PROYECTO | id_proyecto | ENTERO | Sí | Llave primaria
+ | codigo_pgd | TEXTO(10) | Sí | Valor único
+ | nombre | TEXTO(150) | Sí | 
+ | monto | DECIMAL(12,2) | Sí | Mayor o igual a 0
+ | anio_inicio | ENTERO | Sí | 
+ | anio_fin | ENTERO | Sí | Mayor o igual a anio_inicio
+ | estado | TEXTO(20) | Sí | Pendiente, En curso o Cerrado; inicia en Pendiente
+ | id_objetivo | ENTERO | Sí | Llave foránea a OBJETIVO_GD
+ | id_responsable | ENTERO | Sí | Llave foránea a RESPONSABLE
+ | fuente | TEXTO(100) | Sí | Origen del registro; por defecto la cartera del PGD
+ | fecha_actualizacion | FECHA Y HORA | Sí | Se actualiza sola en cada modificación
+HITO | id_hito | ENTERO | Sí | Llave primaria
+ | id_proyecto | ENTERO | Sí | Llave foránea a PROYECTO
+ | descripcion | TEXTO(150) | Sí | 
+ | fecha_prevista | FECHA | Sí | 
+ | fecha_cierre | FECHA | No | Vacía mientras el hito está pendiente
+ | evidencia | TEXTO(200) | No | Referencia al documento que respalda el cierre
+ | en_linea_base | BOOLEANO | Sí | 0 o 1; inicia en 1
+AVANCE_ PRESUPUESTAL | id_avance | ENTERO | Sí | Llave primaria
+ | id_proyecto | ENTERO | Sí | Llave foránea a PROYECTO; único junto con fecha_reporte
+ | fecha_reporte | FECHA | Sí | Único junto con id_proyecto
+ | presupuesto_planificado | DECIMAL(12,2) | Sí | Mayor o igual a 0
+ | gasto_acumulado | DECIMAL(12,2) | Sí | Mayor o igual a 0
+BITACORA_ CAMBIO | id_cambio | ENTERO | Sí | Llave primaria
+ | tabla_afectada | TEXTO(30) | Sí | Una de las cinco tablas del sistema
+ | id_registro | ENTERO | Sí | Referencia lógica, sin llave foránea
+ | campo | TEXTO(40) | Sí | 
+ | valor_anterior | TEXTO(200) | No | 
+ | valor_nuevo | TEXTO(200) | No | 
+ | fecha_hora | FECHA Y HORA | Sí | Se asigna al registrar el cambio
+ | id_responsable | ENTERO | Sí | Llave foránea a RESPONSABLE
+P199 [Normal] Nota. Elaboración propia. Las 41 columnas coinciden con el diccionario de datos del Excel.
+P200 [Heading 2] Integridad referencial
+P201 [Normal] Cada llave foránea garantiza que una fila hija siempre apunte a una fila padre que existe. La Tabla 18 indica qué ocurre cuando se modifica o se intenta borrar la fila padre.
+P202 [Normal] Tabla 18
+P203 [Normal] Llaves foráneas y reglas de integridad
+TABLE 204
+Tabla hija | Llave foránea | Tabla padre | Si cambia la llave | Si se borra el padre
+PROYECTO | id_objetivo | OBJETIVO_GD | Se actualiza en cascada | Se impide
+PROYECTO | id_responsable | RESPONSABLE | Se actualiza en cascada | Se impide
+HITO | id_proyecto | PROYECTO | Se actualiza en cascada | Se impide
+AVANCE_ PRESUPUESTAL | id_proyecto | PROYECTO | Se actualiza en cascada | Se impide
+BITACORA_ CAMBIO | id_responsable | RESPONSABLE | Se actualiza en cascada | Se impide
+P205 [Normal] Nota. Elaboración propia.
+P206 [Normal] Se eligió impedir el borrado y no borrar en cascada porque el sistema guarda historial. Si al eliminar un proyecto se perdieran sin aviso sus hitos y sus avances, se destruirían datos que sirven para auditar.
+P207 [Heading 2] Restricciones de dominio y de unicidad
+P208 [Normal] Además de las llaves, el diseño impone reglas que la base verifica sola:
+P209 [List Paragraph] Valores únicos: codigo en OBJETIVO_GD, usuario en RESPONSABLE, codigo_pgd en PROYECTO, y la combinación id_proyecto y fecha_reporte en AVANCE_PRESUPUESTAL.
+P210 [List Paragraph] Valores permitidos: el perfil solo puede ser Administrador, Responsable o Consulta; el estado solo puede ser Pendiente, En curso o Cerrado; tabla_afectada solo puede nombrar una de las cinco tablas del sistema, y activo y en_linea_base solo pueden valer 0 o 1.
+P211 [List Paragraph] Valores no negativos y plazos coherentes: monto, presupuesto_planificado y gasto_acumulado deben ser mayores o iguales a 0, y anio_fin no puede ser menor que anio_inicio.
+P212 [List Paragraph] Valores por defecto: un proyecto nuevo inicia como Pendiente y la bitácora toma la fecha y hora del cambio, y fecha_actualizacion se renueva sola al modificar un proyecto.
+P213 [Heading 2] Reglas que el esquema no cubre
+P214 [Normal] Algunas reglas del negocio no se pueden expresar con llaves ni con restricciones simples y deberán controlarse con disparadores en el diseño físico o con la lógica de la aplicación:
+P215 [List Paragraph] El gasto acumulado de un proyecto no debe disminuir de un reporte al siguiente.
+P216 [List Paragraph] El gasto acumulado no debe superar el monto del proyecto.
+P217 [List Paragraph] El estado del proyecto debe ser coherente con sus hitos; por ejemplo, un proyecto no debería estar Cerrado con hitos pendientes.
+P218 [List Paragraph] La referencia de la bitácora (tabla_afectada e id_registro) apunta a tablas distintas, por lo que no puede ser una llave foránea y debe validarse al registrar el cambio.
+P219 [List Paragraph] La clave debe guardarse cifrada con un método seguro (hash con sal) desde la aplicación; la base solo almacena el resultado.
+P220 [List Paragraph] El campo area de RESPONSABLE repite texto; si las áreas requirieran datos propios, convendría una tabla AREA.
+P222 [Heading 2] Diagrama lógico
+P223 [Normal] La Figura 2 muestra el esquema relacional completo. Cada flecha va de la tabla hija a la tabla padre, y los números 1 y N indican el lado de la llave primaria y el de la llave foránea.
+P224 [Normal] Figura 2
+P225 [Normal] Diagrama lógico del sistema de seguimiento
+P227 [Normal] Nota. Elaboración propia. Dominios lógicos. La llave primaria de AVANCE_PRESUPUESTAL es id_avance; la combinación id_proyecto y fecha_reporte es única.
+P229 [Heading 2] Conclusión de este capítulo
+P230 [Normal] El diseño lógico convirtió las seis entidades del MER en seis tablas con sus llaves primarias, cinco llaves foráneas, dominios y restricciones de integridad. El resultado es un esquema relacional completo y coherente con la tercera forma normal, que se implementa en el diseño físico con el lenguaje SQL, y se identificaron las reglas que requerirán disparadores o control desde la aplicación.
+P231 [Heading 1] Capítulo 4. Diseño físico
+P232 [Normal] Este capítulo presenta el diseño físico de la base de datos del sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A. El diseño físico lleva el esquema lógico a un gestor de base de datos real: define el tipo exacto de cada columna, las restricciones que protegen los datos, los índices que aceleran las consultas, las reglas que la base hace cumplir sola y los permisos de cada perfil de usuario.
+P233 [Normal] El punto de partida es el diseño lógico del capítulo 3: seis tablas, 41 columnas y cinco llaves foráneas. El diseño físico no cambia esa estructura. Agrega lo que el gestor necesita para funcionar y para cuidar la calidad de los datos, y deja todo escrito en scripts que se ejecutan en MySQL Workbench o en XAMPP.
+P234 [Heading 2] Entorno y decisiones generales
+P235 [Normal] La Tabla 19 resume las decisiones que se tomaron para toda la base de datos y el motivo de cada una.
+P236 [Normal] Tabla 19
+P237 [Normal] Decisiones generales del diseño físico
+TABLE 238
+Decisión | Elección | Motivo
+Gestor | MySQL 8.0.16 o superior, o MariaDB 10.2 o superior (XAMPP) | Desde esas versiones se hacen cumplir las restricciones CHECK. Son los gestores que se usan en el curso.
+Motor de almacenamiento | InnoDB | Admite transacciones y llaves foráneas, que el sistema necesita.
+Juego de caracteres | utf8mb4 | Guarda tildes, eñes y símbolos sin errores.
+Nombres | Minúsculas, con guion bajo y sin tildes | Evita problemas entre sistemas operativos y al escribir consultas.
+Llaves primarias | INT con AUTO_INCREMENT | Identificador corto y estable que asigna la propia base.
+Montos en soles | DECIMAL(12,2) | No tiene errores de redondeo y admite hasta 9 999 999 999,99.
+Fechas | DATE para días y DATETIME para momentos | El seguimiento trabaja por día; la bitácora necesita la hora.
+Claves de usuario | VARCHAR(255) con hash | Nunca se guarda la clave en texto plano.
+P239 [Normal] Nota. Elaboración propia.
+P240 [Heading 2] Tipos de dato físicos
+P241 [Normal] Los dominios del diseño lógico se convierten en tipos del gestor como indica la Tabla 20.
+P242 [Normal] Tabla 20
+P243 [Normal] Conversión de dominios lógicos a tipos físicos
+TABLE 244
+Dominio lógico | Tipo físico | Observación
+ENTERO | INT | Identificadores y años.
+TEXTO(n) | VARCHAR(n) | La longitud n es la que figura en la Tabla 21.
+DECIMAL | DECIMAL(12,2) | Montos, presupuesto planificado y gasto acumulado.
+FECHA | DATE | Fechas previstas, de cierre y de reporte.
+FECHA Y HORA | DATETIME | Fecha de actualización del proyecto y momento de cada cambio.
+BOOLEANO | TINYINT(1) | Con una restricción que solo admite 0 o 1.
+P245 [Normal] Nota. Elaboración propia.
+P246 [Heading 2] Tablas y columnas
+P247 [Normal] La Tabla 21 muestra las seis tablas tal como quedaron creadas en el gestor. Se obtuvo directamente del catálogo de la base de datos, por lo que coincide con lo que existe y no con lo que se pretendía crear. Las 41 columnas son las mismas del diseño lógico.
+P248 [Normal] Tabla 21
+P249 [Normal] Tablas y columnas de la base de datos seguimiento_gd
+TABLE 250
+Tabla | Columna | Tipo | Nulo | Valor por defecto | Llave
+objetivo_gd | id_objetivo | INT | No | AUTO_INCREMENT | PK
+ | codigo | VARCHAR(10) | No |  | UQ
+ | descripcion | VARCHAR(200) | No |  | 
+responsable | id_responsable | INT | No | AUTO_INCREMENT | PK
+ | nombre | VARCHAR(100) | No |  | 
+ | area | VARCHAR(80) | No |  | 
+ | perfil | VARCHAR(20) | No |  | 
+ | usuario | VARCHAR(30) | No |  | UQ
+ | clave_hash | VARCHAR(255) | No |  | 
+ | activo | TINYINT(1) | No | 1 | 
+proyecto | id_proyecto | INT | No | AUTO_INCREMENT | PK
+ | codigo_pgd | VARCHAR(10) | No |  | UQ
+ | nombre | VARCHAR(150) | No |  | 
+ | monto | DECIMAL(12,2) | No |  | 
+ | anio_inicio | INT | No |  | 
+ | anio_fin | INT | No |  | 
+ | estado | VARCHAR(20) | No | Pendiente | 
+ | id_objetivo | INT | No |  | FK
+ | id_responsable | INT | No |  | FK
+ | fuente | VARCHAR(100) | No | Cartera PGD 2023 a 2026 | 
+ | fecha_actualizacion | DATETIME | No | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 
+hito | id_hito | INT | No | AUTO_INCREMENT | PK
+ | id_proyecto | INT | No |  | FK
+ | descripcion | VARCHAR(150) | No |  | 
+ | fecha_prevista | DATE | No |  | 
+ | fecha_cierre | DATE | Sí |  | 
+ | evidencia | VARCHAR(200) | Sí |  | 
+ | en_linea_base | TINYINT(1) | No | 1 | 
+avance_presupuestal | id_avance | INT | No | AUTO_INCREMENT | PK
+ | id_proyecto | INT | No |  | FK
+ | fecha_reporte | DATE | No |  | 
+ | presupuesto_planificado | DECIMAL(12,2) | No |  | 
+ | gasto_acumulado | DECIMAL(12,2) | No |  | 
+bitacora_cambio | id_cambio | INT | No | AUTO_INCREMENT | PK
+ | tabla_afectada | VARCHAR(30) | No |  | 
+ | id_registro | INT | No |  | 
+ | campo | VARCHAR(40) | No |  | 
+ | valor_anterior | VARCHAR(200) | Sí |  | 
+ | valor_nuevo | VARCHAR(200) | Sí |  | 
+ | fecha_hora | DATETIME | No | CURRENT_TIMESTAMP | 
+ | id_responsable | INT | No |  | FK
+P251 [Normal] Nota. Elaboración propia a partir del catálogo del gestor. PK: llave primaria. FK: llave foránea. UQ: valor único.
+P252 [Normal] Como ejemplo, la tabla de avances presupuestales queda escrita así:
+P253 [Normal] CREATE TABLE avance_presupuestal (
+P254 [Normal]     id_avance INT NOT NULL AUTO_INCREMENT,
+P255 [Normal]     id_proyecto INT NOT NULL,
+P256 [Normal]     fecha_reporte DATE NOT NULL,
+P257 [Normal]     presupuesto_planificado DECIMAL(12,2) NOT NULL,
+P258 [Normal]     gasto_acumulado DECIMAL(12,2) NOT NULL,
+P259 [Normal]     CONSTRAINT pk_avance_presupuestal PRIMARY KEY (id_avance),
+P260 [Normal]     CONSTRAINT uq_avance_proyecto_fecha UNIQUE (id_proyecto, fecha_reporte),
+P261 [Normal]     CONSTRAINT ck_avance_presupuesto CHECK (presupuesto_planificado >= 0),
+P262 [Normal]     CONSTRAINT ck_avance_gasto CHECK (gasto_acumulado >= 0),
+P263 [Normal]     CONSTRAINT fk_avance_proyecto FOREIGN KEY (id_proyecto)
+P264 [Normal]         REFERENCES proyecto (id_proyecto) ON UPDATE CASCADE ON DELETE RESTRICT
+P265 [Normal] ) ENGINE = InnoDB;
+P266 [Heading 2] Restricciones de integridad
+P267 [Normal] Las restricciones son reglas que el gestor revisa en cada inserción o modificación. Si un dato las incumple, se rechaza. La base tiene 24 restricciones: seis llaves primarias, una por tabla, y las 18 que muestra la Tabla 22.
+P268 [Normal] Tabla 22
+P269 [Normal] Restricciones de unicidad, de dominio y de referencia
+TABLE 270
+Restricción | Tabla | Regla que hace cumplir
+uq_objetivo_codigo | objetivo_gd | El código del objetivo no se repite.
+uq_responsable_usuario | responsable | El nombre de usuario no se repite.
+uq_proyecto_codigo | proyecto | El código del PGD no se repite.
+uq_avance_proyecto_fecha | avance_presupuestal | Un proyecto tiene un solo avance por fecha de reporte.
+ck_responsable_activo | responsable | El campo activo vale 0 o 1.
+ck_responsable_perfil | responsable | El perfil es Administrador, Responsable o Consulta.
+ck_proyecto_monto | proyecto | El monto es mayor o igual a cero.
+ck_proyecto_anios | proyecto | El año de fin no es menor que el de inicio.
+ck_proyecto_estado | proyecto | El estado es Pendiente, En curso o Cerrado.
+ck_hito_linea_base | hito | El campo en_linea_base vale 0 o 1.
+ck_avance_presupuesto | avance_presupuestal | El presupuesto planificado es mayor o igual a cero.
+ck_avance_gasto | avance_presupuestal | El gasto acumulado es mayor o igual a cero.
+ck_bitacora_tabla | bitacora_cambio | La tabla afectada es una de las cinco relaciones registrables.
+fk_proyecto_objetivo | proyecto | El id_objetivo existe en objetivo_gd.
+fk_proyecto_responsable | proyecto | El id_responsable existe en responsable.
+fk_hito_proyecto | hito | El id_proyecto existe en proyecto.
+fk_avance_proyecto | avance_presupuestal | El id_proyecto existe en proyecto.
+fk_bitacora_responsable | bitacora_cambio | El id_responsable existe en responsable.
+P271 [Normal] Nota. Elaboración propia. Las cinco llaves foráneas se crean con ON UPDATE CASCADE y ON DELETE RESTRICT.
+P272 [Normal] La regla ON DELETE RESTRICT impide borrar un objetivo, un responsable o un proyecto que todavía tiene datos asociados, para no perder el historial de hitos, avances y cambios. La regla ON UPDATE CASCADE hace que, si algún día cambia un identificador, el cambio llegue solo a las tablas que lo usan.
+P273 [Heading 2] Índices
+P274 [Normal] Un índice es una estructura que permite encontrar filas sin recorrer toda la tabla. El gestor crea algunos por sí mismo, para las llaves primarias, los valores únicos y las llaves foráneas, y se agregaron tres más para las consultas del tablero. La Tabla 23 los lista.
+P275 [Normal] Tabla 23
+P276 [Normal] Índices de la base de datos, sin contar las llaves primarias
+TABLE 277
+Índice | Tabla | Columnas | Tipo | Para qué sirve
+uq_avance_proyecto_fecha | avance_presupuestal | id_proyecto, fecha_reporte | Único | Evita avances repetidos y también encuentra los avances de un proyecto.
+fk_bitacora_responsable | bitacora_cambio | id_responsable | Automático | Cambios hechos por un responsable.
+ix_bitacora_tabla_registro | bitacora_cambio | tabla_afectada, id_registro | De apoyo | Historial de cambios de un registro.
+ix_hito_proyecto_fecha | hito | id_proyecto, fecha_prevista | De apoyo | Hitos de un proyecto por fecha prevista; también atiende la llave foránea.
+uq_objetivo_codigo | objetivo_gd | codigo | Único | Busca un objetivo por su código.
+fk_proyecto_objetivo | proyecto | id_objetivo | Automático | Proyectos de un objetivo.
+fk_proyecto_responsable | proyecto | id_responsable | Automático | Proyectos de un responsable.
+ix_proyecto_estado | proyecto | estado | De apoyo | Contar y filtrar proyectos por estado en el tablero.
+uq_proyecto_codigo | proyecto | codigo_pgd | Único | Busca un proyecto por su código del PGD.
+uq_responsable_usuario | responsable | usuario | Único | Valida el ingreso de un usuario.
+P278 [Normal] Nota. Elaboración propia a partir del catálogo del gestor. Las tablas hito y avance_presupuestal no necesitan un índice propio para su llave foránea porque ya la cubren ix_hito_proyecto_fecha y uq_avance_proyecto_fecha, que comienzan por id_proyecto.
+P279 [Heading 2] Vista de indicadores
+P280 [Normal] Los indicadores no se guardan en ninguna tabla porque son datos derivados: se calculan cada vez que se consultan para que siempre reflejen los últimos datos. Para no repetir la fórmula, se creó la vista v_indicadores_proyecto, que entrega una fila por proyecto con su último reporte y sus indicadores.
+P281 [Normal] Las definiciones son las del plan de proyecto. El avance de hitos es el cociente entre los hitos concluidos a la fecha del reporte y los hitos de la línea base. Un hito está vencido cuando su fecha prevista es anterior al reporte y no tenía cierre a esa fecha. La desviación presupuestal es la diferencia entre el gasto acumulado y el presupuesto planificado, dividida entre el planificado. Los proyectos con retraso son los activos, es decir Pendiente o En curso, con al menos un hito vencido.
+P282 [Heading 2] Reglas programadas
+P283 [Normal] Algunas reglas del negocio no se pueden expresar con una restricción, porque comparan una fila con otras filas o con otra tabla. Para cubrirlas se crearon seis disparadores (triggers) y dos procedimientos almacenados, que se ejecutan solos cuando se inserta o modifica un dato. La Tabla 24 resume las cuatro reglas.
+P284 [Normal] Tabla 24
+P285 [Normal] Reglas que la base de datos hace cumplir mediante triggers
+TABLE 286
+Regla | Cómo se cumple | Mensaje cuando se incumple
+R1. El gasto acumulado y el presupuesto planificado no superan el monto del proyecto. | Triggers trg_avance_bi y trg_avance_bu, con el procedimiento sp_validar_avance. | El gasto acumulado supera el monto del proyecto. El presupuesto planificado supera el monto del proyecto.
+R2. El gasto acumulado no baja de un reporte al siguiente. | El mismo procedimiento compara con los reportes anteriores y posteriores del proyecto. | El gasto acumulado es menor que el de un reporte anterior.
+R3. Un proyecto solo se cierra si todos los hitos de su línea base tienen fecha de cierre. | Trigger trg_proyecto_bu. | No se puede cerrar el proyecto: hay hitos de la línea base sin cierre.
+R4. Todo cambio de un dato clave queda en la bitácora con su autor. | Triggers trg_proyecto_au, trg_hito_au y trg_avance_au, con el procedimiento sp_registrar_cambio. | Defina @id_responsable antes de modificar datos.
+P287 [Normal] Nota. Elaboración propia.
+P288 [Normal] La regla R4 resuelve el registro de cambios del requisito RF03. La aplicación solo debe indicar quién hace el cambio con la instrucción SET @id_responsable, y la base escribe sola el valor anterior, el valor nuevo y la fecha. Si no se indica el autor, el cambio se rechaza, de modo que ninguna modificación queda sin dueño. Se registran el estado, el monto y el responsable de un proyecto, las fechas y la línea base de un hito, y el presupuesto planificado y el gasto de un avance. Como ejemplo, la regla R3 queda escrita así:
+P289 [Normal] CREATE TRIGGER trg_proyecto_bu BEFORE UPDATE ON proyecto FOR EACH ROW
+P290 [Normal] BEGIN
+P291 [Normal]     IF NEW.estado = 'Cerrado' AND OLD.estado <> 'Cerrado'
+P292 [Normal]        AND EXISTS (SELECT 1 FROM hito h WHERE h.id_proyecto = NEW.id_proyecto
+P293 [Normal]                     AND h.en_linea_base = 1 AND h.fecha_cierre IS NULL) THEN
+P294 [Normal]         SIGNAL SQLSTATE '45000'
+P295 [Normal]             SET MESSAGE_TEXT = 'No se puede cerrar el proyecto: hay hitos de la linea base sin cierre';
+P296 [Normal]     END IF;
+P297 [Normal] END
+P298 [Heading 2] Carga inicial de datos
+P299 [Normal] La base se entrega con una muestra de los diez proyectos del plan de proyecto, tomados de la cartera del Plan de Gobierno Digital (Electrocentro S. A., 2023, p. 28). El código, el nombre, el objetivo, el monto y los años de cada proyecto son datos reales. Los responsables, los hitos, los avances presupuestales y la bitácora son datos de demostración. La Tabla 25 muestra la cartera cargada.
+P300 [Normal] Tabla 25
+P301 [Normal] Cartera de diez proyectos cargada en la base
+TABLE 302
+Código | Proyecto | Objetivo | Monto (S/) | Años | Estado
+005 | Equipos de ciberseguridad | OGD 04 | 500 000 | 2023 a 2024 | En curso
+010 | Servicio Software Factory (FONAFE) | OGD 05 | 2 383 550 | 2023 a 2026 | En curso
+011 | Enlaces de fibra óptica en subestaciones | OGD 03 | 2 500 000 | 2023 a 2025 | En curso
+013 | Implementación de SAP S/4 HANA | OGD 06 | 2 000 000 | 2023 a 2026 | En curso
+014 | Actualización del marco de gobierno e incorporación del Comité de Gobierno Digital | OGD 02 | 120 000 | 2023 | Cerrado
+017 | Fortalecimiento de las competencias digitales del personal | OGD 01 | 300 000 | 2023 a 2026 | En curso
+020 | Transición al protocolo IPv6 | OGD 03 | 400 000 | 2023 a 2025 | En curso
+022 | Publicación de datos abiertos en la Plataforma Nacional de Datos Abiertos | OGD 05 | 108 000 | 2023 | Cerrado
+023 | Implementación y certificación del sistema de gestión de seguridad de la información (NTP ISO/IEC 27001:2014) | OGD 04 | 212 000 | 2023 | Cerrado
+024 | Mesa de partes digital integrada al sistema de gestión documental | OGD 05 | 100 000 | 2023 | En curso
+P303 [Normal] Nota. Datos de código, nombre, objetivo, monto y años tomados del Plan de Gobierno Digital (Electrocentro S. A., 2023, p. 28).
+P304 [Normal] En total se cargaron 6 objetivos, 3 responsables, 10 proyectos, 24 hitos, 24 avances presupuestales y 2 cambios en la bitácora. Los objetivos OGD 01 y OGD 06 están en la base porque dos proyectos los usan, pero su descripción quedó marcada como pendiente: el texto exacto debe tomarse de la página 25 del plan y no se inventó. Con estos datos la vista de indicadores entrega los resultados de la Tabla 26.
+P305 [Normal] Tabla 26
+P306 [Normal] Indicadores por proyecto calculados con la vista v_indicadores_proyecto
+TABLE 307
+Código | Estado | Último reporte | Hitos concluidos | Hitos vencidos | Avance de hitos | Gasto frente al plan
+005 | En curso | 30/09/2024 | 1 de 2 | 1 | 50,0 % | 6,3 % menos
+010 | En curso | 30/09/2024 | 2 de 3 | 0 | 66,7 % | 8,3 % menos
+011 | En curso | 30/09/2024 | 1 de 1 | 0 | 100,0 % | 7,9 % menos
+013 | En curso | 30/09/2024 | 2 de 4 | 1 | 50,0 % | 1,7 % menos
+014 | Cerrado | 31/12/2023 | 2 de 2 | 0 | 100,0 % | 6,7 % menos
+017 | En curso | 30/09/2024 | 2 de 3 | 0 | 66,7 % | 6,7 % menos
+020 | En curso | 30/09/2024 | 2 de 3 | 0 | 66,7 % | 9,1 % menos
+022 | Cerrado | 31/12/2023 | 2 de 2 | 0 | 100,0 % | 5,6 % menos
+023 | Cerrado | 31/12/2023 | 2 de 2 | 0 | 100,0 % | 3,3 % menos
+024 | En curso | 30/06/2024 | 1 de 2 | 1 | 50,0 % | 5,0 % menos
+P308 [Normal] Nota. Elaboración propia con datos de demostración. El gasto frente al plan compara el gasto acumulado con el presupuesto planificado a la fecha del último reporte.
+P309 [Normal] De los siete proyectos activos, tres tienen al menos un hito vencido, por lo que el indicador de proyectos con retraso resulta 42,9 %. Los tres proyectos de la muestra de normalización (005, 010 y 011) conservan los mismos resultados que tenían en el anexo de Excel, que se mantiene con esos tres proyectos como ejemplo de la normalización.
+P310 [Heading 2] Seguridad y privilegios
+P311 [Normal] Además de la validación que hace la aplicación según el perfil de cada usuario, la base de datos limita lo que puede hacer cada cuenta. Se crearon tres roles, uno por perfil del requisito RF01, y una cuenta de aplicación para cada uno, como muestra la Tabla 27. Es una segunda barrera: aunque la aplicación fallara, una cuenta de consulta no podría modificar datos.
+P312 [Normal] Tabla 27
+P313 [Normal] Roles de base de datos y sus permisos
+TABLE 314
+Rol y cuenta | Perfil | Permisos
+rol_administrador / cuenta app_admin | Administrador | Consultar, insertar, modificar, borrar y ejecutar procedimientos en todas las tablas. No puede cambiar la estructura.
+rol_responsable / cuenta app_resp | Responsable | Consultar todo. Insertar y modificar hitos y avances presupuestales. Insertar en la bitácora. Modificar solo el estado de un proyecto.
+rol_consulta / cuenta app_consulta | Consulta | Solo consultar.
+P315 [Normal] Nota. Elaboración propia. Las cuentas se crean con una clave de demostración que debe cambiarse.
+P316 [Normal] Las claves de los usuarios del sistema se guardan en la columna clave_hash. En los datos de demostración se usó SHA2 sobre la palabra Demo2024 solo para poder probar el ingreso. En producción, la aplicación debe generar un hash con sal, con un algoritmo diseñado para claves, y la base solo debe guardar ese resultado.
+P317 [Heading 2] Pruebas realizadas
+P318 [Normal] Todos los scripts se ejecutaron de principio a fin sobre una base vacía, en MariaDB 10.11. La Tabla 28 resume las pruebas y su resultado.
+P319 [Normal] Tabla 28
+P320 [Normal] Pruebas del diseño físico
+TABLE 321
+N.º | Prueba | Resultado
+1 | Crear estructura, triggers y carga inicial desde cero. | Sin errores: 6 tablas, 41 columnas, 5 llaves foráneas, 6 triggers y 2 procedimientos.
+2 | Contar los datos cargados. | 6 objetivos, 3 responsables, 10 proyectos, 24 hitos, 24 avances y 2 cambios.
+3 | Intentar 16 datos inválidos: valores repetidos, vacíos, fuera de dominio o con llaves foráneas inexistentes. | Las 16 pruebas son rechazadas.
+4 | Registrar un gasto mayor al monto del proyecto. | Rechazado con el mensaje de la regla R1.
+5 | Registrar un presupuesto planificado mayor al monto. | Rechazado con el mensaje de la regla R1.
+6 | Registrar un gasto menor al de un reporte anterior. | Rechazado con el mensaje de la regla R2.
+7 | Cerrar un proyecto con hitos de la línea base sin cierre. | Rechazado con el mensaje de la regla R3.
+8 | Cerrar un proyecto con todos sus hitos cerrados. | Aceptado y registrado en la bitácora.
+9 | Modificar un dato sin indicar el autor. | Rechazado con el mensaje de la regla R4.
+10 | Modificar el monto de un proyecto indicando el autor. | Aceptado y registrado con valor anterior, valor nuevo y autor.
+11 | Registrar un avance válido. | Aceptado.
+12 | Modificar un proyecto y revisar fecha_actualizacion. | La fecha se renueva sola.
+13 | Con la cuenta de consulta, intentar borrar un hito. | Permiso denegado.
+14 | Con la cuenta de responsable, intentar cambiar el nombre de un proyecto. | Permiso denegado.
+15 | Con la cuenta de responsable, registrar el cierre de un hito. | Aceptado y registrado en la bitácora.
+16 | Calcular los indicadores con la vista. | Coinciden con el anexo de Excel en los proyectos 005, 010 y 011. Proyectos con retraso: 42,9 %.
+P322 [Normal] Nota. Elaboración propia. Las pruebas se ejecutaron en MariaDB 10.11 y no en MySQL Workbench; el código usado es el mismo.
+P323 [Heading 2] Cómo ejecutar los scripts
+P324 [Normal] Los scripts se entregan numerados en el orden en que deben ejecutarse, como indica la Tabla 29.
+P325 [Normal] Tabla 29
+P326 [Normal] Archivos del diseño físico
+TABLE 327
+Archivo | Contenido
+01_estructura.sql | Crea la base de datos, las tablas, las restricciones, los índices y la vista.
+02_triggers.sql | Crea los procedimientos y los triggers de las reglas R1 a R4.
+03_carga_inicial.sql | Carga los 10 proyectos y sus datos de demostración.
+04_privilegios.sql | Crea los roles y las cuentas de la aplicación. Se ejecuta con una cuenta administradora.
+05_pruebas.sql | Pruebas de los triggers y de la bitácora. Las marcadas como error esperado deben fallar.
+06_consultas.sql | Consultas del tablero: indicadores, proyectos por estado, retraso, monto por objetivo y hitos vencidos.
+seguimiento_gd_fisico_completo.sql | Los scripts 01, 02 y 03 en un solo archivo.
+Workbench_importar_modelo.sql | Solo la estructura, sin datos, para importarla y dibujar el diagrama.
+P328 [Normal] Nota. Elaboración propia.
+P329 [List Paragraph] Abrir MySQL Workbench y conectarse al servidor local.
+P330 [List Paragraph] Abrir el archivo seguimiento_gd_fisico_completo.sql con File, Open SQL Script, y ejecutarlo con el botón del rayo.
+P331 [List Paragraph] Para crear los roles, abrir y ejecutar 04_privilegios.sql con la cuenta root.
+P332 [List Paragraph] Para ver el diagrama, crear un modelo nuevo con File, New Model, elegir File, Import, Reverse Engineer MySQL Create Script, seleccionar Workbench_importar_modelo.sql y marcar la opción de colocar los objetos en un diagrama.
+P333 [List Paragraph] Si el docente pide crear la base desde el diagrama, usar Database, Forward Engineer sobre ese mismo modelo.
+P334 [Heading 2] Reglas que la base no cubre
+P335 [Normal] El diseño físico cubre la mayor parte de las reglas del sistema, pero quedan algunos puntos que deben resolverse en la aplicación o en etapas posteriores:
+P336 [List Paragraph] La clave de cada usuario debe cifrarse con un hash con sal en la aplicación. La base solo guarda el resultado.
+P337 [List Paragraph] La columna id_registro de la bitácora apunta a registros de varias tablas, por lo que no puede tener una llave foránea. Su coherencia con tabla_afectada la cuida la aplicación.
+P338 [List Paragraph] Que un responsable solo modifique sus propios proyectos se controla en la aplicación, porque los permisos de la base se dan por tabla y no por fila.
+P339 [List Paragraph] Falta el texto exacto de los objetivos OGD 01 y OGD 06, que está en la página 25 del Plan de Gobierno Digital.
+P340 [Heading 2] Conclusión de este capítulo
+P341 [Normal] El diseño físico dejó la base de datos seguimiento_gd creada y probada: seis tablas InnoDB con 41 columnas, 24 restricciones, índices para las consultas del tablero, una vista de indicadores, reglas programadas que protegen la coherencia del gasto, del cierre de proyectos y de la bitácora, tres roles de acceso y una carga de diez proyectos de la cartera real. Con esta base ya se pueden calcular los indicadores del tablero y se tiene la fuente de datos operativa a partir de la cual se diseñará el almacén de datos en el siguiente capítulo.
+P342 [Heading 1] Capítulo 5. Alcances de Data Warehouse, Data Mart y Business Intelligence
+P343 [Normal] Este capítulo define el alcance del almacén de datos (Data Warehouse), del primer Data Mart y de la inteligencia de negocios (Business Intelligence, BI) del sistema de seguimiento de proyectos de gobierno digital de Electrocentro S. A. También deja preparado todo lo necesario para implementarlos: los scripts del modelo dimensional, el proceso de carga, las vistas de indicadores, los datos listos para Power BI, las medidas de cálculo y una guía paso a paso.
+P344 [Normal] Los capítulos anteriores construyeron la base de datos operativa seguimiento_gd, pensada para registrar el día a día: proyectos, hitos, avances y cambios. Esa base responde bien a preguntas puntuales, pero no está organizada para analizar. El Data Warehouse toma esos datos, los ordena alrededor de lo que la gerencia quiere medir y conserva cada corte de seguimiento, para que el tablero calcule los indicadores de forma rápida y siempre igual, sin cargar a la base operativa.
+P345 [Heading 2] Conceptos y su aplicación en el sistema
+P346 [Normal] La Tabla 30 resume los conceptos que se usan en este capítulo y cómo se aplican en el sistema de seguimiento.
+P347 [Normal] Tabla 30
+P348 [Normal] Conceptos de Data Warehouse, Data Mart y BI aplicados al sistema
+TABLE 349
+Concepto | Qué es | Cómo se aplica aquí
+Data Warehouse | Repositorio integrado, histórico y orientado al análisis, que reúne datos de una o más fuentes. | Base dw_seguimiento_gd, separada de la base operativa.
+Data Mart | Parte del Data Warehouse dedicada a un tema o a un grupo de usuarios. | Data Mart de seguimiento de la cartera de gobierno digital, para el Comité de Gobierno Digital.
+Business Intelligence | Conjunto de herramientas y prácticas que convierten datos en información para decidir. | Tablero en Power BI con los cuatro indicadores del plan, filtros y alertas.
+ETL | Proceso que extrae datos de las fuentes, los transforma y los carga en el almacén. | Procedimiento sp_etl_cargar, con registro de cada carga.
+Modelo estrella | Diseño con una tabla de hechos en el centro y dimensiones alrededor. | Dos tablas de hechos que comparten cuatro dimensiones.
+Hecho y medida | Hecho: lo que se mide. Medida: el valor numérico que se analiza. | Avance de un proyecto en un corte; presupuesto, gasto e hitos.
+Dimensión | Contexto con que se filtra y agrupa una medida. | Tiempo, proyecto, objetivo y responsable.
+Granularidad | Nivel de detalle de una fila de la tabla de hechos. | Un proyecto en una fecha de corte; un hito.
+Llave sustituta | Identificador propio del almacén, distinto del de la fuente. | sk_proyecto, sk_objetivo y sk_responsable.
+P350 [Normal] Nota. Elaboración propia a partir de Kimball y Ross (2013) e Inmon (2005).
+P351 [Normal] Se siguió el enfoque de Kimball y Ross (2013), que construye el almacén de abajo hacia arriba: se empieza por un Data Mart que responde a un tema concreto, con dimensiones que después pueden compartir otros Data Marts. Por eso, en este trabajo el Data Warehouse contiene por ahora un solo Data Mart, y su diseño deja abierta la puerta a sumar otros temas sin rehacer lo construido.
+P353 [Heading 2] Arquitectura de la solución
+P354 [Normal] La Figura 3 muestra las cuatro capas de la solución: las fuentes, la integración mediante el proceso ETL, el almacenamiento en el Data Warehouse y la explotación con Power BI.
+P355 [Normal] Figura 3
+P356 [Normal] Arquitectura del Data Warehouse y del BI del sistema de seguimiento
+P358 [Normal] Nota. Elaboración propia. Las cajas con línea discontinua son ampliaciones posibles que no forman parte del alcance actual.
+P360 [Heading 2] Alcance del Data Warehouse
+P361 [Normal] La Tabla 31 delimita qué incluye el Data Warehouse y qué queda fuera, para que la implementación tenga límites claros.
+P362 [Normal] Tabla 31
+P363 [Normal] Alcance del Data Warehouse
+TABLE 364
+Aspecto | Dentro del alcance | Fuera del alcance
+Propósito | Analizar el avance físico y financiero de la cartera de proyectos de gobierno digital. | La operación diaria: el registro de datos sigue en la base operativa.
+Fuentes | Base operativa seguimiento_gd: proyectos, objetivos, responsables, hitos y avances presupuestales. | La bitácora de cambios, que se consulta en la base operativa, y sistemas como SAP S/4 HANA o la gestión documental, que pueden sumarse después.
+Periodo | Calendario de 2023 a 2027, que cubre el PGD 2023 a 2026; se amplía solo si llegan otras fechas. | Años anteriores a la cartera actual.
+Granularidad | Un proyecto en cada fecha de corte y cada hito individual. | Detalle diario de gastos o de tareas.
+Historia | Se conservan todos los cortes de seguimiento. Las dimensiones guardan el valor vigente (tipo 1). | Historia de cambios de atributos de proyecto o de responsable (tipo 2).
+Frecuencia de carga | Semanal, como indica el plan, y a pedido cuando se registra un corte. | Carga en tiempo real.
+Usuarios | Comité de Gobierno Digital, gerencia, área de TIC y responsables de proyecto. | Usuarios externos a Electrocentro.
+Seguridad | Cuenta de solo lectura para BI. El almacén no guarda usuarios ni claves. | Seguridad por fila en Power BI, que queda como mejora.
+Volumen | Muestra de 10 proyectos: 24 cortes y 24 hitos. La cartera completa del PGD tiene 19 proyectos. | Grandes volúmenes que requieran otro motor.
+P365 [Normal] Nota. Elaboración propia. El PGD es el Plan de Gobierno Digital de Electrocentro S. A. (2023).
+P366 [Heading 2] Alcance del Data Mart
+P367 [Normal] El primer y, por ahora, único Data Mart es el de seguimiento de la cartera de gobierno digital. Su usuario principal es el Comité de Gobierno Digital, que según el plan recibe los reportes de supervisión del área de TIC. Su alcance se define por las preguntas gerenciales que debe responder, que muestra la Tabla 32 con los resultados de los datos de demostración.
+P368 [Normal] Tabla 32
+P369 [Normal] Preguntas gerenciales que responde el Data Mart
+TABLE 370
+Pregunta gerencial | Dónde se responde | Resultado con los datos de demostración
+¿Qué parte de los hitos comprometidos se ha cumplido? | Avance de hitos | 70,8 % de los hitos de la línea base, al último corte de cada proyecto.
+¿Qué proyectos activos tienen hitos vencidos? | Proyectos con retraso y alertas | 42,9 % de los activos: 005, 013, 024.
+¿El gasto va de acuerdo con lo planificado? | Desviación presupuestal | El gasto acumulado está 6,5 % por debajo de lo planificado.
+¿Cómo se compone la cartera? | Proyectos por estado | 7 en curso y 3 cerrados.
+¿Qué responsable concentra retrasos? | Indicadores por responsable | Ana Quispe: 1 de 3; Luis Rojas: 1 de 3; Marta Salas: 1 de 1 proyectos activos.
+¿En qué objetivos se concentra el monto? | Monto por objetivo | OGD 03 y OGD 05 suman S/ 5 491 550 de S/ 8 623 550.
+¿Qué proyectos no se actualizan? | Alertas | 024, sin corte en los 90 días previos al último corte de la cartera.
+¿Qué datos faltan para calcular bien? | Calidad de datos | 2 objetivos con descripción pendiente.
+P371 [Normal] Nota. Elaboración propia con datos de demostración; no describen el desempeño real de Electrocentro.
+P372 [Normal] La Tabla 33 es la matriz de bus del Data Warehouse: cruza los procesos que se miden con las dimensiones que comparten. Gracias a que las dimensiones son comunes, un mismo filtro por responsable u objetivo sirve para las dos tablas de hechos, y un futuro Data Mart podría reutilizarlas.
+P373 [Normal] Tabla 33
+P374 [Normal] Matriz de bus del Data Warehouse
+TABLE 375
+Proceso medido | Tiempo | Proyecto | Objetivo | Responsable
+Avance del proyecto por corte (fact_avance_proyecto) | Sí | Sí | Sí | Sí
+Cumplimiento de hitos (fact_hito) | Sí, dos veces | Sí | Sí | Sí
+Ejecución financiera (ampliación futura) | Sí | Sí | Sí | Sí
+P376 [Normal] Nota. Elaboración propia. En fact_hito el tiempo se usa dos veces: fecha prevista y fecha de cierre.
+P377 [Heading 2] Modelo dimensional
+P378 [Normal] El modelo es una constelación de dos estrellas: dos tablas de hechos que comparten las mismas dimensiones. La Figura 4 lo muestra completo y las Tablas 34 y 35 describen cada tabla.
+P380 [Normal] Figura 4
+P381 [Normal] Modelo estrella del Data Mart de seguimiento
+P383 [Normal] Nota. Elaboración propia. Cada línea une una dimensión (lado 1) con una tabla de hechos (lado N).
+P385 [Normal] Tabla 34
+P386 [Normal] Dimensiones del Data Mart
+TABLE 387
+Dimensión | Una fila representa | Atributos principales | Origen y actualización
+dim_tiempo | Un día del calendario | fecha, año, semestre, trimestre, mes, nombre del mes, día de la semana, fin de mes | Se genera con sp_cargar_dim_tiempo. Llave con formato AAAAMMDD.
+dim_proyecto | Un proyecto de la cartera | código PGD, nombre, monto, rango de monto, años, estado actual, si está activo, fuente | Tabla proyecto. Tipo 1.
+dim_objetivo | Un objetivo de gobierno digital | código y descripción | Tabla objetivo_gd. Tipo 1.
+dim_responsable | Una persona responsable | nombre, área, perfil y si está activa | Tabla responsable, sin usuario ni clave. Tipo 1.
+P388 [Normal] Nota. Elaboración propia. Tipo 1: si el dato cambia en la fuente, se reemplaza el valor anterior.
+P389 [Normal] Tabla 35
+P390 [Normal] Tablas de hechos y sus medidas
+TABLE 391
+Tabla de hechos | Granularidad | Medidas | Comportamiento
+fact_avance_proyecto | Un proyecto en una fecha de corte (24 filas) | presupuesto_planificado, gasto_acumulado, diferencia_gasto, monto_proyecto, hitos_linea_base, hitos_concluidos, hitos_vencidos, con_retraso, es_ultimo_corte | Foto periódica. Las medidas se suman entre proyectos de un mismo corte, pero no entre fechas, porque son acumuladas (semiaditivas).
+fact_hito | Un hito (24 filas) | concluido, vencido, dias_desfase, concluido_a_tiempo, tiene_evidencia, más estado_hito y descripción | Se cuentan y promedian libremente. El estado del hito se evalúa al último corte de su proyecto.
+P392 [Normal] Nota. Elaboración propia.
+P393 [Normal] Los porcentajes no se guardan en las tablas de hechos, porque un porcentaje no se puede sumar. Se guardan sus partes, por ejemplo hitos concluidos y hitos de la línea base, y el porcentaje se calcula al consultar. Así el resultado es correcto para un proyecto, para un responsable o para toda la cartera.
+P394 [Normal] El estado del proyecto se toma como estado actual. La base operativa guarda el estado vigente y sus cambios quedan en la bitácora como texto, por lo que reconstruir el estado de cada corte pasado queda fuera del alcance. Es la misma regla que usa la vista de indicadores de la base operativa, de modo que ambas dan los mismos resultados.
+P395 [Heading 2] Proceso ETL
+P396 [Normal] La carga la hace el procedimiento sp_etl_cargar, que se ejecuta en el mismo servidor y lee directamente la base operativa. La Tabla 36 describe sus pasos.
+P397 [Normal] Tabla 36
+P398 [Normal] Pasos del proceso ETL
+TABLE 399
+Paso | Qué hace | Regla aplicada
+1. Registro | Abre una fila en etl_control con la hora de inicio. | Toda carga deja constancia, correcta o fallida.
+2. Calendario | Revisa las fechas mínima y máxima de hitos y avances y completa dim_tiempo. | Ninguna fecha de la fuente se queda sin día en el calendario.
+3. Dimensiones | Inserta los registros nuevos y actualiza los existentes por su llave natural. | Tipo 1. Las llaves sustitutas no cambian entre cargas.
+4. Hechos de avance | Recarga una fila por avance presupuestal, con los hitos de la línea base, concluidos y vencidos a esa fecha. | Mismas definiciones del plan y de la vista de la base operativa.
+5. Hechos de hito | Recarga una fila por hito, con su estado al último corte del proyecto, el desfase en días y si tiene evidencia. | Concluido, Vencido, En plazo o Sin corte.
+6. Cierre | Confirma la transacción y anota las filas cargadas. | Si algo falla, se deshace todo y la carga queda como Fallida con su mensaje.
+P400 [Normal] Nota. Elaboración propia.
+P401 [Normal] Los hechos se recargan completos en cada ejecución porque el volumen es pequeño: así el almacén siempre coincide con la base operativa, incluso si se corrige un dato antiguo. Si el volumen creciera, la carga podría pasar a ser incremental, solo con los cortes nuevos. La carga semanal se programa con un evento del gestor (script 05), y también puede ejecutarse a mano con la instrucción CALL sp_etl_cargar().
+P402 [Heading 2] Vistas de indicadores
+P403 [Normal] Sobre el modelo se crearon seis vistas que calculan los indicadores en SQL. Sirven para consultar sin Power BI y, sobre todo, como cifra de control: el tablero debe mostrar los mismos valores que estas vistas. La Tabla 37 las resume.
+P404 [Normal] Tabla 37
+P405 [Normal] Vistas del Data Mart
+TABLE 406
+Vista | Contenido | Uso
+v_kpi_cartera | Una fila con los indicadores de toda la cartera al último corte. | Tarjetas del tablero y control.
+v_kpi_proyecto | Indicadores de cada proyecto a su último corte. | Gráficos y tabla por proyecto.
+v_proyectos_por_estado | Cantidad de proyectos y monto por estado. | Cuarto indicador del plan.
+v_evolucion_por_corte | Presupuesto, gasto, desviación y hitos vencidos por fecha de corte. | Gráfico de tendencia.
+v_alertas | Hitos vencidos, hitos cerrados sin evidencia, proyectos sin actualización reciente y sin datos. | Lista de alertas (RF08).
+v_calidad_datos | Cantidad de registros sin información suficiente para algún cálculo. | Control de calidad pedido en el plan.
+P407 [Normal] Nota. Elaboración propia.
+P408 [Heading 2] Alcance de Business Intelligence
+P409 [Normal] La herramienta elegida es Power BI Desktop, que es gratuita y coincide con la restricción del plan de usar herramientas sin costo. El tablero se organiza en tres páginas y respeta las reglas del plan: los cuatro indicadores se calculan sobre la misma fecha de corte, la fecha de corte se muestra siempre y, si falta información para un cálculo, se muestra Sin datos. La Figura 5 presenta el boceto de la página principal con los datos de demostración.
+P411 [Normal] Figura 5
+P412 [Normal] Boceto de la página principal del tablero
+P414 [Normal] Nota. Elaboración propia con datos de demostración calculados en el Data Mart. No representa resultados reales de Electrocentro.
+P416 [Normal] Tabla 38
+P417 [Normal] Páginas y elementos del tablero
+TABLE 418
+Página | Elemento | Medida o campo | Requisito
+Resumen | Filtros de fecha de corte, estado, responsable y objetivo | dim_tiempo[fecha], dim_proyecto[estado_actual], dim_responsable[nombre], dim_objetivo[codigo] | RF05
+Resumen | Cuatro tarjetas de indicadores y texto del corte | Avance de hitos, Retraso, Desviación, Proyectos (n), Texto del corte | RF04
+Resumen | Barras de avance por proyecto, coloreadas si hay retraso | Avance de hitos %, Color retraso | RF04
+Resumen | Columnas de desviación por proyecto | Desviación presupuestal % | RF04
+Resumen | Lista de alertas | Vista v_alertas | RF08
+Hitos | Tabla de hitos con estado, fechas, desfase y evidencia | fact_hito con sus dimensiones | RF03 y RF05
+Hitos | Hitos por estado y porcentaje concluido a tiempo | Hitos (n), Hitos concluidos a tiempo % | RF04
+Evolución | Desviación y gasto por fecha de corte | Planificado al corte, Gasto al corte, eje dim_tiempo[fecha] | RF04
+Evolución | Calidad de datos | Vista v_calidad_datos | Plan, reglas de datos
+P419 [Normal] Nota. Elaboración propia. El reporte exportable (RF06) se obtiene con Archivo, Exportar a PDF, y conserva los filtros aplicados.
+P420 [Normal] El acceso por perfil sigue el requisito RF01. El perfil Consulta y la gerencia ven el tablero completo en modo lectura. El perfil Responsable usa el mismo tablero y filtra por su nombre para revisar sus proyectos. El perfil Administrador, además, ejecuta la carga del almacén. Restringir por fila lo que ve cada responsable dentro de Power BI es posible con la seguridad por roles, pero requiere publicar el tablero en el servicio de Power BI con cuentas institucionales, por lo que queda fuera del alcance.
+P421 [Heading 2] Guía de implementación
+P422 [Heading 3] Paso 1. Crear el almacén y cargarlo
+P423 [List Paragraph] Encender MySQL desde XAMPP y abrir MySQL Workbench con la cuenta root.
+P424 [List Paragraph] Verificar que exista la base operativa seguimiento_gd. Si no existe, ejecutar seguimiento_gd_fisico_completo.sql del capítulo 4.
+P425 [List Paragraph] Abrir y ejecutar dw_completo.sql. Crea dw_seguimiento_gd, el calendario, el procedimiento de carga y las vistas, y hace la primera carga.
+P426 [List Paragraph] Ejecutar 04_dw_cargar_y_validar.sql. Debe mostrar las mismas filas en la fuente y en el almacén, 0 diferencias de indicadores y 0 diferencias de montos.
+P427 [List Paragraph] Ejecutar 06_dw_usuario_bi.sql para crear la cuenta bi_lector y, si se desea la carga semanal automática, 05_dw_programar_carga.sql.
+P428 [Heading 3] Paso 2. Llevar los datos a Power BI
+P429 [Normal] Hay dos caminos. El recomendado para empezar es importar el archivo DW_seguimiento_gd_datos.xlsx, que ya contiene las tablas del almacén y las vistas: en Power BI se elige Obtener datos, Libro de Excel, y se marcan las seis tablas y las vistas v_alertas y v_calidad_datos. El segundo camino conecta Power BI directamente al servidor: Obtener datos, Base de datos MySQL, servidor localhost y base dw_seguimiento_gd, con la cuenta bi_lector. Este camino requiere instalar antes el conector MySQL Connector/NET y permite actualizar el tablero con un clic después de cada carga.
+P430 [Heading 3] Paso 3. Armar el modelo
+P431 [Normal] Power BI puede crear relaciones automáticas equivocadas. Conviene borrarlas en la vista Modelo y crear las de la Tabla 39. Luego se marca dim_tiempo como tabla de fechas con la columna fecha, se ordena nombre_mes por la columna mes y se ocultan las llaves sk_ e id_ para que no aparezcan en los filtros.
+P432 [Normal] Tabla 39
+P433 [Normal] Relaciones del modelo en Power BI
+TABLE 434
+Desde (lado 1) | Hacia (lado N) | Activa
+dim_tiempo[id_tiempo] | fact_avance_proyecto[id_tiempo] | Sí
+dim_tiempo[id_tiempo] | fact_hito[id_tiempo_prevista] | Sí
+dim_tiempo[id_tiempo] | fact_hito[id_tiempo_cierre] | No, se usa con USERELATIONSHIP
+dim_proyecto[sk_proyecto] | fact_avance_proyecto[sk_proyecto] y fact_hito[sk_proyecto] | Sí
+dim_objetivo[sk_objetivo] | fact_avance_proyecto[sk_objetivo] y fact_hito[sk_objetivo] | Sí
+dim_responsable[sk_responsable] | fact_avance_proyecto[sk_responsable] y fact_hito[sk_responsable] | Sí
+P435 [Normal] Nota. Elaboración propia. Todas las relaciones son de uno a varios con filtro en una sola dirección.
+P436 [Heading 3] Paso 4. Crear las medidas y las páginas
+P437 [Normal] Las medidas están en el archivo medidas_DAX.txt. Se crea una tabla vacía llamada Medidas y en ella se pega cada medida. La medida clave toma, para cada proyecto, su último corte dentro de las fechas filtradas y luego suma los proyectos, porque el presupuesto y el gasto son acumulados. Después se arman las tres páginas de la Tabla 38 tomando como guía la Figura 5.
+P438 [Heading 3] Paso 5. Validar con las cifras de control
+P439 [Normal] Antes de presentar el tablero hay que comparar sus valores con los de la Tabla 40, que salen de las vistas SQL del almacén. Si un valor no coincide, la causa suele ser una relación mal creada o un filtro de fecha que no empieza en 2023.
+P440 [Normal] Tabla 40
+P441 [Normal] Cifras de control para validar el tablero
+TABLE 442
+Escenario de filtros | Avance de hitos | Proyectos con retraso | Desviación presupuestal
+Sin filtros (último corte de cada proyecto) | 70,8 % | 42,9 % (3 de 7) | 6,5 % menos
+Fecha de corte hasta el 30/06/2024 | 58,3 % | 14,3 % (1 de 7) | 7,2 % menos
+Responsable Ana Quispe | 70,0 % | 33,3 % (1 de 3) | 7,7 % menos
+P443 [Normal] Nota. Elaboración propia con consultas sobre dw_seguimiento_gd. La palabra menos indica gasto menor a lo planificado.
+P444 [Heading 3] Paso 6. Mantener el tablero al día
+P445 [Normal] Cada vez que se registra un nuevo corte en la base operativa, se ejecuta la carga del almacén, o se espera la carga semanal, y luego se actualiza Power BI con el botón Actualizar. Si se usó el archivo de Excel, hay que volver a exportar las tablas desde Workbench o conectar Power BI directamente al servidor. La tabla etl_control permite revisar cuándo fue la última carga y si terminó bien.
+P446 [Heading 2] Pruebas realizadas
+P447 [Normal] El almacén se construyó y se probó en MariaDB 10.11 sobre la base operativa del capítulo 4. La Tabla 41 resume las pruebas.
+P448 [Normal] Tabla 41
+P449 [Normal] Pruebas del Data Warehouse
+TABLE 450
+N.º | Prueba | Resultado
+1 | Crear el almacén y hacer la primera carga desde cero. | Correcta: 1826 días, 10 proyectos, 6 objetivos, 3 responsables, 24 cortes y 24 hitos.
+2 | Comparar los indicadores de cada proyecto con la vista de la base operativa. | 0 diferencias en los 10 proyectos.
+3 | Comparar el monto total y el gasto total con la fuente. | 0 diferencias. El monto total es S/ 8 623 550, igual al del plan.
+4 | Ejecutar la carga dos veces seguidas. | Mismos resultados y mismas llaves sustitutas.
+5 | Cerrar un proyecto en la base operativa y volver a cargar. | La dimensión toma el nuevo estado y el indicador de retraso se recalcula.
+6 | Registrar un hito con fecha fuera del calendario. | La carga amplía el calendario sola y no falla.
+7 | Provocar un error quitando una tabla de la fuente. | La carga queda como Fallida con su mensaje y los hechos anteriores se conservan.
+8 | Con la cuenta bi_lector, intentar borrar datos. | Permiso denegado; solo puede leer.
+9 | Crear el evento de carga semanal. | Evento creado y habilitado.
+P451 [Normal] Nota. Elaboración propia. Después de las pruebas 5 a 7, las dos bases se reconstruyeron desde cero con los datos originales. Las medidas DAX no se pudieron ejecutar en Power BI durante la preparación; por eso se entregan las cifras de control de la Tabla 40.
+P452 [Heading 2] Archivos de este capítulo
+P453 [Normal] La Tabla 42 lista los archivos que se entregan para implementar el almacén y el tablero.
+P454 [Normal] Tabla 42
+P455 [Normal] Archivos para implementar el Data Warehouse y el BI
+TABLE 456
+Archivo | Contenido
+dw_completo.sql | Scripts 01, 02 y 03 en un solo archivo, más la primera carga.
+01_dw_estructura.sql | Base dw_seguimiento_gd, dimensiones, hechos, control de cargas y calendario.
+02_dw_etl.sql | Procedimiento de carga sp_etl_cargar.
+03_dw_vistas_kpi.sql | Las seis vistas de indicadores, alertas y calidad de datos.
+04_dw_cargar_y_validar.sql | Carga y comparación con la base operativa.
+05_dw_programar_carga.sql | Evento de carga semanal (opcional).
+06_dw_usuario_bi.sql | Cuenta de solo lectura bi_lector para Power BI.
+DW_seguimiento_gd_datos.xlsx y carpeta csv | Tablas y vistas del almacén listas para importar en Power BI.
+medidas_DAX.txt | Medidas del tablero, explicadas.
+Figuras del modelo y del tablero | Diagrama estrella, arquitectura y boceto en formato PNG.
+P457 [Normal] Nota. Elaboración propia.
+P458 [Heading 2] Limitaciones y trabajo futuro
+P459 [List Paragraph] Los hitos, avances y responsables son datos de demostración; los resultados no describen el desempeño real de Electrocentro.
+P460 [List Paragraph] El estado del proyecto y el responsable se guardan con su valor vigente. Para analizar cómo cambiaron en el tiempo, la dimensión de proyecto tendría que pasar a tipo 2, usando la bitácora como fuente.
+P461 [List Paragraph] La línea base de hitos se toma tal como está hoy; si se modifica, los cortes antiguos se recalculan con la línea base nueva.
+P462 [List Paragraph] Faltan las descripciones de OGD 01 y OGD 06, que el control de calidad de datos señala.
+P463 [List Paragraph] Las ampliaciones naturales son un Data Mart de ejecución financiera con datos de SAP S/4 HANA y la seguridad por fila al publicar el tablero.
+P464 [Heading 2] Conclusión de este capítulo
+P465 [Normal] El Data Warehouse dw_seguimiento_gd y su Data Mart de seguimiento quedaron definidos, construidos y probados. El modelo estrella, con cuatro dimensiones compartidas y dos tablas de hechos, responde las preguntas del Comité de Gobierno Digital con los mismos resultados que la base operativa. La carga es repetible y deja registro, y el tablero de Power BI tiene sus medidas, su diseño y sus cifras de control listos para construirse y validarse.
+P466 [Heading 1] Conclusiones generales
+P467 [List Paragraph] La normalización transformó un registro con grupos repetidos y datos duplicados en seis relaciones en tercera forma normal, de modo que cada dato del seguimiento se guarda una sola vez.
+P468 [List Paragraph] El modelo entidad relación y el diseño lógico describen la misma estructura con seis entidades, cinco relaciones de uno a muchos y 41 columnas, sin contradicciones entre ellos ni con el diccionario de datos.
+P469 [List Paragraph] El diseño físico dejó la base seguimiento_gd creada y probada en MySQL, con 24 restricciones, reglas programadas para el gasto, el cierre de proyectos y la bitácora, tres roles de acceso y una muestra de diez proyectos reales de la cartera.
+P470 [List Paragraph] El Data Warehouse dw_seguimiento_gd, con un modelo estrella de cuatro dimensiones y dos tablas de hechos, reproduce sin diferencias los indicadores de la base operativa y deja listo el tablero de Power BI con sus medidas y cifras de control.
+P471 [List Paragraph] Con los datos de demostración, la cartera muestra un avance de hitos de 70,8 %, tres de siete proyectos activos con retraso y un gasto 6,5 % por debajo de lo planificado, lo que ilustra el tipo de información que el Comité de Gobierno Digital podría revisar en cada corte.
+P472 [Heading 1] Recomendaciones
+P473 [List Paragraph] Completar la descripción de los objetivos OGD 01 y OGD 06 con el texto exacto de la página 25 del Plan de Gobierno Digital antes de usar el tablero.
+P474 [List Paragraph] Reemplazar los datos de demostración por los hitos y cortes reales de cada proyecto, y cambiar las claves de demostración de las cuentas de la base de datos.
+P475 [List Paragraph] Programar la carga semanal del almacén y revisar la tabla de control de cargas después de cada ejecución.
+P476 [List Paragraph] Si se necesita analizar cómo cambian el estado o el responsable de un proyecto en el tiempo, convertir la dimensión de proyecto a tipo 2 usando la bitácora como fuente.
+P477 [List Paragraph] Al publicar el tablero con cuentas institucionales, activar la seguridad por roles para que cada responsable vea solo sus proyectos.
+P478 [Heading 1] Referencias
+P479 [Normal] Electrocentro S. A. (2023). Plan de gobierno digital Electrocentro S. A. 2023 a 2026. https://www.distriluz.com.pe/transp/ftp/elcto/transp3/Plan%20de%20Gobierno%20Digital%20ELCTO_2023-2026_vf_01.pdf
+P480 [Normal] Inmon, W. H. (2005). Building the data warehouse (4.ª ed.). Wiley.
+P481 [Normal] Kimball, R., y Ross, M. (2013). The data warehouse toolkit: The definitive guide to dimensional modeling (3.ª ed.). Wiley.
+P482 [Heading 1] Anexo. Archivos que acompañan al informe
+P483 [Normal] Los archivos se entregan en un archivo comprimido organizado por capítulos, como muestra la Tabla 43.
+P484 [Normal] Tabla 43
+P485 [Normal] Contenido del archivo comprimido
+TABLE 486
+Carpeta | Contenido principal
+00_Informe_final | Este informe en Word.
+01_Normalizacion | Documento del capítulo 1.
+02_MER | Documento del capítulo 2, diagrama en imagen y archivo editable de draw.io.
+03_Diseno_Logico | Documento del capítulo 3 y diagrama lógico.
+04_Diseno_Fisico | Documento del capítulo 4, scripts SQL numerados, script completo, script para importar en MySQL Workbench y pruebas.
+05_DW_DM_BI | Documento del capítulo 5, scripts del almacén, datos para Power BI en Excel y CSV, medidas DAX y figuras.
+06_Anexos | Libro de Excel de la normalización y del diccionario de datos, y plan de proyecto.
+P487 [Normal] Nota. Elaboración propia. El archivo LEEME de la carpeta principal indica el orden de ejecución de los scripts.
