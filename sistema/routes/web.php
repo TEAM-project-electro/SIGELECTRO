@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
     // Motor de Indicadores y Consulta (RF04 - Etapa 10)
     Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');
 
+    // Data Warehouse y ETL (Etapa 11)
+    Route::get('/etl/estado', [\App\Http\Controllers\EtlController::class, 'estado'])->name('etl.estado');
+    Route::post('/etl/ejecutar', [\App\Http\Controllers\EtlController::class, 'ejecutar'])->name('etl.ejecutar');
+
     // Módulo de Auditoría y Trazabilidad (RF05 - Solo Administrador)
     Route::get('/auditoria', [\App\Http\Controllers\AuditoriaController::class, 'index'])->name('auditoria.index');
 

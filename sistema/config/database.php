@@ -101,6 +101,20 @@ return [
             'engine' => 'InnoDB',
         ],
 
+        'dw_migrador' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3307'),
+            'database' => env('DW_DB_DATABASE', 'dw_seguimiento_gd'),
+            'username' => env('DB_USERNAME', 'sig_migrador'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => 'InnoDB',
+        ],
+
         'dw_etl' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
