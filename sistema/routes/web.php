@@ -69,11 +69,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    Route::get('/tablero', function () {
-        return view('tablero', [
-            'usuario' => Auth::user(),
-        ]);
-    })->name('tablero');
+    Route::get('/tablero', [\App\Http\Controllers\TableroController::class, 'index'])->name('tablero');
 
     // Motor de Indicadores y Consulta (RF04 - Etapa 10)
     Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');
