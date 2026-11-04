@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/etl/estado', [\App\Http\Controllers\EtlController::class, 'estado'])->name('etl.estado');
     Route::post('/etl/ejecutar', [\App\Http\Controllers\EtlController::class, 'ejecutar'])->name('etl.ejecutar');
 
+    // Reportes y Exportación (RF06 - Etapa 13 - Gate G3)
+    Route::get('/reportes/imprimir', [\App\Http\Controllers\ReporteController::class, 'imprimir'])->name('reportes.imprimir');
+    Route::get('/reportes/csv', [\App\Http\Controllers\ReporteController::class, 'exportarCsv'])->name('reportes.csv');
+
     // Módulo de Auditoría y Trazabilidad (RF05 - Solo Administrador)
     Route::get('/auditoria', [\App\Http\Controllers\AuditoriaController::class, 'index'])->name('auditoria.index');
 

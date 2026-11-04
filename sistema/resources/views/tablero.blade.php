@@ -55,6 +55,27 @@
                         DW Sincronizado
                     </span>
                 @endif
+
+                <!-- Botones de Exportación (RF06 - Etapa 13) -->
+                <div class="flex items-center gap-1 ml-2">
+                    <a href="{{ route('reportes.csv', array_merge(request()->query(), ['revision_esperada' => $datos['contexto']['revision_datos']])) }}"
+                       title="Descargar datos en formato CSV UTF-8"
+                       class="px-3 py-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        CSV
+                    </a>
+                    <a href="{{ route('reportes.imprimir', array_merge(request()->query(), ['revision_esperada' => $datos['contexto']['revision_datos']])) }}"
+                       target="_blank"
+                       title="Abrir vista imprimible / Guardar como PDF"
+                       class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Imprimir / PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>
