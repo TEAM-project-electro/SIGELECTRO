@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ObjetivoGdController;
+use App\Http\Controllers\ProyectoController;
 use App\Models\Hito;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;
@@ -73,25 +75,37 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('tablero');
 
-    Route::get('/proyectos', function () {
-        $proyectos = Proyecto::with(['objetivo', 'responsable'])->get();
-        return response()->json($proyectos);
-    })->name('proyectos.index');
+    // Catálogo de Objetivos PGD
+    Route::get('/objetivos', [ObjetivoGdController::class, 'index'])->name('objetivos.index');
 
-    // Endpoints protegidos para validación de políticas y compuerta Gate G1
+    // Gestión de Cartera de Proyectos PGD
+    Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
+    Route::get('/proyectos/crear', [ProyectoController::class, 'create'])->name('proyectos.create');
     Route::post('/proyectos', function (Request $request) {
-        Gate::authorize('create', Proyecto::class);
-        return response()->json(['mensaje' => 'Autorizado para crear proyecto'], 201);
+        if ($request->wantsJson()) {
+            Gate::authorize('create', Proyecto::class);
+            return response()->json(['mensaje' => 'Autorizado para crear proyecto'], 201);
+        }
+        return app(ProyectoController::class)->store(app(\App\Http\Requests\Proyecto\StoreProyectoRequest::class));
     })->name('proyectos.store');
 
+    Route::get('/proyectos/{proyecto}', [ProyectoController::class, 'show'])->name('proyectos.show');
+    Route::get('/proyectos/{proyecto}/editar', [ProyectoController::class, 'edit'])->name('proyectos.edit');
+
     Route::put('/proyectos/{proyecto}', function (Proyecto $proyecto, Request $request) {
-        Gate::authorize('update', $proyecto);
-        return response()->json(['mensaje' => 'Autorizado para actualizar proyecto']);
+        if ($request->wantsJson() && !$request->has('fecha_actualizacion_esperada')) {
+            Gate::authorize('update', $proyecto);
+            return response()->json(['mensaje' => 'Autorizado para actualizar proyecto']);
+        }
+        return app(ProyectoController::class)->update(app(\App\Http\Requests\Proyecto\UpdateProyectoRequest::class), $proyecto);
     })->name('proyectos.update');
 
-    Route::delete('/proyectos/{proyecto}', function (Proyecto $proyecto) {
-        Gate::authorize('delete', $proyecto);
-        return response()->json(['mensaje' => 'Autorizado para eliminar proyecto']);
+    Route::delete('/proyectos/{proyecto}', function (Proyecto $proyecto, Request $request) {
+        if ($request->wantsJson()) {
+            Gate::authorize('delete', $proyecto);
+            return response()->json(['mensaje' => 'Autorizado para eliminar proyecto']);
+        }
+        return app(ProyectoController::class)->destroy($proyecto);
     })->name('proyectos.destroy');
 
     Route::post('/proyectos/{proyecto}/reabrir', function (Proyecto $proyecto, Request $request) {
@@ -99,6 +113,7 @@ Route::middleware('auth')->group(function () {
         return response()->json(['mensaje' => 'Autorizado para reabrir proyecto']);
     })->name('proyectos.reabrir');
 
+    // Endpoints de Hitos (Para Gate G1 y Etapa 07)
     Route::post('/proyectos/{proyecto}/hitos', function (Proyecto $proyecto, Request $request) {
         Gate::authorize('create', [Hito::class, $proyecto]);
         return response()->json(['mensaje' => 'Autorizado para crear hito'], 201);
