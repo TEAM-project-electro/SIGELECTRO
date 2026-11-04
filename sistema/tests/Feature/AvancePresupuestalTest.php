@@ -24,10 +24,13 @@ class AvancePresupuestalTest extends TestCase
     protected function tearDown(): void
     {
         // Limpiar posibles cortes temporales creados en pruebas
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Limpieza prueba';");
         DB::connection('mysql')->table('avance_presupuestal')
             ->where('fecha_reporte', '2024-12-31')
             ->orWhere('fecha_reporte', '2023-04-30')
             ->delete();
+        DB::connection('mysql')->statement("SET @id_responsable = NULL;");
 
         parent::tearDown();
     }

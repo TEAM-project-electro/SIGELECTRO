@@ -7,13 +7,17 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Procedimientos y Vistas del Data Warehouse con DEFINER = 'sig_definer'@'localhost',
+     * atomicidad completa en dimensiones/hechos y exclusión mutua mediante lock mutex (A05, A07).
      */
     public function up(): void
     {
+        $origenDb = config('database.connections.mysql.database', 'seguimiento_gd');
+
         // 1. PROCEDIMIENTO sp_cargar_dim_tiempo
         DB::connection('dw_migrador')->statement("DROP PROCEDURE IF EXISTS sp_cargar_dim_tiempo;");
         DB::connection('dw_migrador')->statement("
-            CREATE PROCEDURE sp_cargar_dim_tiempo(IN p_anio_inicio INT, IN p_anio_fin INT)
+            CREATE DEFINER = 'sig_definer'@'localhost' PROCEDURE sp_cargar_dim_tiempo(IN p_anio_inicio INT, IN p_anio_fin INT)
             BEGIN
                 DECLARE v_fecha DATE;
                 DECLARE v_fin DATE;
@@ -61,10 +65,10 @@ return new class extends Migration
             END;
         ");
 
-        // 2. PROCEDIMIENTO sp_etl_cargar
+        // 2. PROCEDIMIENTO sp_etl_cargar (A07: Mutex y atomicidad global)
         DB::connection('dw_migrador')->statement("DROP PROCEDURE IF EXISTS sp_etl_cargar;");
         DB::connection('dw_migrador')->statement("
-            CREATE PROCEDURE sp_etl_cargar()
+            CREATE DEFINER = 'sig_definer'@'localhost' PROCEDURE sp_etl_cargar()
             BEGIN
                 DECLARE v_id_carga INT;
                 DECLARE v_rev BIGINT DEFAULT 1;
@@ -72,10 +76,12 @@ return new class extends Migration
                 DECLARE v_filas_hito INT DEFAULT 0;
                 DECLARE v_min_anio INT DEFAULT 2023;
                 DECLARE v_max_anio INT DEFAULT 2027;
+                DECLARE v_lock_res INT DEFAULT 0;
 
                 DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 BEGIN
                     ROLLBACK;
+                    DO RELEASE_LOCK('sig_etl_mutex');
                     IF v_id_carga IS NOT NULL THEN
                         UPDATE etl_control
                         SET estado = 'Fallido', fecha_fin = NOW(), mensaje = 'Error durante la ejecución de sp_etl_cargar'
@@ -84,14 +90,23 @@ return new class extends Migration
                     RESIGNAL;
                 END;
 
+                -- A07: Adquisición de exclusión mutua de ETL
+                SELECT GET_LOCK('sig_etl_mutex', 10) INTO v_lock_res;
+                IF v_lock_res IS NULL OR v_lock_res = 0 THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se pudo adquirir el bloqueo exclusivo de ETL (sig_etl_mutex)';
+                END IF;
+
                 -- 1. Registro de inicio en etl_control
                 INSERT INTO etl_control (fecha_inicio, estado, revision_origen)
                 VALUES (NOW(), 'En ejecucion', 1);
                 SET v_id_carga = LAST_INSERT_ID();
 
+                -- A07: Toda la sincronización de dimensiones y hechos en una única transacción atómica
+                START TRANSACTION;
+
                 -- 2. Captura de revisión técnica de origen
                 SELECT IFNULL(version, 1) INTO v_rev
-                FROM seguimiento_gd.control_revision
+                FROM {$origenDb}.control_revision
                 WHERE id = 1 LIMIT 1;
 
                 UPDATE etl_control SET revision_origen = v_rev WHERE id_carga = v_id_carga;
@@ -101,7 +116,7 @@ return new class extends Migration
                     LEAST(2023, IFNULL(MIN(YEAR(fecha_reporte)), 2023)),
                     GREATEST(2027, IFNULL(MAX(YEAR(fecha_reporte)), 2027))
                 INTO v_min_anio, v_max_anio
-                FROM seguimiento_gd.avance_presupuestal;
+                FROM {$origenDb}.avance_presupuestal;
 
                 CALL sp_cargar_dim_tiempo(v_min_anio, v_max_anio);
 
@@ -109,7 +124,7 @@ return new class extends Migration
                 -- 4.1 dim_objetivo
                 INSERT INTO dim_objetivo (id_objetivo, codigo, descripcion)
                 SELECT id_objetivo, codigo, descripcion
-                FROM seguimiento_gd.objetivo_gd
+                FROM {$origenDb}.objetivo_gd
                 ON DUPLICATE KEY UPDATE
                     codigo = VALUES(codigo),
                     descripcion = VALUES(descripcion);
@@ -117,7 +132,7 @@ return new class extends Migration
                 -- 4.2 dim_responsable (sin usuario ni credenciales)
                 INSERT INTO dim_responsable (id_responsable, nombre, area, perfil, es_activo)
                 SELECT id_responsable, nombre, area, perfil, activo
-                FROM seguimiento_gd.responsable
+                FROM {$origenDb}.responsable
                 ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     area = VALUES(area),
@@ -143,7 +158,7 @@ return new class extends Migration
                     estado,
                     IF(estado IN ('Pendiente', 'En curso'), 1, 0),
                     fuente
-                FROM seguimiento_gd.proyecto
+                FROM {$origenDb}.proyecto
                 ON DUPLICATE KEY UPDATE
                     codigo_pgd = VALUES(codigo_pgd),
                     nombre = VALUES(nombre),
@@ -155,10 +170,7 @@ return new class extends Migration
                     es_activo = VALUES(es_activo),
                     fuente = VALUES(fuente);
 
-                -- 5. Carga de Hechos en Transacción Atómica
-                START TRANSACTION;
-
-                -- Vaciado reversible de hechos dentro de la transacción
+                -- 5. Carga de Hechos
                 DELETE FROM fact_hito;
                 DELETE FROM fact_avance_proyecto;
 
@@ -191,20 +203,15 @@ return new class extends Migration
                     ap.gasto_acumulado,
                     (ap.gasto_acumulado - ap.presupuesto_planificado) AS diferencia_gasto,
                     p.monto AS monto_proyecto,
-                    -- Hitos LB totales del proyecto
-                    (SELECT COUNT(*) FROM seguimiento_gd.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1) AS hitos_linea_base,
-                    -- Hitos LB concluidos a la fecha de reporte
-                    (SELECT COUNT(*) FROM seguimiento_gd.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_cierre IS NOT NULL AND h.fecha_cierre <= ap.fecha_reporte) AS hitos_concluidos,
-                    -- Hitos LB vencidos a la fecha de reporte
-                    (SELECT COUNT(*) FROM seguimiento_gd.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_prevista < ap.fecha_reporte AND (h.fecha_cierre IS NULL OR h.fecha_cierre > ap.fecha_reporte)) AS hitos_vencidos,
-                    -- Con retraso si activo con LB y tiene vencidos
+                    (SELECT COUNT(*) FROM {$origenDb}.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1) AS hitos_linea_base,
+                    (SELECT COUNT(*) FROM {$origenDb}.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_cierre IS NOT NULL AND h.fecha_cierre <= ap.fecha_reporte) AS hitos_concluidos,
+                    (SELECT COUNT(*) FROM {$origenDb}.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_prevista < ap.fecha_reporte AND (h.fecha_cierre IS NULL OR h.fecha_cierre > ap.fecha_reporte)) AS hitos_vencidos,
                     IF(p.estado IN ('Pendiente', 'En curso')
-                       AND (SELECT COUNT(*) FROM seguimiento_gd.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1) > 0
-                       AND (SELECT COUNT(*) FROM seguimiento_gd.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_prevista < ap.fecha_reporte AND (h.fecha_cierre IS NULL OR h.fecha_cierre > ap.fecha_reporte)) > 0, 1, 0) AS con_retraso,
-                    -- Es último corte
-                    IF(ap.fecha_reporte = (SELECT MAX(ap2.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap2 WHERE ap2.id_proyecto = p.id_proyecto), 1, 0) AS es_ultimo_corte
-                FROM seguimiento_gd.avance_presupuestal ap
-                INNER JOIN seguimiento_gd.proyecto p ON ap.id_proyecto = p.id_proyecto
+                       AND (SELECT COUNT(*) FROM {$origenDb}.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1) > 0
+                       AND (SELECT COUNT(*) FROM {$origenDb}.hito h WHERE h.id_proyecto = p.id_proyecto AND h.en_linea_base = 1 AND h.fecha_prevista < ap.fecha_reporte AND (h.fecha_cierre IS NULL OR h.fecha_cierre > ap.fecha_reporte)) > 0, 1, 0) AS con_retraso,
+                    IF(ap.fecha_reporte = (SELECT MAX(ap2.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap2 WHERE ap2.id_proyecto = p.id_proyecto), 1, 0) AS es_ultimo_corte
+                FROM {$origenDb}.avance_presupuestal ap
+                INNER JOIN {$origenDb}.proyecto p ON ap.id_proyecto = p.id_proyecto
                 INNER JOIN dim_proyecto dp ON p.id_proyecto = dp.id_proyecto
                 INNER JOIN dim_objetivo dob ON p.id_objetivo = dob.id_objetivo
                 INNER JOIN dim_responsable dr ON p.id_responsable = dr.id_responsable
@@ -241,21 +248,20 @@ return new class extends Migration
                     h.descripcion,
                     h.en_linea_base,
                     IF(h.fecha_cierre IS NOT NULL, 1, 0) AS concluido,
-                    -- Vencido evaluado al último corte o fecha actual
-                    IF(h.en_linea_base = 1 AND (h.fecha_cierre IS NULL OR h.fecha_cierre > IFNULL((SELECT MAX(ap.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto), CURRENT_DATE()))
-                       AND h.fecha_prevista < IFNULL((SELECT MAX(ap.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto), CURRENT_DATE()), 1, 0) AS vencido,
+                    IF(h.en_linea_base = 1 AND (h.fecha_cierre IS NULL OR h.fecha_cierre > IFNULL((SELECT MAX(ap.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto), CURRENT_DATE()))
+                       AND h.fecha_prevista < IFNULL((SELECT MAX(ap.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto), CURRENT_DATE()), 1, 0) AS vencido,
                     IF(h.fecha_cierre IS NOT NULL, DATEDIFF(h.fecha_cierre, h.fecha_prevista), NULL) AS dias_desfase,
                     IF(h.fecha_cierre IS NOT NULL AND h.fecha_cierre <= h.fecha_prevista, 1, 0) AS concluido_a_tiempo,
                     IF(h.evidencia IS NOT NULL AND LENGTH(TRIM(h.evidencia)) > 0, 1, 0) AS tiene_evidencia,
                     CASE
                         WHEN h.fecha_cierre IS NOT NULL THEN 'Concluido'
-                        WHEN (SELECT MAX(ap.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) IS NOT NULL
-                             AND h.fecha_prevista < (SELECT MAX(ap.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) THEN 'Vencido'
-                        WHEN (SELECT MAX(ap.fecha_reporte) FROM seguimiento_gd.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) IS NOT NULL THEN 'En plazo'
+                        WHEN (SELECT MAX(ap.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) IS NOT NULL
+                             AND h.fecha_prevista < (SELECT MAX(ap.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) THEN 'Vencido'
+                        WHEN (SELECT MAX(ap.fecha_reporte) FROM {$origenDb}.avance_presupuestal ap WHERE ap.id_proyecto = h.id_proyecto) IS NOT NULL THEN 'En plazo'
                         ELSE 'Sin corte'
                     END AS estado_hito
-                FROM seguimiento_gd.hito h
-                INNER JOIN seguimiento_gd.proyecto p ON h.id_proyecto = p.id_proyecto
+                FROM {$origenDb}.hito h
+                INNER JOIN {$origenDb}.proyecto p ON h.id_proyecto = p.id_proyecto
                 INNER JOIN dim_proyecto dp ON p.id_proyecto = dp.id_proyecto
                 INNER JOIN dim_objetivo dob ON p.id_objetivo = dob.id_objetivo
                 INNER JOIN dim_responsable dr ON p.id_responsable = dr.id_responsable
@@ -266,7 +272,9 @@ return new class extends Migration
 
                 COMMIT;
 
-                -- 6. Cierre exitoso en etl_control
+                -- 6. Liberar lock y cerrar exitosamente en etl_control
+                DO RELEASE_LOCK('sig_etl_mutex');
+
                 UPDATE etl_control
                 SET estado = 'Completado',
                     fecha_fin = NOW(),
@@ -278,11 +286,11 @@ return new class extends Migration
             END;
         ");
 
-        // 3. SEIS VISTAS ANALÍTICAS DEL DATA MART
+        // 3. SEIS VISTAS ANALÍTICAS DEL DATA MART CON DEFINER 'sig_definer'@'localhost'
         // 3.1 v_kpi_cartera
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_kpi_cartera;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_kpi_cartera AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_kpi_cartera AS
             SELECT
                 COUNT(DISTINCT fa.id_proyecto) AS total_proyectos,
                 SUM(fa.monto_proyecto) AS monto_total_cartera,
@@ -304,14 +312,16 @@ return new class extends Migration
         // 3.2 v_kpi_proyecto
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_kpi_proyecto;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_kpi_proyecto AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_kpi_proyecto AS
             SELECT
                 dp.id_proyecto,
                 dp.codigo_pgd,
                 dp.nombre AS proyecto,
                 dp.estado_actual,
                 dp.es_activo,
+                dr.id_responsable,
                 dr.nombre AS responsable,
+                dob.id_objetivo,
                 dob.codigo AS objetivo_codigo,
                 dob.descripcion AS objetivo_descripcion,
                 fa.monto_proyecto,
@@ -335,7 +345,7 @@ return new class extends Migration
         // 3.3 v_proyectos_por_estado
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_proyectos_por_estado;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_proyectos_por_estado AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_proyectos_por_estado AS
             SELECT
                 dp.estado_actual,
                 COUNT(*) AS cantidad_proyectos,
@@ -349,7 +359,7 @@ return new class extends Migration
         // 3.4 v_evolucion_por_corte
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_evolucion_por_corte;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_evolucion_por_corte AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_evolucion_por_corte AS
             SELECT
                 fa.fecha_reporte,
                 COUNT(DISTINCT fa.id_proyecto) AS proyectos_reportados,
@@ -367,12 +377,12 @@ return new class extends Migration
         // 3.5 v_alertas
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_alertas;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_alertas AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_alertas AS
             -- Alerta 1: Hito de línea base vencido
             SELECT
                 CONVERT('Hito vencido' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS tipo_alerta,
                 CONVERT('ALTA' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS severidad,
-                CONVERT(CONCAT('Hito \"', fh.descripcion, '\" venció el ', fh.id_hito, ' y sigue sin cierre') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS detalle,
+                CONVERT(CONCAT('Hito \"', fh.descripcion, '\" venció y sigue sin cierre') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS detalle,
                 dp.codigo_pgd,
                 dp.nombre AS proyecto,
                 dr.nombre AS responsable
@@ -394,7 +404,7 @@ return new class extends Migration
             INNER JOIN dim_responsable dr ON fh.sk_responsable = dr.sk_responsable
             WHERE fh.concluido = 1 AND fh.tiene_evidencia = 0
             UNION ALL
-            -- Alerta 3: Proyecto activo con retraso presupuestal (gasto > plan)
+            -- Alerta 3: Proyecto activo con sobregasto (gasto > plan)
             SELECT
                 CONVERT('Sobregasto' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS tipo_alerta,
                 CONVERT('MEDIA' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS severidad,
@@ -411,7 +421,7 @@ return new class extends Migration
         // 3.6 v_calidad_datos
         DB::connection('dw_migrador')->statement("DROP VIEW IF EXISTS v_calidad_datos;");
         DB::connection('dw_migrador')->statement("
-            CREATE VIEW v_calidad_datos AS
+            CREATE DEFINER = 'sig_definer'@'localhost' VIEW v_calidad_datos AS
             SELECT
                 'Proyectos sin hitos en línea base' AS regla_calidad,
                 COUNT(*) AS casos_detectados,

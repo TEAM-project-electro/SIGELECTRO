@@ -20,6 +20,7 @@ class SeguimientoSeeder extends Seeder
             // 005 - Equipos de ciberseguridad (En curso)
             ['cod' => '005', 'desc' => 'Adquisicion de equipamiento de seguridad', 'prev' => '2023-03-15', 'cie' => '2023-03-15', 'evi' => 'Acta de conformidad N° 012-TIC', 'lb' => 1],
             ['cod' => '005', 'desc' => 'Instalacion y configuracion en sede central', 'prev' => '2024-09-15', 'cie' => null, 'evi' => null, 'lb' => 1], // Vencido al 30/09/2024
+            ['cod' => '005', 'desc' => 'Despliegue y pruebas de seguridad perimetral', 'prev' => '2023-08-15', 'cie' => '2024-10-01', 'evi' => 'Conformidad total para pase a cierre', 'lb' => 1],
 
             // 010 - Software Factory (En curso)
             ['cod' => '010', 'desc' => 'Terminos de referencia y contratacion', 'prev' => '2023-04-30', 'cie' => '2023-04-28', 'evi' => 'Contrato N° 045-2023-ELCTO', 'lb' => 1],

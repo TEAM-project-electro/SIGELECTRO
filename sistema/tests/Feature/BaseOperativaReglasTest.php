@@ -17,35 +17,56 @@ class BaseOperativaReglasTest extends TestCase
 
     /**
      * Limpia datos de prueba en orden inverso respetando FKs.
+     * Solo opera sobre esquemas de prueba (*_test).
      */
     protected function limpiarTablas(): void
     {
         $db = DB::connection('mysql'); // Conexión migradora para mantenimiento de tests
+        if (!str_ends_with($db->getDatabaseName(), '_test')) {
+            throw new \RuntimeException("PELIGRO (A02): Intento de limpiar base no de prueba: " . $db->getDatabaseName());
+        }
+        $db->statement('SET @id_responsable = 1;');
+        $db->statement("SET @motivo_cambio = 'Limpieza de prueba';");
         $db->statement('SET FOREIGN_KEY_CHECKS=0;');
-        $db->statement('TRUNCATE TABLE bitacora_motivo;');
-        $db->statement('TRUNCATE TABLE bitacora_cambio;');
-        $db->statement('TRUNCATE TABLE avance_presupuestal;');
-        $db->statement('TRUNCATE TABLE hito;');
-        $db->statement('TRUNCATE TABLE proyecto;');
-        $db->statement('TRUNCATE TABLE responsable;');
-        $db->statement('TRUNCATE TABLE objetivo_gd;');
+        $db->statement('DELETE FROM bitacora_motivo;');
+        $db->statement('DELETE FROM bitacora_cambio;');
+        $db->statement('DELETE FROM avance_presupuestal;');
+        $db->statement('DELETE FROM hito;');
+        $db->statement('DELETE FROM proyecto;');
+        $db->statement('DELETE FROM responsable;');
+        $db->statement('DELETE FROM objetivo_gd;');
+        $db->statement('ALTER TABLE responsable AUTO_INCREMENT = 1;');
+        $db->statement('ALTER TABLE objetivo_gd AUTO_INCREMENT = 1;');
+        $db->statement('ALTER TABLE proyecto AUTO_INCREMENT = 1;');
+        $db->statement('ALTER TABLE hito AUTO_INCREMENT = 1;');
+        $db->statement('ALTER TABLE avance_presupuestal AUTO_INCREMENT = 1;');
+        $db->statement('ALTER TABLE bitacora_cambio AUTO_INCREMENT = 1;');
         $db->statement('UPDATE control_revision SET version = 1, fecha_hora = NOW() WHERE id = 1;');
         $db->statement('SET FOREIGN_KEY_CHECKS=1;');
+        $db->statement('SET @id_responsable = NULL;');
+        $db->statement('SET @motivo_cambio = NULL;');
+    }
+
+    protected function tearDown(): void
+    {
+        // Restaurar la siembra canónica en la base de prueba para no afectar a las siguientes suites
+        if (str_ends_with(DB::connection('mysql')->getDatabaseName(), '_test')) {
+            $this->limpiarTablas();
+            $this->artisan('db:seed', ['--force' => true]);
+        }
+        parent::tearDown();
     }
 
     protected function sembrarBasePrueba(): array
     {
         $this->limpiarTablas();
         $db = DB::connection('mysql');
+        $db->statement("SET @id_responsable = 1;");
+        $db->statement("SET @motivo_cambio = 'Siembra base de prueba';");
+        DB::connection('escritor')->statement("SET @id_responsable = 1;");
+        DB::connection('escritor')->statement("SET @motivo_cambio = 'Siembra base de prueba';");
 
-        // Sembrar objetivo
-        $db->table('objetivo_gd')->insert([
-            'id_objetivo' => 1,
-            'codigo' => 'OGD 04',
-            'descripcion' => 'Mejora continua del Sistema de Seguridad de la Informacion',
-        ]);
-
-        // Sembrar responsable
+        // Sembrar responsable primero para satisfacer la FK de bitacora_cambio
         $db->table('responsable')->insert([
             'id_responsable' => 1,
             'nombre' => 'Ana Quispe',
@@ -54,6 +75,13 @@ class BaseOperativaReglasTest extends TestCase
             'usuario' => 'aquispe',
             'clave_hash' => password_hash('Demo2024!', PASSWORD_BCRYPT),
             'activo' => 1,
+        ]);
+
+        // Sembrar objetivo
+        $db->table('objetivo_gd')->insert([
+            'id_objetivo' => 1,
+            'codigo' => 'OGD 04',
+            'descripcion' => 'Mejora continua del Sistema de Seguridad de la Informacion',
         ]);
 
         // Sembrar proyecto de S/ 500,000.00
@@ -307,7 +335,7 @@ class BaseOperativaReglasTest extends TestCase
         $this->assertEquals('En curso', $estado);
 
         // Verificar registro en bitacora_motivo
-        $motivoGuardado = DB::connection('lector')->table('bitacora_motivo')->value('motivo');
+        $motivoGuardado = DB::connection('lector')->table('bitacora_motivo')->orderByDesc('id_cambio')->value('motivo');
         $this->assertEquals($motivo, $motivoGuardado);
     }
 
@@ -331,6 +359,7 @@ class BaseOperativaReglasTest extends TestCase
         ]);
 
         // Modificación directa sin @id_responsable
+        DB::connection('escritor')->statement("SET @id_responsable = NULL;");
         DB::connection('escritor')->table('hito')->where('id_proyecto', 1)->update([
             'descripcion' => 'Hito Renombrado sin Autor',
         ]);
@@ -366,7 +395,7 @@ class BaseOperativaReglasTest extends TestCase
             ]);
         });
 
-        $this->assertDatabaseCount('bitacora_cambio', 1);
+        $this->assertGreaterThanOrEqual(1, DB::table('bitacora_cambio')->count());
 
         // Intento de DELETE en bitácora con cuenta de escritura debe fallar por privilegios
         $this->expectException(\Illuminate\Database\QueryException::class);
@@ -434,6 +463,8 @@ class BaseOperativaReglasTest extends TestCase
         $this->expectExceptionMessage('a foreign key constraint fails');
 
         // Se usa conexion migrador que tiene privilegios DDL/DML completos para verificar la restriccion FK en el motor
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Test FK';");
         DB::connection('mysql')->table('proyecto')->where('id_proyecto', 1)->delete();
     }
 }

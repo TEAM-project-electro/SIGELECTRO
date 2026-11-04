@@ -5,7 +5,8 @@
     Restaura los respaldos logicos creados por 'respaldo_db.ps1' hacia esquemas
     nuevos descartables (por defecto 'seguimiento_gd_restaurada' y 'dw_seguimiento_gd_restaurada')
     o hacia los esquemas operativos si se solicita expresamente.
-    Configura codificacion utf8mb4 y grants tecnicos necesarios para su verificacion.
+    Configura codificacion utf8mb4, remapea referencias entre esquemas y establece
+    los privilegios minimos granulares por tabla y columna sin secretos (A08).
 .PARAMETER HostName
     Dirección del servidor MariaDB (por defecto 127.0.0.1).
 .PARAMETER Port
@@ -23,7 +24,7 @@
 .PARAMETER DwSqlFile
     Ruta o nombre del archivo .sql para el esquema DW. Si se omite, usa 'dw_seguimiento_gd_latest.sql'.
 .PARAMETER ForzarSobrescritura
-    Obligatorio si se especifica DatabaseTarget='seguimiento_gd' para prevenir sobrescritura accidental.
+    Obligatorio si se especifica DatabaseTarget='seguimiento_gd' o DwDatabaseTarget='dw_seguimiento_gd'.
 .PARAMETER MariaDbBinDir
     Ruta a la carpeta bin de MariaDB 10.11 (por defecto 'C:\mariadb-10.11\bin').
 #>
@@ -63,9 +64,9 @@ if (-not $Password) {
     $Password = "Migrador2026!"
 }
 
-# Salvaguarda contra sobrescritura accidental de base operativa
-if ($DatabaseTarget -eq "seguimiento_gd" -and -not $ForzarSobrescritura) {
-    Write-Error "PELIGRO: Ha indicado la base operativa 'seguimiento_gd'. Para sobrescribirla debe especificar el parametro -ForzarSobrescritura."
+# A08: Salvaguarda contra sobrescritura accidental de cualquier base operativa
+if (($DatabaseTarget -eq "seguimiento_gd" -or $DwDatabaseTarget -eq "dw_seguimiento_gd") -and -not $ForzarSobrescritura) {
+    Write-Error "PELIGRO: Ha indicado un esquema operativo ('seguimiento_gd' o 'dw_seguimiento_gd'). Para sobrescribirlo debe especificar el parámetro -ForzarSobrescritura."
     exit 1
 }
 
@@ -144,7 +145,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host " [OK]" -ForegroundColor Green
 
-# 3. Restaurar esquema Data Warehouse
+# 3. Restaurar esquema Data Warehouse remapeando referencias cruzadas (A08)
 Write-Host "Restaurando '$DwDatabaseTarget' desde $(Split-Path -Leaf $DwSqlFile)..." -NoNewline
 $mysqlArgsDw = @(
     "-h", $HostName,
@@ -155,7 +156,11 @@ $mysqlArgsDw = @(
     $DwDatabaseTarget
 )
 
-Get-Content -LiteralPath $DwSqlFile -Raw -Encoding utf8 | & $mysqlBin $mysqlArgsDw
+$dwSqlContent = Get-Content -LiteralPath $DwSqlFile -Raw -Encoding utf8
+if ($DatabaseTarget -ne "seguimiento_gd") {
+    $dwSqlContent = $dwSqlContent -replace "\bseguimiento_gd\b", $DatabaseTarget
+}
+$dwSqlContent | & $mysqlBin $mysqlArgsDw
 if ($LASTEXITCODE -ne 0) {
     Write-Host " [FALLO]" -ForegroundColor Red
     Write-Error "Error restaurando $DwDatabaseTarget"
@@ -163,37 +168,42 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host " [OK]" -ForegroundColor Green
 
-# 4. Asegurar privilegios de las cuentas técnicas sobre los esquemas restaurados
-Write-Host "Configurando privilegios tecnicos sobre esquemas restaurados..."
-$grantsSql = @"
-GRANT ALL PRIVILEGES ON $DatabaseTarget.* TO 'sig_migrador'@'localhost';
-GRANT ALL PRIVILEGES ON $DwDatabaseTarget.* TO 'sig_migrador'@'localhost';
-GRANT ALL PRIVILEGES ON $DatabaseTarget.* TO 'sig_migrador'@'127.0.0.1';
-GRANT ALL PRIVILEGES ON $DwDatabaseTarget.* TO 'sig_migrador'@'127.0.0.1';
-GRANT ALL PRIVILEGES ON $DatabaseTarget.* TO 'sig_definer'@'localhost';
-GRANT ALL PRIVILEGES ON $DwDatabaseTarget.* TO 'sig_definer'@'localhost';
-GRANT ALL PRIVILEGES ON $DatabaseTarget.* TO 'sig_definer'@'127.0.0.1';
-GRANT ALL PRIVILEGES ON $DwDatabaseTarget.* TO 'sig_definer'@'127.0.0.1';
-GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.* TO 'sig_escritor'@'localhost';
-GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.* TO 'sig_escritor'@'127.0.0.1';
-REVOKE UPDATE, DELETE ON $DatabaseTarget.bitacora_cambio FROM 'sig_escritor'@'localhost';
-REVOKE UPDATE, DELETE ON $DatabaseTarget.bitacora_cambio FROM 'sig_escritor'@'127.0.0.1';
-GRANT SELECT ON $DatabaseTarget.* TO 'sig_lector'@'localhost';
-GRANT SELECT ON $DatabaseTarget.* TO 'sig_lector'@'127.0.0.1';
-GRANT SELECT ON $DatabaseTarget.users TO 'sig_auth'@'localhost';
-GRANT SELECT ON $DatabaseTarget.users TO 'sig_auth'@'127.0.0.1';
-GRANT SELECT ON $DatabaseTarget.password_reset_tokens TO 'sig_auth'@'localhost';
-GRANT SELECT ON $DatabaseTarget.password_reset_tokens TO 'sig_auth'@'127.0.0.1';
-GRANT SELECT ON $DatabaseTarget.sessions TO 'sig_auth'@'localhost';
-GRANT SELECT ON $DatabaseTarget.sessions TO 'sig_auth'@'127.0.0.1';
-GRANT SELECT, INSERT, UPDATE, DELETE ON $DwDatabaseTarget.* TO 'sig_etl'@'localhost';
-GRANT SELECT, INSERT, UPDATE, DELETE ON $DwDatabaseTarget.* TO 'sig_etl'@'127.0.0.1';
-GRANT EXECUTE ON $DwDatabaseTarget.* TO 'sig_etl'@'localhost';
-GRANT EXECUTE ON $DwDatabaseTarget.* TO 'sig_etl'@'127.0.0.1';
-GRANT SELECT ON $DwDatabaseTarget.* TO 'bi_lector'@'localhost';
-GRANT SELECT ON $DwDatabaseTarget.* TO 'bi_lector'@'127.0.0.1';
-FLUSH PRIVILEGES;
-"@
+# 4. Asegurar privilegios minimos granulares por tabla y columna (A08)
+Write-Host "Configurando privilegios tecnicos minimos sobre esquemas restaurados..."
+$hosts = @("localhost", "127.0.0.1")
+$grantsSql = ""
+
+foreach ($h in $hosts) {
+    # 4.1 sig_escritor: acceso de escritura en tablas de negocio, solo SELECT/INSERT en auditoría, sin UPDATE/DELETE
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.proyecto TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.hito TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.avance_presupuestal TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, UPDATE ON $DatabaseTarget.control_revision TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE ON $DatabaseTarget.responsable TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE ON $DatabaseTarget.objetivo_gd TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT ON $DatabaseTarget.bitacora_cambio TO 'sig_escritor'@'$h';`n"
+    $grantsSql += "GRANT SELECT, INSERT ON $DatabaseTarget.bitacora_motivo TO 'sig_escritor'@'$h';`n"
+
+    # 4.2 sig_lector: lectura de tablas de negocio y auditoria; lectura de columnas en responsable SIN clave_hash
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.proyecto TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.hito TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.avance_presupuestal TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.objetivo_gd TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.control_revision TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.bitacora_cambio TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.bitacora_motivo TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT ON $DatabaseTarget.v_indicadores_proyecto TO 'sig_lector'@'$h';`n"
+    $grantsSql += "GRANT SELECT (id_responsable, nombre, area, perfil, usuario, activo) ON $DatabaseTarget.responsable TO 'sig_lector'@'$h';`n"
+
+    # 4.3 sig_auth: columnas de autenticacion estrictas
+    $grantsSql += "GRANT SELECT (id_responsable, usuario, clave_hash, activo, perfil, nombre, area) ON $DatabaseTarget.responsable TO 'sig_auth'@'$h';`n"
+
+    # 4.4 sig_etl: manipulacion de hechos y ejecucion de rutinas en DW
+    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON $DwDatabaseTarget.* TO 'sig_etl'@'$h';`n"
+
+    # 4.5 bi_lector: solo lectura de vistas y hechos en DW
+    $grantsSql += "GRANT SELECT ON $DwDatabaseTarget.* TO 'bi_lector'@'$h';`n"
+}
 
 $mysqlArgsGrants = @(
     "-h", $HostName,
@@ -202,7 +212,11 @@ $mysqlArgsGrants = @(
     "-p$Password",
     "-e", $grantsSql
 )
-& $mysqlBin $mysqlArgsGrants 2>$null
+& $mysqlBin $mysqlArgsGrants
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Error configurando privilegios tecnicos en MariaDB"
+    exit 1
+}
 
 Write-Host "----------------------------------------------------------" -ForegroundColor Cyan
 Write-Host "Restauracion completada con exito." -ForegroundColor Green

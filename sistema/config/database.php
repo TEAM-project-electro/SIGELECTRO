@@ -208,6 +208,7 @@ return [
 
     'migrations' => [
         'table' => 'migrations',
+        'connection' => 'mysql',
         'update_date_on_publish' => true,
     ],
 

@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
 
         try {
             $this->call([
-                ObjetivoGdSeeder::class,
                 ResponsableSeeder::class,
+                ObjetivoGdSeeder::class,
                 ProyectoSeeder::class,
                 SeguimientoSeeder::class,
             ]);

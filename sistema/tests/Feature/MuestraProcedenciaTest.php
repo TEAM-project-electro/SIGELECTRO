@@ -11,11 +11,14 @@ class MuestraProcedenciaTest extends TestCase
     {
         parent::setUp();
         // Asegurar que la base tenga exclusivamente la muestra canónica sembrada
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Limpieza prueba';");
         DB::connection('mysql')->table('hito')
             ->where('descripcion', 'like', 'Recepción y homologación%')
             ->orWhere('descripcion', 'like', 'Mantenimiento preventivo adicional%')
             ->orWhere('descripcion', 'like', 'Hito temporal para prueba%')
             ->delete();
+        DB::connection('mysql')->statement("SET @id_responsable = NULL;");
         $this->seed();
     }
 

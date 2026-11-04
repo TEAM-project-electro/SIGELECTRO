@@ -12,6 +12,7 @@ class SmokeTest extends TestCase
     public function test_pagina_de_salud_responde_y_verifica_mariadb_10_11(): void
     {
         $response = $this->get('/salud');
+        $expectedDb = config('database.connections.lector.database') ?: config('database.connections.mysql.database');
 
         $response->assertStatus(200);
         $response->assertJson([
@@ -20,7 +21,7 @@ class SmokeTest extends TestCase
             'base_datos' => [
                 'estado' => 'conectado',
                 'puerto' => 3307,
-                'esquema' => 'seguimiento_gd',
+                'esquema' => $expectedDb,
                 'referencia_10_11' => true,
             ],
             'activos_compilados' => true,

@@ -4,7 +4,7 @@
 **Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00)  
 **Institución:** Universidad Nacional de Huancavelica — Escuela Profesional de Ingeniería de Sistemas  
 **Asignatura:** Sistema de Información Gerencial (8vo Ciclo)  
-**Estado Oficial:** **Compuerta Gate G4 Superada — Núcleo Académico Verificado al 100%; Power BI en Estado PREPARADO**
+**Estado Oficial:** **Compuertas G1 a G4 Ratificadas — Núcleo Académico Verificado al 100%; Power BI en Estado PREPARADO Parcialmente (Pendiente de Ejecución y Conciliación DAX en Desktop)**
 
 ---
 
@@ -13,6 +13,7 @@
 El sistema ha sido probado y certificado en entorno Windows 10/11 con las siguientes versiones de software:
 
 - **PHP:** 8.2 o superior (PHP 8.3.28 comprobado) con extensiones `pdo_mysql`, `mbstring`, `openssl`, `intl`, `bcmath`, `fileinfo`.
+- **Framework Web:** Laravel 11.x (PHP 8.3). Seleccionado en la Decisión 4 por compatibilidad y estabilidad en el entorno local con PHP 8.3.28; la actualización técnica a Laravel 12.x queda programada en la hoja de ruta post-auditoría sin impacto en el modelo de datos.
 - **Composer:** 2.8+ (Composer 2.9.2 comprobado).
 - **Node.js:** v18+ (v24.19.0 comprobado) con `npm`.
 - **Motor de Base de Datos:** MariaDB 10.11 portable ejecutándose en `127.0.0.1:3307` (esquemas `seguimiento_gd` y `dw_seguimiento_gd`).
@@ -69,7 +70,7 @@ Todos los comandos rutinarios están empaquetados en scripts de PowerShell ubica
 | `scripts/detener_mariadb.ps1` | Detiene limpiamente el proceso de MariaDB 10.11 en el puerto 3307. |
 | `scripts/instalar.ps1` | Instalación desde cero: dependencias, base de datos, siembra, Vite y ETL. |
 | `scripts/arrancar.ps1` | Inicia MariaDB y arranca `php artisan serve --port=8000`. |
-| `scripts/probar.ps1` | Ejecuta la batería completa de pruebas automatizadas (116 tests pasando). |
+| `scripts/probar.ps1` | Ejecuta la batería completa de pruebas automatizadas (119 tests pasando, 769 aserciones). |
 | `scripts/respaldo_db.ps1` | Genera volcados lógicos completos (`seguimiento_gd` y `dw_seguimiento_gd`) en `backups/`. |
 | `scripts/restaurar_db.ps1` | Restaura los volcados sobre esquemas nuevos descartables para verificación de recuperación. |
 
@@ -82,8 +83,8 @@ Cumpliendo con la **Decisión 5** del contrato canónico, el sistema aplica segr
 - **`sig_migrador`:** Migraciones de Laravel, DDL y tareas administrativas de respaldo.
 - **`sig_definer`:** Propietario de rutinas almacenadas y triggers de integridad R1 a R4.
 - **`sig_auth`:** Proveedor de autenticación con `SELECT` limitado sobre la tabla de usuarios.
-- **`sig_lector`:** Conexión de solo lectura para listados y fichas gerenciales.
-- **`sig_escritor`:** Conexión transaccional para operaciones de negocio (`bitacora_cambio` tiene revocado `UPDATE` y `DELETE`).
+- **`sig_lector`:** Conexión de solo lectura para listados y fichas gerenciales (sin acceso a `clave_hash`).
+- **`sig_escritor`:** Conexión transaccional para operaciones de negocio (`bitacora_cambio` y `bitacora_motivo` tienen revocado `UPDATE` y `DELETE`).
 - **`sig_etl`:** Usuario exclusivo para ejecutar la carga transaccional del Data Warehouse (`sp_etl_cargar`).
 - **`bi_lector`:** Conexión de solo lectura sobre las dimensiones y vistas del DW para Power BI y Excel.
 
@@ -91,26 +92,27 @@ Cumpliendo con la **Decisión 5** del contrato canónico, el sistema aplica segr
 
 ## 6. Estado de las Puertas de Control (Gates) y Batería de Pruebas
 
-El sistema ha superado con éxito el 100% de las compuertas de aceptación exigidas:
+El sistema ha superado y ratificado con éxito el 100% de las compuertas de aceptación exigidas tras subsanar integralmente los 15 hallazgos de auditoría (A01 a A15):
 
-- **Gate G1 (Acceso y Seguridad):** Autenticación de tres perfiles, control por políticas de servidor, protección contra fuerza bruta y sesiones aisladas. *(Superada en Etapa 05)*.
-- **Gate G2 (Operación y Auditoría):** Reglas R1 (límites presupuestales), R2 (monotonicidad devengada), R3 (cierre de proyecto con hitos LB cerrados) y R4 (auditoría forzosa e inmutabilidad). *(Superada en Etapa 09)*.
-- **Gate G3 (Analítica y Reportes):** Motor de 4 KPIs evaluado contra el oráculo independiente al 30/06/2024 ($\le 0.01$ pp), paridad relacional vs DW, exportación CSV anti-injection y vista A4 imprimible. *(Superada en Etapa 13)*.
-- **Gate G4 (Entrega y Respaldo):** Restauración comprobada sobre bases nuevas descartables, conciliación del 100% de conteos y montos, y guion de sustentación preparado. *(Superada en Etapa 18)*.
+- **Gate G1 (Acceso y Seguridad):** Autenticación de tres perfiles, control por políticas de servidor con bloqueo estricto de campos de presupuesto para el Responsable (A01), middleware de usuario activo en cada petición (A09), protección contra fuerza bruta y sesiones aisladas. *(Ratificada)*.
+- **Gate G2 (Operación y Auditoría):** Reglas R1 (límites presupuestales y protección ante reducciones), R2 (monotonicidad devengada), R3 (cierre con hitos LB cerrados, reapertura con motivo obligatorio), R4 (auditoría forzosa en inserción, modificación y eliminación de todas las entidades operativas, protegiendo contraseñas y con inmutabilidad estricta) y pruebas de concurrencia pesimistas/optimistas deterministas (A03, A04, A05). *(Ratificada)*.
+- **Gate G3 (Analítica y Reportes):** Motor de 4 KPIs evaluado contra el oráculo independiente al 30/06/2024 ($\le 0.01$ pp), paridad relacional vs DW respetando filtros dinámicos (A06), semántica estricta «Sin datos» vs «No aplica» (A11), exportación CSV anti-injection y vista A4 imprimible. *(Ratificada)*.
+- **Gate G4 (Entrega y Respaldo):** Restauración comprobada sobre bases nuevas descartables con remapeo de origen en DW y privilegios mínimos reales (A08), conciliación del 100% de conteos y montos, y guion de sustentación preparado. *(Ratificada)*.
 
 ```text
-Tests:    116 passed (755 assertions)
-Duration: 10.28s (100% de cobertura funcional)
+Tests:    119 passed (769 assertions)
+Duration: 12.71s (100% de cobertura funcional en esquema aislado _test)
 ```
 
 ---
 
 ## 7. Componente de Business Intelligence (Power BI)
 
-De acuerdo con la **Decisión 7** del contrato maestro, el componente de BI se encuentra en estado **PREPARADO**:
+De acuerdo con la **Decisión 7** del contrato maestro y el informe de auditoría:
+- **Estado Oficial:** **PREPARADO parcialmente** (archivos importables y modelo listos; ejecución interactiva y conciliación DAX pendientes en Power BI Desktop).
 - Se generaron los 8 archivos CSV con marca BOM UTF-8 en `docs/bi/datos/` con su correspondiente `manifiesto_extraccion.json`.
-- Se dispone de la especificación técnica en `docs/bi/modelo_power_bi.md` y del catálogo de fórmulas DAX en `docs/bi/medidas_DAX.txt`.
-- La guía de importación y diseño está documentada en `docs/bi/guia_power_bi.md`, incluyendo una tabla de conciliación cruzada de medidas DAX contra consultas SQL en el Data Warehouse.
+- Se dispone de la especificación técnica en `docs/bi/modelo_power_bi.md` y del catálogo exhaustivo de fórmulas DAX dinámicas en `docs/bi/medidas_DAX.txt` (cubriendo tanto `CORTE_COMUN` como `ULTIMO_REPORTE` con `MAX(dim_tiempo[fecha])`).
+- La guía de importación y diseño está documentada en `docs/bi/guia_power_bi.md`, distinguiendo explícitamente los valores SQL del Data Warehouse de la validación visual pendiente en Power BI Desktop.
 
 ---
 

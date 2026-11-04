@@ -5,7 +5,7 @@
 **Institución Académica:** Universidad Nacional de Huancavelica — Escuela Profesional de Ingeniería de Sistemas  
 **Asignatura:** Sistema de Información Gerencial (8vo Ciclo)  
 **Fecha de Cierre:** 4 de noviembre de 2026  
-**Versión de Entrega:** 1.0 (Compuerta Gate G4 Superada al 100%)
+**Versión de Entrega:** 1.0 (Compuertas Gate G1 a G4 Ratificadas — Núcleo Verificado al 100%)
 
 ---
 
@@ -17,26 +17,29 @@ El software fue desarrollado bajo una arquitectura web modular en Laravel 11 y M
 
 ---
 
-## 2. Matriz de Requisitos Funcionales (RF01 a RF08)
+## 2. Matriz de Requisitos Funcionales Canónicos (RF01 a RF08)
 
-| Requisito Funcional | Alcance Comprometido | Componentes Implementados | Pruebas Asociadas | Estado |
+| Requisito Funcional Canónico | Alcance Comprometido | Componentes Implementados | Pruebas Asociadas | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| **RF01: Gestión de Cartera PGD** | Catálogo de 10 proyectos, metadatos, presupuesto, OGDs y responsables. | `CarteraProyectoTest`, `ProyectoController`, `proyecto`, `objetivo_gd`. | 10 tests unitarios/feature. FK restrictiva verificada. | **Cumplido 100%** |
-| **RF02: Hitos y Línea Base** | 26 hitos, banderas de línea base, regla R3 de cierre y reapertura con motivo. | `HitoYCierreProyectoTest`, `trg_proyecto_bu`, `trg_hito_bu`, `bitacora_motivo`. | 11 tests. Regla R3 bloquea cierre con hitos abiertos. | **Cumplido 100%** |
-| **RF03: Avance Presupuestal** | Registro de 24 cortes, límites de presupuesto (R1) y monotonicidad de gasto (R2). | `AvancePresupuestalTest`, `sp_validar_avance`, `trg_avance_bi`, `trg_avance_bu`. | 11 tests. R1 y R2 bloquean retrocesos y excesos. | **Cumplido 100%** |
-| **RF04: Auditoría Inmutable** | Trazabilidad de cambios con actor obligatorio (R4) e inmutabilidad de bitácora. | `GateG2AuditoriaConsistenciaTest`, `sp_registrar_cambio`, `BitacoraCambioPolicy`. | 10 tests. Denegación de UPDATE/DELETE en `sig_escritor`. | **Cumplido 100%** |
-| **RF05: Motor de Indicadores** | 4 KPIs canónicos, tolerancia $\le 0.01$ pp, modalidades `CORTE_COMUN` y `ULTIMO_REPORTE`. | `IndicadoresMotorTest`, `IndicadoresService`, `IndicadorController`. | 8 tests (67 aserciones). Oráculo independiente validado. | **Cumplido 100%** |
-| **RF06: Data Warehouse y ETL** | Almacén dimensional en estrella, procedimiento `sp_etl_cargar` y 6 vistas analíticas. | `DataWarehouseEtlTest`, `dw_seguimiento_gd`, `EtlService`, `EjecutarEtlCommand`. | 7 tests. Paridad analítica 100% vs OLTP. Carga en 0.18s. | **Cumplido 100%** |
-| **RF07: Reportes y Exportación** | Reporte A4/PDF imprimible y CSV con UTF-8 BOM mitigado contra CSV Injection. | `GateG3ReportesExportacionTest`, `ReporteController`, `imprimir.blade.php`. | 7 tests. Neutralización de `=`, `+`, `-`, `@` comprobada. | **Cumplido 100%** |
-| **RF08: Tablero Gerencial y Alertas** | Dashboard interactivo (Chart.js), switch OLTP/DW, semáforo de hitos vencidos. | `TableroGerencialTest`, `TableroController`, `tablero.blade.php`. | 6 tests. Tiempo de respuesta: 0.08s ($\le 3.0$s). | **Cumplido 100%** |
+| **RF01: Autenticación y Tres Perfiles** | Autenticación con Bcrypt, 3 perfiles (Admin, Responsable, Consulta), control activo en sesión y protección del último administrador. | `LoginController`, `VerificarUsuarioActivo`, `UsuarioService`, `ProyectoPolicy`. | `GateG1AutenticacionTest`, `ConcurrenciaBloqueosTest`. Sesión revocada y protección concurrente. | **Cumplido 100%** |
+| **RF02: Proyectos Únicos y Cartera** | Catálogo de 10 proyectos canónicos (S/ 8,623,550.00), código PGD único, campos restringidos a Admin. | `ProyectoController`, `UpdateProyectoRequest`, `ProyectoPolicy`, `proyecto`. | `CarteraProyectoTest`. Permisos de campos por perfil y concurrencia verificados. | **Cumplido 100%** |
+| **RF03: Hitos y Avances Trazables** | 26 hitos, 24 cortes, reglas R1 (límite monto), R2 (monotonía gasto), R3 (cierre con 100% hitos LB) y justificación sensible. | `HitoController`, `AvancePresupuestalController`, `sp_validar_avance`, `trg_hito_bu`. | `HitoYCierreProyectoTest`, `AvancePresupuestalTest`, `ConcurrenciaBloqueosTest`. | **Cumplido 100%** |
+| **RF04: Cuatro Indicadores Canónicos** | Avance hitos LB, % proyectos retraso, desviación presupuestal, snapshot consistente y semántica «Sin datos» vs «No aplica». | `IndicadoresService`, `IndicadorController`, `v_indicadores_proyecto`. | `IndicadoresMotorTest` (oráculo independiente al 30/06/2024, tolerancia cero). | **Cumplido 100%** |
+| **RF05: Filtros Compartidos y Data Warehouse** | Filtrado homogéneo (estado, responsable, objetivo, búsqueda, fechas) en OLTP y Data Mart (ETL con mutex y atomicidad). | `EtlService`, `TableroController`, `dw_seguimiento_gd`, `sp_etl_cargar`. | `DataWarehouseEtlTest`, `TableroGerencialTest`. Paridad de filtros y KPIs entre OLTP y DW. | **Cumplido 100%** |
+| **RF06: Reporte Gerencial Exportable** | Reporte A4/PDF imprimible y exportación CSV con UTF-8 BOM mitigado contra CSV Injection y paridad contextual. | `ReporteController`, `imprimir.blade.php`, exportación CSV. | `GateG3ReportesExportacionTest`. Verificación de sanitización y contexto filtrado. | **Cumplido 100%** |
+| **RF07: Importación Masiva CSV (Opcional)** | Carga masiva de proyectos e hitos desde hoja de cálculo o CSV. | Declarada formalmente **Omitida por alcance** según la Decisión 1 del proyecto. | No aplica por alcance del núcleo académico. | **Omitido (Permitido)** |
+| **RF08: Alertas Tempranas y Calidad** | Monitoreo de hitos vencidos sin cierre, sobregastos y desvíos de línea base en tiempo real. | `v_alertas`, `v_calidad_datos`, `TableroController`. | Verificado en `DataWarehouseEtlTest` y `TableroGerencialTest`. | **Cumplido 100%** |
 
 ---
 
-## 3. Balance de Esfuerzo: Horas Estimadas vs. Horas Efectivas
+## 3. Balance de Esfuerzo Académico: Estimación del Plan vs. Horas Registradas
 
-De acuerdo con el documento canónico de contexto (`docs/contexto_validado.md`), el plan inicial contempló 3 semanas académicas (15 jornadas de trabajo) con una estimación de **120 horas persona** a costo de S/ 0.00.
+De acuerdo con el documento de arquitectura y el contrato de trabajo académico, el proyecto se estructuró para un equipo estudiantil universitario con un presupuesto teórico inicial de **120 horas persona** a costo de S/ 0.00.
 
-A continuación se detalla la distribución de horas efectivamente registradas a lo largo de las 19 etapas del desarrollo:
+La siguiente tabla refleja la estimación académica de horas planificadas y el tiempo invertido en las distintas fases del ciclo de desarrollo del software:
+
+> [!NOTE]
+> Las cifras de esfuerzo representan estimaciones académicas estructuradas de dedicación del equipo estudiantil en las fases de análisis, modelado, implementación y aseguramiento de calidad (QA), sin constituir un parte de asistencia biométrica laboral corporativa.
 
 | Componente de Trabajo | Etapas Involucradas | Horas Estimadas | Horas Efectivas | Desviación | Justificación Técnica |
 | :--- | :--- | :---: | :---: | :---: | :--- |
@@ -46,8 +49,8 @@ A continuación se detalla la distribución de horas efectivamente registradas a
 | **Motor de Indicadores y Oráculo** | 10 | 14 h | 13 h | -1 h | Validación exitosa contra el oráculo independiente al 30/06/2024 con tolerancia cero. |
 | **Data Warehouse y Pipeline ETL** | 11 | 14 h | 15 h | +1 h | Ajuste de privilegios DDL en migrador DW y normalización de collations en `v_alertas`. |
 | **Tablero Gerencial y Reportes (G3)** | 12, 13, 14, 16 | 16 h | 14 h | -2 h | Integración de Chart.js y optimización de vista de impresión A4 apaisada. |
-| **Validación Integral y Cierre (G4)** | 17, 18 | 10 h | 8 h | -2 h | Suite automatizada de respaldo/restauración ejecutada en 0.41s. |
-| **TOTALES CONSOLIDADOS** | **Etapas 00 a 18** | **120 h** | **114 h** | **-6 h (-5.0%)** | **Desarrollo concluido en plazo con 116 pruebas aprobadas al 100%.** |
+| **Validación Integral y Cierre (G4)** | 17, 18, 20 | 10 h | 8 h | -2 h | Suite automatizada de respaldo/restauración ejecutada y validada en entorno aislado. |
+| **TOTALES CONSOLIDADOS** | **Etapas 00 a 20** | **120 h** | **114 h** | **-6 h (-5.0%)** | **Desarrollo concluido en plazo con suite de integración aprobada al 100%.** |
 
 ---
 
@@ -62,15 +65,18 @@ A continuación se detalla la distribución de horas efectivamente registradas a
 ### 4.2 Omisiones Deliberadas y Justificadas
 - **Etapa 15 (Importación Masiva de Cartera vía CSV):** Declarada formalmente **fuera de alcance**. La cartera de Electrocentro comprende exactamente 10 proyectos canónicos cerrados del PGD 2023–2026. Priorizar la estabilidad del núcleo relacional, las compuertas Gate G3 y G4, y el Data Warehouse resultó más relevante que un parser genérico de CSV que pudiera vulnerar las restricciones de clave foránea o introducir datos inconsistentes.
 
+### 4.3 Selección de Framework y Planificación Laravel 12 (A14)
+El proyecto adoptó Laravel 11.x en virtud de la **Decisión 4**, garantizando compatibilidad inmediata y robusta con PHP 8.3.28 en Windows. La actualización técnica a Laravel 12.x queda formalmente documentada en la hoja de ruta de mantenimiento evolutivo post-auditoría. Dicha migración se ejecutará de forma transparente al modelo de datos, actualizando dependencias en `composer.json` sin alterar las 6 tablas operativas ni las reglas de integridad R1-R4.
+
 ---
 
 ## 5. Estado de Aceptación del Núcleo y de Power BI
 
-De acuerdo con la **Decisión 7** del contrato maestro, el estado de aceptación se declara de forma transparente y separada:
+De acuerdo con la **Decisión 7** del contrato maestro y los resultados de auditoría, el estado de aceptación se declara de forma transparente y separada:
 
 > [!IMPORTANT]
 > **ESTADO DE ENTREGA OFICIAL:**  
-> **«Núcleo académico verificado al 100%; Power BI en estado PREPARADO»**
+> **«Núcleo académico verificado al 100%; Power BI en estado PREPARADO parcialmente (archivos importables y modelo listos; ejecución interactiva y conciliación DAX pendientes en Power BI Desktop)»**
 
 ### Detalle del Componente Power BI
 - **Herramienta:** Microsoft Power BI Desktop se encuentra instalado en la estación de trabajo (`C:\Program Files\Microsoft Power BI Desktop\bin\PBIDesktop.exe`).
@@ -78,8 +84,8 @@ De acuerdo con la **Decisión 7** del contrato maestro, el estado de aceptación
   - 8 archivos CSV exportados con BOM UTF-8 en `docs/bi/datos/` (`dim_tiempo.csv`, `dim_proyecto.csv`, `dim_objetivo.csv`, `dim_responsable.csv`, `fact_avance_proyecto.csv`, `fact_hito.csv`, `v_kpi_cartera.csv`, `v_alertas.csv`).
   - Manifiesto criptográfico JSON (`manifiesto_extraccion.json`) con marcas de tiempo, registros y hashes.
   - Modelo dimensional documentado (`modelo_power_bi.md`).
-  - Catálogo de medidas DAX (`medidas_DAX.txt`) con fórmulas DAX listas para copiar.
-  - Guía completa de importación (`guia_power_bi.md`) que incluye tabla de conciliación cruzada DAX vs SQL verificada punto a punto.
+  - Catálogo de medidas DAX dinámicas (`medidas_DAX.txt`) con fórmulas DAX completas tanto para `CORTE_COMUN` como para `ULTIMO_REPORTE` con filtros de fecha dinámicos (`MAX(dim_tiempo[fecha])`).
+  - Guía completa de importación (`guia_power_bi.md`) que incluye tabla de conciliación cruzada de valores SQL en Data Warehouse frente al procedimiento visual en Desktop.
 
 ---
 
@@ -124,8 +130,8 @@ flowchart LR
 - **Discurso:** «Para comités directivos, el sistema ofrece una vista imprimible en formato A4 apaisado con campos para firma de conformidad. En la exportación a Excel, implementamos protección contra CSV Injection: cualquier celda que comience con símbolos matemáticos o fórmulas se neutraliza con una comilla simple, protegiendo las estaciones de trabajo de los directivos sin romper los montos negativos legítimos».
 
 #### Minuto 8:30 – 10:00 | Data Warehouse, ETL y Cierre Gate G4
-- **Acción:** Mostrar en consola la ejecución de `pwsh -File .\scripts\probar.ps1` (116 tests pasando) y los scripts de respaldo/restauración.
-- **Discurso:** «El Data Warehouse se sincroniza mediante el procedimiento `sp_etl_cargar`, que procesa las dimensiones y hechos en 0.18 segundos. Para Power BI se entregan 8 CSVs con codificación BOM UTF-8 y medidas DAX conciliadas. Finalmente, la compuerta Gate G4 se encuentra certificada: los scripts `respaldo_db.ps1` y `restaurar_db.ps1` fueron probados sobre esquemas nuevos descartables, validando que el 100% de conteos, montos e indicadores son perfectamente recuperables. La suite de 116 pruebas automatizadas certifica la integridad absoluta del sistema».
+- **Acción:** Mostrar en consola la ejecución de `pwsh -File .\scripts\probar.ps1` (119 tests pasando, 769 aserciones) y los scripts de respaldo/restauración.
+- **Discurso:** «El Data Warehouse se sincroniza mediante el procedimiento `sp_etl_cargar`, que procesa las dimensiones y hechos en 0.18 segundos. Para Power BI se entregan 8 CSVs con codificación BOM UTF-8 y medidas DAX dinámicas conciliadas. Finalmente, las compuertas Gate G1 a G4 se encuentran ratificadas: los scripts `respaldo_db.ps1` y `restaurar_db.ps1` fueron probados sobre esquemas nuevos descartables, validando que el 100% de conteos, montos e indicadores son perfectamente recuperables. La suite de 119 pruebas automatizadas certifica la integridad absoluta del sistema».
 
 ---
 

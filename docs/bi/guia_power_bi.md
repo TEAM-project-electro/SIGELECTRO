@@ -101,33 +101,34 @@ Crear una tabla vacía llamada `_Medidas` y agregar las expresiones DAX de [`doc
 
 ## 5. Tabla de Conciliación DAX vs SQL (Muestra Canónica)
 
-La siguiente tabla presenta los resultados exactos que deben contrastarse entre las medidas DAX en Power BI y las vistas SQL en `dw_seguimiento_gd`:
+La siguiente tabla presenta los resultados calculados por las vistas SQL en `dw_seguimiento_gd` como **valores esperados de referencia** para la posterior contrastación interactiva una vez importado el modelo en Microsoft Power BI Desktop. Dado que en el entorno de desarrollo y pruebas automatizadas (CLI/PHPUnit) no se ejecuta el motor interno de evaluación de Power BI Desktop (`PBIDesktop.exe`), la conciliación interactiva DAX queda documentada como **PREPARADA (Valores SQL comprobados / Conciliación DAX pendiente de apertura y verificación interactiva en Desktop)**, separando con rigor metodológico los resultados SQL observados de las lecturas visuales a verificar por el usuario en Power BI Desktop:
 
-| Métrica / Indicador | Vista SQL (`v_kpi_cartera`) | Medida DAX Esperada | Tolerancia Máxima | Estado de Paridad |
+| Métrica / Indicador | Valor Esperado SQL (`dw_seguimiento_gd`) | Medida DAX Esperada | Tolerancia Máxima | Estado de Conciliación en Desktop |
 | :--- | :---: | :---: | :---: | :---: |
-| **Total Proyectos Cartera** | `10` | `10` | 0 diferencias | **CONCILIADO** |
-| **Monto Total Cartera** | `S/ 8,623,550.00` | `S/ 8,623,550.00` | 0.00 PEN | **CONCILIADO** |
-| **Presupuesto Planificado Acumulado** | `S/ 6,090,000.00` | `S/ 6,090,000.00` | 0.00 PEN | **CONCILIADO** |
-| **Gasto Acumulado Ejecutado** | `S/ 5,700,500.00` | `S/ 5,700,500.00` | 0.00 PEN | **CONCILIADO** |
-| **Diferencia Presupuestal** | `- S/ 389,500.00` | `- S/ 389,500.00` | 0.00 PEN | **CONCILIADO** |
-| **KPI 3: Desviación Presupuestal (%)** | `-6.40 %` | `-6.40 %` | $\le 0.01$ pp | **CONCILIADO** |
-| **Total Hitos Línea Base** | `25` | `25` | 0 diferencias | **CONCILIADO** |
-| **Hitos Línea Base Concluidos** | `17` | `17` | 0 diferencias | **CONCILIADO** |
-| **KPI 1: Avance de Hitos (%)** | `68.00 %` | `68.00 %` | $\le 0.01$ pp | **CONCILIADO** |
-| **Proyectos Activos Evaluables** | `7` | `7` | 0 diferencias | **CONCILIADO** |
-| **Proyectos con Retraso (Conteo)** | `3` | `3` | 0 diferencias | **CONCILIADO** |
-| **KPI 2: Proyectos con Retraso (%)** | `42.86 %` | `42.86 %` | $\le 0.01$ pp | **CONCILIADO** |
-| **Proyectos Cerrados** | `3` | `3` | 0 diferencias | **CONCILIADO** |
-| **Proyectos En Curso** | `7` | `7` | 0 diferencias | **CONCILIADO** |
+| **Total Proyectos Cartera** | `10` | `10` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **Monto Total Cartera** | `S/ 8,623,550.00` | `S/ 8,623,550.00` | 0.00 PEN | **PREPARADO (Pendiente en Desktop)** |
+| **Presupuesto Planificado Acumulado** | `S/ 6,090,000.00` | `S/ 6,090,000.00` | 0.00 PEN | **PREPARADO (Pendiente en Desktop)** |
+| **Gasto Acumulado Ejecutado** | `S/ 5,700,500.00` | `S/ 5,700,500.00` | 0.00 PEN | **PREPARADO (Pendiente en Desktop)** |
+| **Diferencia Presupuestal** | `- S/ 389,500.00` | `- S/ 389,500.00` | 0.00 PEN | **PREPARADO (Pendiente en Desktop)** |
+| **KPI 3: Desviación Presupuestal (%)** | `-6.40 %` | `-6.40 %` | $\le 0.01$ pp | **PREPARADO (Pendiente en Desktop)** |
+| **Total Hitos Línea Base** | `25` | `25` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **Hitos Línea Base Concluidos** | `17` | `17` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **KPI 1: Avance de Hitos (%)** | `68.00 %` | `68.00 %` | $\le 0.01$ pp | **PREPARADO (Pendiente en Desktop)** |
+| **Proyectos Activos Evaluables** | `7` | `7` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **Proyectos con Retraso (Conteo)** | `3` | `3` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **KPI 2: Proyectos con Retraso (%)** | `42.86 %` | `42.86 %` | $\le 0.01$ pp | **PREPARADO (Pendiente en Desktop)** |
+| **Proyectos Cerrados** | `3` | `3` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
+| **Proyectos En Curso** | `7` | `7` | 0 diferencias | **PREPARADO (Pendiente en Desktop)** |
 
 ---
 
 ## 6. Estado de Verificación de la Etapa 14
 
-- [x] Extracción y exportación limpia de datos en `docs/bi/datos/` (CSV UTF-8 con BOM y manifiesto JSON).
-- [x] Modelo dimensional y relaciones documentadas en [`docs/bi/modelo_power_bi.md`](./modelo_power_bi.md).
-- [x] Catálogo exhaustivo de medidas DAX analíticas en [`docs/bi/medidas_DAX.txt`](./medidas_DAX.txt).
+- [x] Extracción y exportación limpia de datos en `docs/bi/datos/` (8 archivos CSV UTF-8 con BOM y manifiesto JSON con hashes criptográficos).
+- [x] Modelo dimensional estrella y relaciones documentadas en [`docs/bi/modelo_power_bi.md`](./modelo_power_bi.md).
+- [x] Catálogo exhaustivo de medidas DAX analíticas completas (modos base, corte común y último reporte) en [`docs/bi/medidas_DAX.txt`](./medidas_DAX.txt).
 - [x] Guía metodológica e instructivo de diseño en [`docs/bi/guia_power_bi.md`](./guia_power_bi.md).
-- [x] Tabla de conciliación DAX vs SQL con tolerancia $\le 0.01$ pp.
-- [x] Disponibilidad del ejecutable Power BI Desktop confirmada en el entorno local (`PBIDesktop.exe`).
-- **Estado formal:** **Preparado y listo para carga interactiva en Power BI Desktop**.
+- [x] Tabla de valores de referencia calculados mediante SQL en el Data Warehouse para contraste con DAX.
+- [x] Disponibilidad del ejecutable Power BI Desktop confirmada en el entorno local (`C:\Program Files\Microsoft Power BI Desktop\bin\PBIDesktop.exe`).
+- [ ] Conciliación interactiva de visuales y archivo `.pbix` guardado en sesión de Power BI Desktop (requiere apertura manual por el usuario).
+- **Estado formal:** **PREPARADO parcialmente; pendiente de ejecución interactiva y conciliación DAX en Power BI Desktop**.

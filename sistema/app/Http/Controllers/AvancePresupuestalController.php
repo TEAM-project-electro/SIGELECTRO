@@ -36,19 +36,26 @@ class AvancePresupuestalController extends Controller
     /**
      * Almacena el corte presupuestal validando las Reglas R1 y R2.
      */
-    public function store(StoreAvanceRequest $request, Proyecto $proyecto): RedirectResponse
+    public function store(StoreAvanceRequest $request, Proyecto $proyecto): mixed
     {
         $idResponsable = Auth::id();
-        $motivo = "Registro de corte presupuestal al {$request->fecha_reporte} en proyecto {$proyecto->codigo_pgd}";
+        $motivo = mb_substr("Registro de corte presupuestal al {$request->fecha_reporte} en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
         try {
-            DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
-                DB::connection('escritor')->table('avance_presupuestal')->insert([
+            $idAvance = DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
+                $id = DB::connection('escritor')->table('avance_presupuestal')->insertGetId([
                     'id_proyecto' => $proyecto->id_proyecto,
                     'fecha_reporte' => $request->fecha_reporte,
                     'presupuesto_planificado' => $request->presupuesto_planificado,
                     'gasto_acumulado' => $request->gasto_acumulado,
                 ]);
+
+                // A15: Refrescar actividad del proyecto padre
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update(['fecha_actualizacion' => now()]);
+
+                return $id;
             }, $motivo);
         } catch (QueryException $e) {
             $msg = $e->getMessage();
@@ -64,9 +71,18 @@ class AvancePresupuestalController extends Controller
                 $errorMsg = 'Error al registrar el corte presupuestal: ' . $msg;
             }
 
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $errorMsg], 422);
+            }
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', $errorMsg);
+        }
+
+        if ($request->wantsJson()) {
+            $avanceCreado = AvancePresupuestal::find($idAvance);
+            return response()->json($avanceCreado, 201);
         }
 
         return redirect()->route('proyectos.show', $proyecto)
@@ -91,25 +107,40 @@ class AvancePresupuestalController extends Controller
     /**
      * Actualiza el corte presupuestal validando R1 y R2.
      */
-    public function update(UpdateAvanceRequest $request, AvancePresupuestal $avance): RedirectResponse
+    public function update(UpdateAvanceRequest $request, AvancePresupuestal $avance): mixed
     {
         $proyecto = $avance->proyecto;
         $idResponsable = Auth::id();
-        $motivo = "Actualización de corte presupuestal #{$avance->id_avance} ({$avance->fecha_reporte}) en proyecto {$proyecto->codigo_pgd}";
+        $motivo = mb_substr("Actualización de corte presupuestal #{$avance->id_avance} ({$avance->fecha_reporte}) en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
         try {
-            DatabaseTransactionService::run($idResponsable, function () use ($request, $avance) {
+            DatabaseTransactionService::run($idResponsable, function () use ($request, $avance, $proyecto) {
                 DB::connection('escritor')->table('avance_presupuestal')
                     ->where('id_avance', $avance->id_avance)
                     ->update([
                         'presupuesto_planificado' => $request->presupuesto_planificado,
                         'gasto_acumulado' => $request->gasto_acumulado,
                     ]);
+
+                // A15: Refrescar actividad del proyecto padre
+                if ($proyecto) {
+                    DB::connection('escritor')->table('proyecto')
+                        ->where('id_proyecto', $proyecto->id_proyecto)
+                        ->update(['fecha_actualizacion' => now()]);
+                }
             }, $motivo);
         } catch (QueryException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Error al actualizar el corte presupuestal: ' . $e->getMessage()], 422);
+            }
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error al actualizar el corte presupuestal: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            $avanceActualizado = AvancePresupuestal::find($avance->id_avance);
+            return response()->json($avanceActualizado, 200);
         }
 
         return redirect()->route('proyectos.show', $proyecto)
@@ -119,23 +150,37 @@ class AvancePresupuestalController extends Controller
     /**
      * Elimina el corte presupuestal (Solo Administrador en proyecto no cerrado).
      */
-    public function destroy(AvancePresupuestal $avance): RedirectResponse
+    public function destroy(AvancePresupuestal $avance): mixed
     {
         Gate::authorize('delete', $avance);
 
         $proyecto = $avance->proyecto;
         if ($proyecto && $proyecto->estado === 'Cerrado') {
+            if (request()->wantsJson()) {
+                return response()->json(['error' => 'No se pueden eliminar cortes de un proyecto cerrado.'], 403);
+            }
             return redirect()->back()->with('error', 'No se pueden eliminar cortes de un proyecto cerrado.');
         }
 
         $idResponsable = Auth::id();
-        $motivo = "Eliminación de corte presupuestal #{$avance->id_avance} en proyecto {$proyecto->codigo_pgd}";
+        $motivo = mb_substr("Eliminación de corte presupuestal #{$avance->id_avance} en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
-        DatabaseTransactionService::run($idResponsable, function () use ($avance) {
+        DatabaseTransactionService::run($idResponsable, function () use ($avance, $proyecto) {
             DB::connection('escritor')->table('avance_presupuestal')
                 ->where('id_avance', $avance->id_avance)
                 ->delete();
+
+            // A15: Refrescar actividad del proyecto padre
+            if ($proyecto) {
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update(['fecha_actualizacion' => now()]);
+            }
         }, $motivo);
+
+        if (request()->wantsJson()) {
+            return response()->json(['mensaje' => 'Corte presupuestal eliminado correctamente.'], 200);
+        }
 
         return redirect()->route('proyectos.show', $proyecto)
             ->with('success', 'Corte presupuestal eliminado correctamente.');

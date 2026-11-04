@@ -23,11 +23,25 @@ class HitoYCierreProyectoTest extends TestCase
 
     protected function tearDown(): void
     {
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Limpieza prueba';");
+        DB::connection('mysql')->table('proyecto')
+            ->where('codigo_pgd', '005')
+            ->update(['estado' => 'En curso']);
         DB::connection('mysql')->table('hito')
             ->where('descripcion', 'like', 'Recepción y homologación%')
             ->orWhere('descripcion', 'like', 'Mantenimiento preventivo adicional%')
             ->orWhere('descripcion', 'like', 'Hito temporal para prueba%')
+            ->orWhere('id_hito', '>', 26)
             ->delete();
+        DB::connection('mysql')->table('hito')
+            ->where('id_hito', 2)
+            ->update([
+                'descripcion' => 'Instalacion y configuracion en sede central',
+                'fecha_cierre' => null,
+                'evidencia' => null,
+            ]);
+        DB::connection('mysql')->statement("SET @id_responsable = NULL;");
 
         parent::tearDown();
     }

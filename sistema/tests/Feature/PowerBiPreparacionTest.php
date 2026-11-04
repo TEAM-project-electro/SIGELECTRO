@@ -66,6 +66,6 @@ class PowerBiPreparacionTest extends TestCase
 
         $guia = File::get($baseBi . '/guia_power_bi.md');
         $this->assertStringContainsString('Tabla de Conciliación DAX vs SQL', $guia);
-        $this->assertStringContainsString('CONCILIADO', $guia);
+        $this->assertStringContainsString('PREPARADO', $guia);
     }
 }

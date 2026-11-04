@@ -59,6 +59,30 @@ class ProyectoPolicy
     }
 
     /**
+     * Determina si el usuario puede modificar el presupuesto del proyecto (solo Administrador).
+     */
+    public function updateMonto(Responsable $user): bool
+    {
+        return $user->esAdmin();
+    }
+
+    /**
+     * Determina si el usuario puede reasignar el responsable del proyecto (solo Administrador).
+     */
+    public function updateResponsable(Responsable $user): bool
+    {
+        return $user->esAdmin();
+    }
+
+    /**
+     * Determina si el usuario puede modificar el objetivo estratégico del proyecto (solo Administrador).
+     */
+    public function updateObjetivo(Responsable $user): bool
+    {
+        return $user->esAdmin();
+    }
+
+    /**
      * Determina si el usuario puede eliminar un proyecto (solo Administrador).
      */
     public function delete(Responsable $user, Proyecto $proyecto): bool

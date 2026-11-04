@@ -184,10 +184,17 @@ class GateG1AutenticacionTest extends TestCase
         $this->actingAs($ana);
         $response = $this->putJson("/proyectos/{$proyecto005->id_proyecto}", [
             'nombre' => 'Nombre Actualizado',
+            'monto' => $proyecto005->monto,
+            'anio_inicio' => $proyecto005->anio_inicio,
+            'anio_fin' => $proyecto005->anio_fin,
+            'id_objetivo' => $proyecto005->id_objetivo,
+            'id_responsable' => $proyecto005->id_responsable,
+            'fecha_actualizacion_esperada' => (string) $proyecto005->fecha_actualizacion,
+            'motivo_cambio' => 'Actualización de prueba G1',
         ]);
 
         $response->assertStatus(200);
-        $response->assertJson(['mensaje' => 'Autorizado para actualizar proyecto']);
+        $response->assertJson(['nombre' => 'Nombre Actualizado']);
     }
 
     /**
@@ -244,13 +251,25 @@ class GateG1AutenticacionTest extends TestCase
         $this->actingAs($admin);
 
         // Crear proyecto -> 201
-        $this->postJson('/proyectos', ['nombre' => 'Nuevo PGD'])->assertStatus(201);
+        $res = $this->postJson('/proyectos', [
+            'codigo_pgd' => '098',
+            'nombre' => 'Nuevo PGD Prueba Admin',
+            'monto' => 150000.00,
+            'anio_inicio' => 2024,
+            'anio_fin' => 2025,
+            'estado' => 'En curso',
+            'id_objetivo' => 1,
+            'id_responsable' => 1,
+            'fuente' => 'Cartera PGD',
+        ]);
+        $res->assertStatus(201);
+        $idNuevo = $res->json('id_proyecto');
 
         // Reabrir proyecto cerrado -> 200
-        $this->postJson("/proyectos/{$proyectoCerrado->id_proyecto}/reabrir", ['motivo' => 'Reapertura oficial'])
+        $this->postJson("/proyectos/{$proyectoCerrado->id_proyecto}/reabrir", ['motivo' => 'Reapertura oficial de prueba'])
             ->assertStatus(200);
 
-        // Eliminar proyecto -> 200
-        $this->deleteJson("/proyectos/{$proyectoCerrado->id_proyecto}")->assertStatus(200);
+        // Eliminar proyecto recién creado -> 200
+        $this->deleteJson("/proyectos/{$idNuevo}")->assertStatus(200);
     }
 }

@@ -18,13 +18,19 @@ class CarteraProyectoTest extends TestCase
     {
         parent::setUp();
         // Limpiar posibles proyectos de prueba previos y asegurar la muestra canónica
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Limpieza de prueba';");
         DB::connection('mysql')->table('proyecto')->where('codigo_pgd', '099')->delete();
+        DB::connection('mysql')->statement("SET @id_responsable = NULL;");
         $this->seed();
     }
 
     protected function tearDown(): void
     {
+        DB::connection('mysql')->statement("SET @id_responsable = 1;");
+        DB::connection('mysql')->statement("SET @motivo_cambio = 'Limpieza de prueba';");
         DB::connection('mysql')->table('proyecto')->where('codigo_pgd', '099')->delete();
+        DB::connection('mysql')->statement("SET @id_responsable = NULL;");
         parent::tearDown();
     }
 
@@ -171,13 +177,13 @@ class CarteraProyectoTest extends TestCase
 
         $response = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
             'nombre' => 'Renovacion de Servidores - Actualizado',
-            'monto' => 650000.00,
-            'anio_inicio' => 2023,
-            'anio_fin' => 2025,
+            'monto' => $proyecto005->monto,
+            'anio_inicio' => $proyecto005->anio_inicio,
+            'anio_fin' => $proyecto005->anio_fin,
             'id_objetivo' => $proyecto005->id_objetivo,
             'id_responsable' => $proyecto005->id_responsable,
             'fecha_actualizacion_esperada' => (string) $proyecto005->fecha_actualizacion,
-            'motivo_cambio' => 'Ampliación de vigencia aprobada por comité',
+            'motivo_cambio' => 'Actualización operativa aprobada por titular',
         ]);
 
         $response->assertRedirect("/proyectos/{$proyecto005->id_proyecto}");
@@ -186,8 +192,19 @@ class CarteraProyectoTest extends TestCase
         $this->assertDatabaseHas('proyecto', [
             'id_proyecto' => $proyecto005->id_proyecto,
             'nombre' => 'Renovacion de Servidores - Actualizado',
-            'anio_fin' => 2025,
         ]);
+
+        // A01: Verificar que si el Responsable intenta alterar el monto, es rechazado
+        $respMonto = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
+            'nombre' => 'Intento no autorizado de cambiar presupuesto',
+            'monto' => 999999.00,
+            'anio_inicio' => $proyecto005->anio_inicio,
+            'anio_fin' => $proyecto005->anio_fin,
+            'id_objetivo' => $proyecto005->id_objetivo,
+            'id_responsable' => $proyecto005->id_responsable,
+            'fecha_actualizacion_esperada' => (string) $proyecto005->fresh()->fecha_actualizacion,
+        ]);
+        $respMonto->assertSessionHasErrors('monto');
     }
 
     /**
@@ -205,9 +222,9 @@ class CarteraProyectoTest extends TestCase
 
         $response = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
             'nombre' => 'Intento con Concurrencia Desfasada',
-            'monto' => 650000.00,
-            'anio_inicio' => 2023,
-            'anio_fin' => 2024,
+            'monto' => $proyecto005->monto,
+            'anio_inicio' => $proyecto005->anio_inicio,
+            'anio_fin' => $proyecto005->anio_fin,
             'id_objetivo' => $proyecto005->id_objetivo,
             'id_responsable' => $proyecto005->id_responsable,
             'fecha_actualizacion_esperada' => $fechaDesfasada,

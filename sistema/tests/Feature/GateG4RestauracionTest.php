@@ -239,7 +239,7 @@ class GateG4RestauracionTest extends TestCase
     }
 
     /**
-     * Recorrido mínimo funcional sobre el esquema restaurado.
+     * Recorrido funcional completo y verificación de independencia en esquema restaurado (A08).
      */
     public function test_recorrido_minimo_funcional_sobre_esquema_restaurado(): void
     {
@@ -255,20 +255,67 @@ class GateG4RestauracionTest extends TestCase
         $this->assertStringStartsWith('$2y$', $admin->clave_hash, 'Hash de clave debe ser bcrypt válido');
 
         // 2. Control de revisión activo
-        $revision = DB::connection('mysql')->selectOne("
-            SELECT version, fecha_hora 
-            FROM seguimiento_gd_restaurada.control_revision 
-            WHERE id = 1
-        ");
+        $revisionInicial = (int) DB::connection('mysql')->table('seguimiento_gd_restaurada.control_revision')
+            ->where('id', 1)
+            ->value('version');
 
-        $this->assertNotNull($revision, 'Control de revisión debe existir');
-        $this->assertGreaterThan(0, $revision->version, 'Versión de revisión debe ser mayor a 0');
+        $this->assertGreaterThan(0, $revisionInicial, 'Versión de revisión debe ser mayor a 0');
 
         // 3. Auditoría registrada en bitácora
-        $auditorias = DB::connection('mysql')->selectOne("
-            SELECT COUNT(*) AS total 
-            FROM seguimiento_gd_restaurada.bitacora_cambio
-        ");
-        $this->assertGreaterThanOrEqual(1, $auditorias->total, 'La bitácora de auditoría debe contener eventos registrados');
+        $auditoriasInicial = (int) DB::connection('mysql')->table('seguimiento_gd_restaurada.bitacora_cambio')->count();
+        $this->assertGreaterThanOrEqual(1, $auditoriasInicial, 'La bitácora de auditoría debe contener eventos registrados');
+
+        // 4. A08: Mutación funcional real con auditoría transaccional sobre el esquema restaurado
+        $proyecto = DB::connection('mysql')->table('seguimiento_gd_restaurada.proyecto')->first();
+        $this->assertNotNull($proyecto, 'Debe existir al menos un proyecto en el esquema restaurado');
+        $idProyecto = (int) $proyecto->id_proyecto;
+        $fuenteOriginal = $proyecto->fuente ?? 'Cartera PGD 2023 a 2026';
+        $nuevaFuente = 'Cartera PGD (G4 Verificado)';
+
+        $motivoPrueba = 'Verificación funcional de auditoría en esquema restaurado G4';
+
+        DB::connection('escritor')->statement("USE seguimiento_gd_restaurada;");
+        DB::connection('escritor')->statement("SET @id_responsable = {$admin->id_responsable};");
+        DB::connection('escritor')->statement("SET @motivo_cambio = '{$motivoPrueba}';");
+
+        DB::connection('escritor')->table('seguimiento_gd_restaurada.proyecto')
+            ->where('id_proyecto', $idProyecto)
+            ->update([
+                'fuente' => $nuevaFuente,
+                'fecha_actualizacion' => now(),
+            ]);
+
+        DB::connection('escritor')->statement("SET @id_responsable = NULL;");
+        DB::connection('escritor')->statement("SET @motivo_cambio = NULL;");
+
+        // 5. Verificar que la mutación quedó auditada con el motivo y la revisión se incrementó
+        $revisionFinal = (int) DB::connection('mysql')->table('seguimiento_gd_restaurada.control_revision')
+            ->where('id', 1)
+            ->value('version');
+
+        $this->assertEquals($revisionInicial + 1, $revisionFinal, 'La versión de control_revision en el esquema restaurado debió incrementarse');
+
+        $ultimoCambio = DB::connection('mysql')->table('seguimiento_gd_restaurada.bitacora_cambio as bc')
+            ->join('seguimiento_gd_restaurada.bitacora_motivo as bm', 'bc.id_cambio', '=', 'bm.id_cambio')
+            ->where('bc.tabla_afectada', 'proyecto')
+            ->where('bc.id_registro', $idProyecto)
+            ->orderByDesc('bc.id_cambio')
+            ->first();
+
+        $this->assertNotNull($ultimoCambio, 'Debe existir registro en bitacora_cambio para el cambio en esquema restaurado');
+        $this->assertEquals($admin->id_responsable, $ultimoCambio->id_responsable);
+        $this->assertEquals($motivoPrueba, $ultimoCambio->motivo);
+
+        // Restaurar valor previo
+        DB::connection('escritor')->statement("SET @id_responsable = {$admin->id_responsable};");
+        DB::connection('escritor')->statement("SET @motivo_cambio = 'Reversión test funcional G4';");
+        DB::connection('escritor')->table('seguimiento_gd_restaurada.proyecto')
+            ->where('id_proyecto', $idProyecto)
+            ->update([
+                'fuente' => $fuenteOriginal,
+                'fecha_actualizacion' => now(),
+            ]);
+        DB::connection('escritor')->statement("SET @id_responsable = NULL;");
+        DB::connection('escritor')->statement("SET @motivo_cambio = NULL;");
     }
 }

@@ -33,14 +33,14 @@ class HitoController extends Controller
     /**
      * Almacena el nuevo hito con transacción y auditoría.
      */
-    public function store(StoreHitoRequest $request, Proyecto $proyecto): RedirectResponse
+    public function store(StoreHitoRequest $request, Proyecto $proyecto): mixed
     {
         $idResponsable = Auth::id();
-        $motivo = "Creación de hito en proyecto {$proyecto->codigo_pgd}: {$request->descripcion}";
+        $motivo = mb_substr("Creación de hito en proyecto {$proyecto->codigo_pgd}: {$request->descripcion}", 0, 200);
 
         try {
-            DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
-                DB::connection('escritor')->table('hito')->insert([
+            $idHito = DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
+                $id = DB::connection('escritor')->table('hito')->insertGetId([
                     'id_proyecto' => $proyecto->id_proyecto,
                     'descripcion' => $request->descripcion,
                     'fecha_prevista' => $request->fecha_prevista,
@@ -48,12 +48,26 @@ class HitoController extends Controller
                     'evidencia' => $request->evidencia,
                     'en_linea_base' => $request->boolean('en_linea_base') ? 1 : 0,
                 ]);
+
+                // A15: Refrescar actividad del proyecto padre
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update(['fecha_actualizacion' => now()]);
+
+                return $id;
             }, $motivo);
         } catch (QueryException $e) {
-            // Manejo de error lanzado por triggers de MariaDB (ej. trg_hito_bi)
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Error de motor: ' . $e->getMessage()], 422);
+            }
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error de motor: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            $hitoCreado = Hito::find($idHito);
+            return response()->json($hitoCreado, 201);
         }
 
         return redirect()->route('proyectos.show', $proyecto)
@@ -78,14 +92,22 @@ class HitoController extends Controller
     /**
      * Actualiza el hito con control transaccional y auditoría.
      */
-    public function update(UpdateHitoRequest $request, Hito $hito): RedirectResponse
+    public function update(UpdateHitoRequest $request, Hito $hito): mixed
     {
         $proyecto = $hito->proyecto;
         $idResponsable = Auth::id();
-        $motivo = "Actualización de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}";
+
+        $nuevaLb = $request->boolean('en_linea_base') ? 1 : 0;
+        $cambioLb = (int) $hito->en_linea_base !== $nuevaLb;
+
+        if ($cambioLb && $request->filled('motivo_cambio')) {
+            $motivo = mb_substr(trim((string) $request->motivo_cambio), 0, 200);
+        } else {
+            $motivo = mb_substr("Actualización de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}", 0, 200);
+        }
 
         try {
-            DatabaseTransactionService::run($idResponsable, function () use ($request, $hito) {
+            DatabaseTransactionService::run($idResponsable, function () use ($request, $hito, $proyecto) {
                 DB::connection('escritor')->table('hito')
                     ->where('id_hito', $hito->id_hito)
                     ->update([
@@ -95,11 +117,24 @@ class HitoController extends Controller
                         'evidencia' => $request->evidencia,
                         'en_linea_base' => $request->boolean('en_linea_base') ? 1 : 0,
                     ]);
+
+                // A15: Refrescar actividad del proyecto padre
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update(['fecha_actualizacion' => now()]);
             }, $motivo);
         } catch (QueryException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Error al actualizar el hito: ' . $e->getMessage()], 422);
+            }
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error al actualizar el hito: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            $hitoActualizado = Hito::find($hito->id_hito);
+            return response()->json($hitoActualizado, 200);
         }
 
         return redirect()->route('proyectos.show', $proyecto)
@@ -109,23 +144,37 @@ class HitoController extends Controller
     /**
      * Elimina el hito (Solo Administrador en proyecto no cerrado).
      */
-    public function destroy(Hito $hito): RedirectResponse
+    public function destroy(Hito $hito): mixed
     {
         Gate::authorize('delete', $hito);
 
         $proyecto = $hito->proyecto;
         if ($proyecto && $proyecto->estado === 'Cerrado') {
+            if (request()->wantsJson()) {
+                return response()->json(['error' => 'No se pueden eliminar hitos de un proyecto cerrado.'], 403);
+            }
             return redirect()->back()->with('error', 'No se pueden eliminar hitos de un proyecto cerrado.');
         }
 
         $idResponsable = Auth::id();
-        $motivo = "Eliminación de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}";
+        $motivo = mb_substr("Eliminación de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
-        DatabaseTransactionService::run($idResponsable, function () use ($hito) {
+        DatabaseTransactionService::run($idResponsable, function () use ($hito, $proyecto) {
             DB::connection('escritor')->table('hito')
                 ->where('id_hito', $hito->id_hito)
                 ->delete();
+
+            // A15: Refrescar actividad del proyecto padre
+            if ($proyecto) {
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update(['fecha_actualizacion' => now()]);
+            }
         }, $motivo);
+
+        if (request()->wantsJson()) {
+            return response()->json(['mensaje' => 'Hito eliminado correctamente.'], 200);
+        }
 
         return redirect()->route('proyectos.show', $proyecto)
             ->with('success', 'Hito eliminado correctamente.');

@@ -14,8 +14,6 @@ class UpdateProyectoRequest extends FormRequest
 
     public function rules(): array
     {
-        $proyecto = $this->route('proyecto');
-
         return [
             'nombre' => ['required', 'string', 'max:150'],
             'monto' => ['required', 'numeric', 'min:0'],
@@ -25,8 +23,45 @@ class UpdateProyectoRequest extends FormRequest
             'id_responsable' => ['required', 'integer', 'exists:responsable,id_responsable'],
             'fuente' => ['nullable', 'string', 'max:100'],
             'fecha_actualizacion_esperada' => ['required'],
-            'motivo_cambio' => ['nullable', 'string', 'max:255'],
+            'motivo_cambio' => ['nullable', 'string', 'max:200'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $user = $this->user();
+            $proyecto = $this->route('proyecto');
+
+            if ($proyecto) {
+                // A01: Un usuario con perfil 'Responsable' no puede modificar campos reservados al Administrador
+                if ($user && $user->esResponsable()) {
+                    if ($this->has('monto') && (float) $this->monto !== (float) $proyecto->monto) {
+                        $validator->errors()->add('monto', 'Solo el Administrador tiene autorización para modificar el presupuesto del proyecto.');
+                    }
+                    if ($this->has('id_responsable') && (int) $this->id_responsable !== (int) $proyecto->id_responsable) {
+                        $validator->errors()->add('id_responsable', 'Solo el Administrador tiene autorización para reasignar el responsable del proyecto.');
+                    }
+                    if ($this->has('id_objetivo') && (int) $this->id_objetivo !== (int) $proyecto->id_objetivo) {
+                        $validator->errors()->add('id_objetivo', 'Solo el Administrador tiene autorización para modificar el objetivo estratégico del proyecto.');
+                    }
+                    if ($this->has('anio_inicio') && (int) $this->anio_inicio !== (int) $proyecto->anio_inicio) {
+                        $validator->errors()->add('anio_inicio', 'Solo el Administrador tiene autorización para modificar los años de vigencia del proyecto.');
+                    }
+                    if ($this->has('anio_fin') && (int) $this->anio_fin !== (int) $proyecto->anio_fin) {
+                        $validator->errors()->add('anio_fin', 'Solo el Administrador tiene autorización para modificar los años de vigencia del proyecto.');
+                    }
+                }
+
+                // A15: Reducción del presupuesto requiere obligatoriamente justificación registrada (5-200 caracteres)
+                if ($this->has('monto') && (float) $this->monto < (float) $proyecto->monto) {
+                    $motivo = trim((string) $this->input('motivo_cambio', ''));
+                    if (mb_strlen($motivo) < 5) {
+                        $validator->errors()->add('motivo_cambio', 'Al reducir el presupuesto del proyecto es obligatorio registrar una justificación detallada de al menos 5 caracteres.');
+                    }
+                }
+            }
+        });
     }
 
     public function messages(): array

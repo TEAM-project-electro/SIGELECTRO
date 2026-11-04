@@ -87,13 +87,13 @@ class ProyectoController extends Controller
     /**
      * Almacena un nuevo proyecto con auditoría transaccional.
      */
-    public function store(StoreProyectoRequest $request): RedirectResponse
+    public function store(StoreProyectoRequest $request): mixed
     {
         $idResponsable = Auth::id();
-        $motivo = "Creación de proyecto PGD {$request->codigo_pgd}";
+        $motivo = mb_substr("Creación de proyecto PGD {$request->codigo_pgd}", 0, 200);
 
-        DatabaseTransactionService::run($idResponsable, function () use ($request) {
-            DB::connection('escritor')->table('proyecto')->insert([
+        $idProyecto = DatabaseTransactionService::run($idResponsable, function () use ($request) {
+            return DB::connection('escritor')->table('proyecto')->insertGetId([
                 'codigo_pgd' => $request->codigo_pgd,
                 'nombre' => $request->nombre,
                 'monto' => $request->monto,
@@ -106,6 +106,11 @@ class ProyectoController extends Controller
                 'fecha_actualizacion' => now(),
             ]);
         }, $motivo);
+
+        if ($request->wantsJson()) {
+            $proyectoCreado = Proyecto::with(['objetivo', 'responsable'])->find($idProyecto);
+            return response()->json($proyectoCreado, 201);
+        }
 
         return redirect()->route('proyectos.index')
             ->with('success', "Proyecto PGD {$request->codigo_pgd} registrado exitosamente.");
@@ -148,7 +153,7 @@ class ProyectoController extends Controller
     /**
      * Actualiza el proyecto con control de concurrencia optimista y auditoría.
      */
-    public function update(UpdateProyectoRequest $request, Proyecto $proyecto): RedirectResponse
+    public function update(UpdateProyectoRequest $request, Proyecto $proyecto): mixed
     {
         // 1. Control de Concurrencia Optimista
         // Verificamos si la fecha_actualizacion en BD coincide con la esperada
@@ -160,6 +165,18 @@ class ProyectoController extends Controller
             abort(404, 'Proyecto no encontrado.');
         }
 
+        // A01: Comprobación estricta en servidor para rol Responsable
+        $user = $request->user();
+        if ($user && $user->esResponsable()) {
+            if ((float) $request->monto !== (float) $proyectoActual->monto ||
+                (int) $request->id_responsable !== (int) $proyectoActual->id_responsable ||
+                (int) $request->id_objetivo !== (int) $proyectoActual->id_objetivo ||
+                (int) $request->anio_inicio !== (int) $proyectoActual->anio_inicio ||
+                (int) $request->anio_fin !== (int) $proyectoActual->anio_fin) {
+                abort(403, 'Acción no autorizada: Solo el Administrador puede modificar presupuesto, asignación de responsable u objetivos del proyecto.');
+            }
+        }
+
         if ($proyectoActual->fecha_actualizacion !== $request->fecha_actualizacion_esperada) {
             throw ValidationException::withMessages([
                 'concurrencia' => 'Conflicto de concurrencia: El proyecto fue modificado por otro usuario mientras lo editabas. Por favor recarga la página para verificar los últimos cambios.',
@@ -167,7 +184,20 @@ class ProyectoController extends Controller
         }
 
         $idResponsable = Auth::id();
-        $motivo = $request->motivo_cambio ?: "Actualización de datos del proyecto PGD {$proyecto->codigo_pgd}";
+        $esReduccionMonto = (float) $request->monto < (float) $proyectoActual->monto;
+
+        if ($esReduccionMonto) {
+            $motivo = mb_substr(trim((string) $request->motivo_cambio), 0, 200);
+            if (mb_strlen($motivo) < 5) {
+                throw ValidationException::withMessages([
+                    'motivo_cambio' => 'Al reducir el presupuesto del proyecto es obligatorio registrar una justificación detallada de al menos 5 caracteres.',
+                ]);
+            }
+        } else {
+            $motivo = $request->filled('motivo_cambio')
+                ? mb_substr(trim((string) $request->motivo_cambio), 0, 200)
+                : mb_substr("Actualización de datos del proyecto PGD {$proyecto->codigo_pgd}", 0, 200);
+        }
 
         DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
             DB::connection('escritor')->table('proyecto')
@@ -184,6 +214,11 @@ class ProyectoController extends Controller
                 ]);
         }, $motivo);
 
+        if ($request->wantsJson()) {
+            $proyectoActualizado = Proyecto::with(['objetivo', 'responsable'])->find($proyecto->id_proyecto);
+            return response()->json($proyectoActualizado, 200);
+        }
+
         return redirect()->route('proyectos.show', $proyecto)
             ->with('success', "Proyecto PGD {$proyecto->codigo_pgd} actualizado exitosamente.");
     }
@@ -191,13 +226,13 @@ class ProyectoController extends Controller
     /**
      * Elimina un proyecto verificando integridad referencial (Solo Administrador).
      */
-    public function destroy(Proyecto $proyecto): RedirectResponse
+    public function destroy(Proyecto $proyecto): mixed
     {
         Gate::authorize('delete', $proyecto);
 
         $idResponsable = Auth::id();
         $codigoPgd = $proyecto->codigo_pgd;
-        $motivo = "Eliminación del proyecto PGD {$codigoPgd}";
+        $motivo = mb_substr("Eliminación del proyecto PGD {$codigoPgd}", 0, 200);
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
@@ -208,10 +243,17 @@ class ProyectoController extends Controller
         } catch (QueryException $e) {
             // Manejo de restricción de clave foránea (ON DELETE RESTRICT)
             if (str_contains($e->getMessage(), '1451') || str_contains($e->getMessage(), 'foreign key constraint fails')) {
+                if (request()->wantsJson()) {
+                    return response()->json(['error' => "No se puede eliminar el proyecto {$codigoPgd} porque tiene hitos o avances presupuestales asociados. Debe desvincularlos primero."], 422);
+                }
                 return redirect()->route('proyectos.index')
                     ->with('error', "No se puede eliminar el proyecto {$codigoPgd} porque tiene hitos o avances presupuestales asociados. Debe desvincularlos primero.");
             }
             throw $e;
+        }
+
+        if (request()->wantsJson()) {
+            return response()->json(['mensaje' => "Proyecto {$codigoPgd} eliminado correctamente."], 200);
         }
 
         return redirect()->route('proyectos.index')

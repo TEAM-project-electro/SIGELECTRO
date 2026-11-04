@@ -16,6 +16,7 @@ class ResponsableSeeder extends Seeder
     {
         $usuarios = [
             [
+                'id_responsable' => 1,
                 'nombre' => 'Marta Salas',
                 'area' => 'Planeamiento',
                 'perfil' => 'Administrador',
@@ -24,6 +25,7 @@ class ResponsableSeeder extends Seeder
                 'activo' => 1,
             ],
             [
+                'id_responsable' => 2,
                 'nombre' => 'Ana Quispe',
                 'area' => 'TIC',
                 'perfil' => 'Responsable',
@@ -32,6 +34,7 @@ class ResponsableSeeder extends Seeder
                 'activo' => 1,
             ],
             [
+                'id_responsable' => 3,
                 'nombre' => 'Luis Rojas',
                 'area' => 'TIC',
                 'perfil' => 'Responsable',
@@ -40,6 +43,7 @@ class ResponsableSeeder extends Seeder
                 'activo' => 1,
             ],
             [
+                'id_responsable' => 4,
                 'nombre' => 'Carlos Garcia',
                 'area' => 'Comite de Gobierno Digital',
                 'perfil' => 'Consulta',
@@ -53,6 +57,7 @@ class ResponsableSeeder extends Seeder
             DB::connection('escritor')->table('responsable')->updateOrInsert(
                 ['usuario' => $u['usuario']],
                 [
+                    'id_responsable' => $u['id_responsable'],
                     'nombre' => $u['nombre'],
                     'area' => $u['area'],
                     'perfil' => $u['perfil'],

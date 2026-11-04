@@ -24,7 +24,7 @@ Route::get('/salud', function () {
     $dbSchema = null;
 
     try {
-        $result = DB::connection('mysql')->select('SELECT VERSION() as v, @@port as p, DATABASE() as d');
+        $result = DB::connection('lector')->select('SELECT VERSION() as v, @@port as p, DATABASE() as d');
         if (!empty($result)) {
             $dbStatus = 'conectado';
             $dbVersion = $result[0]->v;
@@ -88,68 +88,28 @@ Route::middleware('auth')->group(function () {
     // Catálogo de Objetivos PGD
     Route::get('/objetivos', [ObjetivoGdController::class, 'index'])->name('objetivos.index');
 
+    // Administración de Usuarios y Responsables (Solo Administrador)
+    Route::get('/usuarios', [\App\Http\Controllers\ResponsableController::class, 'index'])->name('usuarios.index');
+    Route::patch('/usuarios/{responsable}/activo', [\App\Http\Controllers\ResponsableController::class, 'toggleActivo'])->name('usuarios.activo');
+
     // Gestión de Cartera de Proyectos PGD
     Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
     Route::get('/proyectos/crear', [ProyectoController::class, 'create'])->name('proyectos.create');
-    Route::post('/proyectos', function (Request $request) {
-        if ($request->wantsJson()) {
-            Gate::authorize('create', Proyecto::class);
-            return response()->json(['mensaje' => 'Autorizado para crear proyecto'], 201);
-        }
-        return app(ProyectoController::class)->store(app(\App\Http\Requests\Proyecto\StoreProyectoRequest::class));
-    })->name('proyectos.store');
-
+    Route::post('/proyectos', [ProyectoController::class, 'store'])->name('proyectos.store');
     Route::get('/proyectos/{proyecto}', [ProyectoController::class, 'show'])->name('proyectos.show');
     Route::get('/proyectos/{proyecto}/editar', [ProyectoController::class, 'edit'])->name('proyectos.edit');
-
-    Route::put('/proyectos/{proyecto}', function (Proyecto $proyecto, Request $request) {
-        if ($request->wantsJson() && !$request->has('fecha_actualizacion_esperada')) {
-            Gate::authorize('update', $proyecto);
-            return response()->json(['mensaje' => 'Autorizado para actualizar proyecto']);
-        }
-        return app(ProyectoController::class)->update(app(\App\Http\Requests\Proyecto\UpdateProyectoRequest::class), $proyecto);
-    })->name('proyectos.update');
-
-    Route::delete('/proyectos/{proyecto}', function (Proyecto $proyecto, Request $request) {
-        if ($request->wantsJson()) {
-            Gate::authorize('delete', $proyecto);
-            return response()->json(['mensaje' => 'Autorizado para eliminar proyecto']);
-        }
-        return app(ProyectoController::class)->destroy($proyecto);
-    })->name('proyectos.destroy');
+    Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->name('proyectos.update');
+    Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
 
     // Cierre y Reapertura de Proyectos (Regla R3)
     Route::post('/proyectos/{proyecto}/cerrar', [ProyectoController::class, 'cerrar'])->name('proyectos.cerrar');
-
-    Route::post('/proyectos/{proyecto}/reabrir', function (Proyecto $proyecto, Request $request) {
-        if ($request->wantsJson() && !$request->filled('motivo')) {
-            Gate::authorize('reabrir', $proyecto);
-            return response()->json(['mensaje' => 'Autorizado para reabrir proyecto']);
-        }
-        return app(ProyectoController::class)->reabrir(app(\App\Http\Requests\Proyecto\ReabrirProyectoRequest::class), $proyecto);
-    })->name('proyectos.reabrir');
+    Route::post('/proyectos/{proyecto}/reabrir', [ProyectoController::class, 'reabrir'])->name('proyectos.reabrir');
 
     // Gestión de Hitos (RF02)
     Route::get('/proyectos/{proyecto}/hitos/crear', [\App\Http\Controllers\HitoController::class, 'create'])->name('proyectos.hitos.create');
-
-    Route::post('/proyectos/{proyecto}/hitos', function (Proyecto $proyecto, Request $request) {
-        if ($request->wantsJson() && !$request->filled('descripcion')) {
-            Gate::authorize('create', [Hito::class, $proyecto]);
-            return response()->json(['mensaje' => 'Autorizado para crear hito'], 201);
-        }
-        return app(\App\Http\Controllers\HitoController::class)->store(app(\App\Http\Requests\Hito\StoreHitoRequest::class), $proyecto);
-    })->name('proyectos.hitos.store')->name('hitos.store');
-
+    Route::post('/proyectos/{proyecto}/hitos', [\App\Http\Controllers\HitoController::class, 'store'])->name('proyectos.hitos.store');
     Route::get('/hitos/{hito}/editar', [\App\Http\Controllers\HitoController::class, 'edit'])->name('hitos.edit');
-
-    Route::put('/hitos/{hito}', function (Hito $hito, Request $request) {
-        if ($request->wantsJson() && !$request->filled('descripcion')) {
-            Gate::authorize('update', $hito);
-            return response()->json(['mensaje' => 'Autorizado para actualizar hito']);
-        }
-        return app(\App\Http\Controllers\HitoController::class)->update(app(\App\Http\Requests\Hito\UpdateHitoRequest::class), $hito);
-    })->name('hitos.update');
-
+    Route::put('/hitos/{hito}', [\App\Http\Controllers\HitoController::class, 'update'])->name('hitos.update');
     Route::delete('/hitos/{hito}', [\App\Http\Controllers\HitoController::class, 'destroy'])->name('hitos.destroy');
 
     // Gestión de Avances Presupuestales y Cortes (RF04 - Reglas R1 y R2)

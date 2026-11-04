@@ -73,7 +73,7 @@ VAR _Valor = [KPI 1 Avance Hitos LB %]
 RETURN
 IF(
     ISBLANK(_Valor),
-    "No aplica",
+    "Sin datos",
     FORMAT(_Valor, "0.00 %")
 )
 
@@ -114,7 +114,7 @@ VAR _Valor = [KPI 2 Proyectos Retraso %]
 RETURN
 IF(
     ISBLANK(_Valor),
-    "No aplica",
+    "Sin datos",
     FORMAT(_Valor, "0.00 %")
 )
 
@@ -193,6 +193,133 @@ IF(
 [Desviación Presupuestal en Fecha Corte] = 
 VAR _Plan = [Plan en Fecha Corte Seleccionada]
 VAR _Gasto = [Gasto en Fecha Corte Seleccionada]
+RETURN
+IF(
+    ISBLANK(_Plan) || _Plan = 0,
+    BLANK(),
+    DIVIDE(_Gasto - _Plan, _Plan)
+)
+
+[Hitos LB Totales en Fecha Corte] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Hitos LB Totales],
+    CALCULATE(
+        SUM(fact_avance_proyecto[hitos_linea_base]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel
+    )
+)
+
+[Hitos LB Concluidos en Fecha Corte] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Hitos LB Concluidos],
+    CALCULATE(
+        SUM(fact_avance_proyecto[hitos_concluidos]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel
+    )
+)
+
+[KPI 1 Avance Hitos en Fecha Corte] = 
+VAR _Num = [Hitos LB Concluidos en Fecha Corte]
+VAR _Den = [Hitos LB Totales en Fecha Corte]
+RETURN
+IF(
+    ISBLANK(_Den) || _Den = 0,
+    BLANK(),
+    DIVIDE(_Num, _Den)
+)
+
+[Proyectos Activos Evaluables en Fecha Corte] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Proyectos Activos Evaluables],
+    CALCULATE(
+        DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel,
+        RELATED(dim_proyecto[es_activo]) = 1,
+        fact_avance_proyecto[hitos_linea_base] > 0
+    )
+)
+
+[Proyectos con Retraso Cantidad en Fecha Corte] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Proyectos con Retraso Cantidad],
+    CALCULATE(
+        DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel,
+        RELATED(dim_proyecto[es_activo]) = 1,
+        fact_avance_proyecto[con_retraso] = 1
+    )
+)
+
+[KPI 2 Proyectos Retraso en Fecha Corte] = 
+VAR _Num = [Proyectos con Retraso Cantidad en Fecha Corte]
+VAR _Den = [Proyectos Activos Evaluables en Fecha Corte]
+RETURN
+IF(
+    ISBLANK(_Den) || _Den = 0,
+    BLANK(),
+    DIVIDE(_Num, _Den)
+)
+
+
+// ------------------------------------------------------------------------------
+// 5.1 MODALIDAD ASINCRÓNICA: ÚLTIMO REPORTE HASTA FECHA LÍMITE (ULTIMO_REPORTE)
+// Filtra las filas de avance donde la fecha de reporte es menor o igual a la seleccionada
+// y toma el último registro de cada proyecto.
+// ------------------------------------------------------------------------------
+
+[Gasto al Último Reporte hasta Fecha] = 
+VAR _FechaMax = SELECTEDVALUE(SelectorCorte[FechaCorte], MAX(dim_tiempo[fecha]))
+VAR _UltimosRegistros = 
+    GENERATE(
+        VALUES(dim_proyecto[id_proyecto]),
+        TOPN(
+            1,
+            FILTER(
+                fact_avance_proyecto,
+                fact_avance_proyecto[id_proyecto] = dim_proyecto[id_proyecto] &&
+                fact_avance_proyecto[fecha_reporte] <= _FechaMax
+            ),
+            fact_avance_proyecto[fecha_reporte],
+            DESC
+        )
+    )
+RETURN
+SUMX(_UltimosRegistros, fact_avance_proyecto[gasto_acumulado])
+
+[Plan al Último Reporte hasta Fecha] = 
+VAR _FechaMax = SELECTEDVALUE(SelectorCorte[FechaCorte], MAX(dim_tiempo[fecha]))
+VAR _UltimosRegistros = 
+    GENERATE(
+        VALUES(dim_proyecto[id_proyecto]),
+        TOPN(
+            1,
+            FILTER(
+                fact_avance_proyecto,
+                fact_avance_proyecto[id_proyecto] = dim_proyecto[id_proyecto] &&
+                fact_avance_proyecto[fecha_reporte] <= _FechaMax
+            ),
+            fact_avance_proyecto[fecha_reporte],
+            DESC
+        )
+    )
+RETURN
+SUMX(_UltimosRegistros, fact_avance_proyecto[presupuesto_planificado])
+
+[Desviación al Último Reporte hasta Fecha] = 
+VAR _Plan = [Plan al Último Reporte hasta Fecha]
+VAR _Gasto = [Gasto al Último Reporte hasta Fecha]
 RETURN
 IF(
     ISBLANK(_Plan) || _Plan = 0,

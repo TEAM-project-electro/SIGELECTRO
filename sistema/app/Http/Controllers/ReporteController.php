@@ -58,78 +58,7 @@ class ReporteController extends Controller
         $estadoDw = $this->etlService->estaDesactualizado();
 
         if ($origen === 'DW') {
-            $metricasDw = $this->etlService->obtenerMetricas();
-            $proyectosDw = DB::connection('dw_lector')->table('v_kpi_proyecto')->get();
-            $kpi = $metricasDw['kpi_cartera'];
-
-            $datos = [
-                'contexto' => [
-                    'modo' => 'VISTA_DATA_MART',
-                    'fecha_corte' => $estadoDw['ultima_carga'] ? substr($estadoDw['ultima_carga'], 0, 10) : 'N/A',
-                    'rango_fechas_texto' => 'Corte analítico del Data Mart (dw_seguimiento_gd)',
-                    'origen' => 'DW',
-                    'revision_datos' => $estadoDw['revision_dw'],
-                    'filtros' => $filtros,
-                ],
-                'resumen' => [
-                    'total_proyectos' => (int) ($kpi->total_proyectos ?? 0),
-                    'conteo_estados' => [
-                        'Pendiente' => 0,
-                        'En curso' => (int) ($metricasDw['proyectos_por_estado']->firstWhere('estado_actual', 'En curso')->cantidad_proyectos ?? 0),
-                        'Cerrado' => (int) ($metricasDw['proyectos_por_estado']->firstWhere('estado_actual', 'Cerrado')->cantidad_proyectos ?? 0),
-                    ],
-                    'monto_total_cartera' => (float) ($kpi->monto_total_cartera ?? 0),
-                    'avance_hitos' => [
-                        'valor' => (float) ($kpi->avance_hitos_pct ?? 0),
-                        'valor_formateado' => number_format((float) ($kpi->avance_hitos_pct ?? 0), 2) . ' %',
-                        'numerador' => (int) ($kpi->total_hitos_concluidos_lb ?? 0),
-                        'denominador' => (int) ($kpi->total_hitos_lb ?? 0),
-                        'unidad' => '%',
-                        'cobertura_proyectos' => ($kpi->total_proyectos ?? 0) . ' proyectos',
-                    ],
-                    'proyectos_retraso' => [
-                        'valor' => (float) ($kpi->porcentaje_retraso ?? 0),
-                        'valor_formateado' => number_format((float) ($kpi->porcentaje_retraso ?? 0), 2) . ' %',
-                        'numerador' => (int) ($kpi->proyectos_con_retraso ?? 0),
-                        'denominador' => (int) ($kpi->proyectos_activos_evaluables ?? 0),
-                        'unidad' => '%',
-                        'cobertura_proyectos' => ($kpi->proyectos_activos_evaluables ?? 0) . ' activos evaluables',
-                    ],
-                    'desviacion_presupuestal' => [
-                        'valor' => (float) ($kpi->desviacion_presupuestal_pct ?? 0),
-                        'valor_formateado' => number_format((float) ($kpi->desviacion_presupuestal_pct ?? 0), 2) . ' %',
-                        'presupuesto_planificado' => (float) ($kpi->total_planificado ?? 0),
-                        'gasto_acumulado' => (float) ($kpi->total_gasto ?? 0),
-                        'diferencia' => (float) ($kpi->diferencia_total ?? 0),
-                        'unidad' => '%',
-                        'cobertura_proyectos' => ($kpi->total_proyectos ?? 0) . ' proyectos',
-                    ],
-                ],
-                'proyectos' => $proyectosDw->map(fn($p) => [
-                    'codigo_pgd' => $p->codigo_pgd,
-                    'nombre' => $p->proyecto,
-                    'objetivo' => ['codigo' => $p->objetivo_codigo, 'descripcion' => $p->objetivo_descripcion],
-                    'responsable' => ['nombre' => $p->responsable],
-                    'estado' => $p->estado_actual,
-                    'monto' => (float) $p->monto_proyecto,
-                    'fecha_evaluacion' => $p->ultimo_corte,
-                    'hitos' => [
-                        'evaluable' => $p->hitos_linea_base > 0,
-                        'total_lb' => $p->hitos_linea_base,
-                        'concluidos_lb' => $p->hitos_concluidos,
-                        'avance_formateado' => number_format((float) $p->avance_pct, 2) . ' %',
-                        'con_retraso' => (bool) $p->con_retraso,
-                        'vencidos_lb' => $p->hitos_vencidos,
-                    ],
-                    'financiero' => [
-                        'tiene_corte' => true,
-                        'presupuesto_planificado' => (float) $p->presupuesto_planificado,
-                        'gasto_acumulado' => (float) $p->gasto_acumulado,
-                        'diferencia' => (float) $p->diferencia_gasto,
-                        'desviacion_formateada' => number_format((float) $p->desviacion_pct, 2) . ' %',
-                    ],
-                ])->toArray(),
-            ];
+            $datos = $this->etlService->consultarDw($filtros);
         } else {
             $datos = $this->indicadoresService->calcularCartera($filtros);
         }

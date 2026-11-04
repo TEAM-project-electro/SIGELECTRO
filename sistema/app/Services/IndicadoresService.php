@@ -25,16 +25,17 @@ class IndicadoresService
      */
     public function calcularCartera(array $filtros = []): array
     {
-        $modo = $filtros['modo'] ?? self::MODO_CORTE_COMUN;
-        $fechaCorteParam = $filtros['fecha_corte'] ?? null;
+        return DB::connection('lector')->transaction(function () use ($filtros) {
+            $modo = $filtros['modo'] ?? self::MODO_CORTE_COMUN;
+            $fechaCorteParam = $filtros['fecha_corte'] ?? null;
 
-        // Si en CORTE_COMUN no se envía fecha, tomar la última fecha de corte global de avance_presupuestal
-        if ($modo === self::MODO_CORTE_COMUN && empty($fechaCorteParam)) {
-            $fechaCorteParam = DB::table('avance_presupuestal')->max('fecha_reporte') ?? '2024-06-30';
-        }
+            // Si en CORTE_COMUN no se envía fecha, tomar la última fecha de corte global de avance_presupuestal
+            if ($modo === self::MODO_CORTE_COMUN && empty($fechaCorteParam)) {
+                $fechaCorteParam = DB::connection('lector')->table('avance_presupuestal')->max('fecha_reporte') ?? '2024-06-30';
+            }
 
-        // 1. Obtener universo de proyectos filtrado
-        $query = DB::table('proyecto as p')
+            // 1. Obtener universo de proyectos filtrado
+            $query = DB::connection('lector')->table('proyecto as p')
             ->join('objetivo_gd as o', 'p.id_objetivo', '=', 'o.id_objetivo')
             ->join('responsable as r', 'p.id_responsable', '=', 'r.id_responsable')
             ->select(
@@ -82,7 +83,7 @@ class IndicadoresService
 
         $hitosPorProyecto = [];
         if (!empty($proyectoIds)) {
-            $hitosDb = DB::table('hito')
+            $hitosDb = DB::connection('lector')->table('hito')
                 ->whereIn('id_proyecto', $proyectoIds)
                 ->orderBy('fecha_prevista', 'asc')
                 ->get();
@@ -93,7 +94,7 @@ class IndicadoresService
 
         $avancesPorProyecto = [];
         if (!empty($proyectoIds)) {
-            $avancesDb = DB::table('avance_presupuestal')
+            $avancesDb = DB::connection('lector')->table('avance_presupuestal')
                 ->whereIn('id_proyecto', $proyectoIds)
                 ->orderBy('fecha_reporte', 'asc')
                 ->get();
@@ -300,7 +301,7 @@ class IndicadoresService
             ];
         }
 
-        // 4. Consolidar KPIs de Cartera
+        // 4. Consolidar KPIs de Cartera (A11: Distinción entre Sin datos y No aplica)
         // KPI 1: Avance de Hitos
         $kpiAvanceValor = null;
         $kpiAvanceFormateado = 'Sin datos';
@@ -310,9 +311,6 @@ class IndicadoresService
             $kpiAvanceValor = ($concluidosHitosLbCartera / $totalHitosLbCartera) * 100;
             $kpiAvanceFormateado = number_format($kpiAvanceValor, 2, '.', '') . ' %';
             $kpiAvanceEstado = 'OK';
-        } elseif ($totalProyectos > 0) {
-            $kpiAvanceFormateado = 'No aplica';
-            $kpiAvanceEstado = 'NO_APLICA';
         }
 
         // KPI 2: Retraso
@@ -324,9 +322,6 @@ class IndicadoresService
             $kpiRetrasoValor = ($proyectosActivosRetrasadosCount / $proyectosActivosEvaluablesCount) * 100;
             $kpiRetrasoFormateado = number_format($kpiRetrasoValor, 2, '.', '') . ' %';
             $kpiRetrasoEstado = 'OK';
-        } elseif ($totalProyectos > 0) {
-            $kpiRetrasoFormateado = 'No aplica';
-            $kpiRetrasoEstado = 'NO_APLICA';
         }
 
         // KPI 3: Desviación Presupuestal
@@ -346,8 +341,8 @@ class IndicadoresService
             }
         }
 
-        // Revisión de datos técnica
-        $revision = DB::table('control_revision')->where('id', 1)->value('version') ?? 1;
+        // Revisión de datos técnica bajo el mismo snapshot de lectura
+        $revision = DB::connection('lector')->table('control_revision')->where('id', 1)->value('version') ?? 1;
 
         $fechaMinReporte = !empty($fechasEfectivas) ? min($fechasEfectivas) : null;
         $fechaMaxReporte = !empty($fechasEfectivas) ? max($fechasEfectivas) : null;
@@ -408,5 +403,6 @@ class IndicadoresService
             ],
             'proyectos' => $proyectosCalculados,
         ];
+        });
     }
 }
