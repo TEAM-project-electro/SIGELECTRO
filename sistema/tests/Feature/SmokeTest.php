@@ -28,12 +28,15 @@ class SmokeTest extends TestCase
     }
 
     /**
-     * Verifica que la ruta raíz responde HTTP 200.
+     * Verifica que la ruta raíz redirige a login para invitados y login responde 200.
      */
     public function test_ruta_raiz_responde_correctamente(): void
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response->assertRedirect('/login');
+
+        $login = $this->get('/login');
+        $login->assertStatus(200);
     }
 }

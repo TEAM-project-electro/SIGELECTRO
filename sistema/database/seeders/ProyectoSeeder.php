@@ -70,7 +70,7 @@ class ProyectoSeeder extends Seeder
                 'anio_inicio' => 2023,
                 'anio_fin' => 2023,
                 'estado' => 'En curso', // Se cierra en SeguimientoSeeder tras registrar sus hitos cerrados
-                'resp_usuario' => 'msalas',
+                'resp_usuario' => 'aquispe',
                 'fuente' => 'Cartera PGD 2023 a 2026',
             ],
             [
@@ -103,7 +103,7 @@ class ProyectoSeeder extends Seeder
                 'anio_inicio' => 2023,
                 'anio_fin' => 2023,
                 'estado' => 'En curso', // Se cierra en SeguimientoSeeder tras registrar sus hitos cerrados
-                'resp_usuario' => 'msalas',
+                'resp_usuario' => 'aquispe',
                 'fuente' => 'Cartera PGD 2023 a 2026',
             ],
             [
@@ -114,7 +114,7 @@ class ProyectoSeeder extends Seeder
                 'anio_inicio' => 2023,
                 'anio_fin' => 2023,
                 'estado' => 'En curso', // Se cierra en SeguimientoSeeder tras registrar sus hitos cerrados
-                'resp_usuario' => 'msalas',
+                'resp_usuario' => 'aquispe',
                 'fuente' => 'Cartera PGD 2023 a 2026',
             ],
             [

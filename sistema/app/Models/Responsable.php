@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Responsable extends Authenticatable
 {
+    protected $connection = 'auth';
     protected $table = 'responsable';
     protected $primaryKey = 'id_responsable';
     public $timestamps = false;
@@ -34,6 +35,14 @@ class Responsable extends Authenticatable
     public function getAuthPasswordName(): string
     {
         return 'clave_hash';
+    }
+
+    /**
+     * Retorna el hash de la contraseña para verificación.
+     */
+    public function getAuthPassword(): string
+    {
+        return $this->clave_hash;
     }
 
     /**

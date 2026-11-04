@@ -1,12 +1,20 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Models\Hito;
+use App\Models\Proyecto;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 
+// Redirección inicial
 Route::get('/', function () {
-    return view('welcome');
+    return Auth::check() ? redirect()->route('tablero') : redirect()->route('login');
 });
 
+// Ruta de diagnóstico técnico
 Route::get('/salud', function () {
     $dbStatus = 'desconectado';
     $dbVersion = null;
@@ -47,4 +55,57 @@ Route::get('/salud', function () {
         ],
         'activos_compilados' => $assetsCompiled,
     ], $isReady ? 200 : 503);
+})->name('salud');
+
+// Rutas de invitados (Login)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+});
+
+// Rutas protegidas (Autenticación requerida)
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/tablero', function () {
+        return view('tablero', [
+            'usuario' => Auth::user(),
+        ]);
+    })->name('tablero');
+
+    Route::get('/proyectos', function () {
+        $proyectos = Proyecto::with(['objetivo', 'responsable'])->get();
+        return response()->json($proyectos);
+    })->name('proyectos.index');
+
+    // Endpoints protegidos para validación de políticas y compuerta Gate G1
+    Route::post('/proyectos', function (Request $request) {
+        Gate::authorize('create', Proyecto::class);
+        return response()->json(['mensaje' => 'Autorizado para crear proyecto'], 201);
+    })->name('proyectos.store');
+
+    Route::put('/proyectos/{proyecto}', function (Proyecto $proyecto, Request $request) {
+        Gate::authorize('update', $proyecto);
+        return response()->json(['mensaje' => 'Autorizado para actualizar proyecto']);
+    })->name('proyectos.update');
+
+    Route::delete('/proyectos/{proyecto}', function (Proyecto $proyecto) {
+        Gate::authorize('delete', $proyecto);
+        return response()->json(['mensaje' => 'Autorizado para eliminar proyecto']);
+    })->name('proyectos.destroy');
+
+    Route::post('/proyectos/{proyecto}/reabrir', function (Proyecto $proyecto, Request $request) {
+        Gate::authorize('reabrir', $proyecto);
+        return response()->json(['mensaje' => 'Autorizado para reabrir proyecto']);
+    })->name('proyectos.reabrir');
+
+    Route::post('/proyectos/{proyecto}/hitos', function (Proyecto $proyecto, Request $request) {
+        Gate::authorize('create', [Hito::class, $proyecto]);
+        return response()->json(['mensaje' => 'Autorizado para crear hito'], 201);
+    })->name('hitos.store');
+
+    Route::put('/hitos/{hito}', function (Hito $hito, Request $request) {
+        Gate::authorize('update', $hito);
+        return response()->json(['mensaje' => 'Autorizado para actualizar hito']);
+    })->name('hitos.update');
 });
