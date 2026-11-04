@@ -21,8 +21,7 @@ Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
 | 01 | Especificación y aceptación | **Verificada** | 00 | `docs/especificacion.md`, `docs/matriz_trazabilidad.md`, `docs/contrato_indicadores.md` | Ninguno |
 | 02 | Arquitectura y entorno | **Verificada** | 01 | MariaDB 10.11 en `C:\mariadb-10.11:3307`, app en `sistema/`, Tailwind/Alpine/Chart.js compilados, test de humo y salud | Ninguno |
 | 03 | Base operativa y controles | **Verificada** | 02 | 6 tablas, 41 columnas, 2 extensiones (`control_revision`, `bitacora_motivo`), triggers R1-R4, suite de 16 tests de reglas | Ninguno para etapa 03 |
-| 04 | Muestra y procedencia | **Pendiente** | 03 | Seeders deterministas (10 proyectos, 6 OGD), `docs/datos_demostracion.md` | Muestra de 10 proyectos |
-| 04 | Muestra y procedencia | **Pendiente** | 03 | Seeders deterministas, `docs/datos_demostracion.md` | Muestra de 10 proyectos |
+| 04 | Muestra y procedencia | **Verificada** | 03 | Seeders deterministas e idempotentes (10 proyectos S/ 8.62M, 6 OGD, 4 responsables, 26 hitos, 24 cortes), `docs/datos_demostracion.md`, test de procedencia | Ninguno |
 | 05 | Autenticación y permisos | **Pendiente** | 04 | Modelo Authenticatable, Policies, tests HTTP (Gate G1) | Auth y sesiones |
 | 06 | Cartera y catálogos | **Pendiente** | G1 | CRUD proyectos y objetivos, control de concurrencia | Formularios y vistas |
 | 07 | Hitos, línea base y cierre | **Pendiente** | 06 | Gestión de hitos, regla de cierre R3, auditoría | Lógica de línea base |
@@ -44,3 +43,5 @@ Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
   - Creado repositorio local Git en `E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team`.
   - Diagnosticado el entorno: PHP 8.3.28, Composer 2.9.2, Node 24.19.0, npm 11.17.0.
   - Seleccionada la ruta de MariaDB 10.11 portable en puerto 3307 para no interferir con XAMPP (10.4) ni Laragon (MySQL 8.4).
+  - Implementada y verificada la Etapa 03: migraciones de 6 tablas operativas, procedimientos almacenados, triggers R1 a R4, vistas e inmutabilidad de auditoría. Suite de 16 tests de reglas aprobada.
+  - Implementada y verificada la Etapa 04: seeders idempotentes completados (`ObjetivoGdSeeder`, `ResponsableSeeder`, `ProyectoSeeder`, `SeguimientoSeeder`, `DatabaseSeeder`), datos demostrativos canónicos (10 proyectos con S/ 8,623,550.00, 26 hitos, 24 cortes), documento `docs/datos_demostracion.md` y test automatizado `MuestraProcedenciaTest.php`. Total de 26 tests automatizados aprobados. Próximo paso: Etapa 05 (Autenticación y Gate G1).

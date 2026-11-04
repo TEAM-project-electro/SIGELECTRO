@@ -2,22 +2,32 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     * Carga idempotente de objetivos, usuarios, proyectos, hitos y avances presupuestales.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Establecer contexto de autor administrativo para la siembra inicial
+        DB::connection('escritor')->statement('SET @id_responsable = 1;');
+        DB::connection('escritor')->statement('SET @motivo_cambio = "Carga inicial demostrativa de la cartera";');
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        try {
+            $this->call([
+                ObjetivoGdSeeder::class,
+                ResponsableSeeder::class,
+                ProyectoSeeder::class,
+                SeguimientoSeeder::class,
+            ]);
+        } finally {
+            // Limpieza estricta del contexto tras sembrar
+            DB::connection('escritor')->statement('SET @id_responsable = NULL;');
+            DB::connection('escritor')->statement('SET @motivo_cambio = NULL;');
+        }
     }
 }
