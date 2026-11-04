@@ -1,0 +1,14 @@
+# Entorno local y dependencias
+.env
+sistema/.env
+sistema/vendor/
+sistema/node_modules/
+sistema/public/build/
+sistema/storage/*.key
+sistema/storage/logs/*.log
+sistema/storage/framework/cache/*
+sistema/storage/framework/sessions/*
+sistema/storage/framework/views/*
+.phpunit.cache
+.phpunit.result.cache
+*.err

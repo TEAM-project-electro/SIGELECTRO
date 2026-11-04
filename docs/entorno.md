@@ -3,55 +3,76 @@
 Fecha de verificación: 3 de noviembre de 2026.
 Referencia canónica: [PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md](../PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md).
 
-## 1. Directorios de Trabajo
+---
+
+## 1. Directorios de Trabajo y Rutas de Ejecución
 
 - **Raíz del proyecto:** `E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team`
-  - Contiene: `PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md`, `AGENTS.md`, `docs/`, `.git/`.
-- **Raíz de la aplicación web:** `E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team\sistema`
-  - Destino para: `composer.json`, `artisan`, `package.json`, tests, controladores y modelos.
+  - Contiene: `PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md`, `AGENTS.md`, `docs/`, `scripts/`, `.git/`.
+- **Raíz de la aplicación Laravel:** `E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team\sistema`
+  - Todos los comandos de Composer, PHP Artisan, PHPUnit y npm se ejecutan **dentro de `sistema/`**.
 
-## 2. Herramientas y Binarios Detectados
+---
 
-| Herramienta | Ruta comprobada | Versión detectada | Estado |
-| --- | --- | --- | --- |
-| PowerShell | `pwsh` | 7.4.5 (Core) | Operativo |
-| PHP CLI | `C:\laragon\bin\php\php-8.3.28-Win32-vs16-x64\php.exe` | PHP 8.3.28 | Operativo (extensiones OK) |
-| Composer | `C:\composer\composer.bat` | 2.9.2 | Operativo |
-| Node.js | `C:\Program Files\nodejs\node.exe` | v24.19.0 | Operativo |
-| npm | `C:\Program Files\nodejs\npm.cmd` | 11.17.0 | Operativo |
-| Git | `C:\Program Files\Git\cmd\git.exe` | 2.52.0.windows.1 | Operativo |
-| MariaDB 10.11 (Objetivo) | `C:\mariadb-10.11\bin\mariadbd.exe` (a preparar en Etapa 02) | 10.11.x (puerto 3307) | Pendiente Etapa 02 |
+## 2. Servidor MariaDB 10.11 Aislado (Puerto 3307)
 
-## 3. Comandos Comprobados por Tarea
+Para no entrar en conflicto con instalaciones existentes en el equipo (XAMPP MariaDB 10.4 en puerto 3306, MySQL 8.4 en Laragon, MySQL 8.0/9.7), se preparó el servidor portátil oficial:
+- **Ubicación:** `C:\mariadb-10.11`
+- **Configuración:** `C:\mariadb-10.11\my.ini`
+- **Puerto:** `3307`
+- **Host:** `127.0.0.1`
+- **Esquemas creados:** `seguimiento_gd`, `dw_seguimiento_gd`, `seguimiento_gd_test`, `dw_seguimiento_gd_test`.
+- **Cuentas técnicas (Decisión 5):** `sig_migrador`, `sig_definer`, `sig_auth`, `sig_lector`, `sig_escritor`, `sig_etl`, `bi_lector`.
 
-### En la Raíz (`proyecto team`)
-- **Estado del repositorio:**
+### Scripts de Gestión de MariaDB
+Desde la raíz del proyecto:
+- **Iniciar servidor:**
   ```powershell
-  Set-Location -LiteralPath 'E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team'
-  git status
+  pwsh -File .\scripts\iniciar_mariadb.ps1
   ```
-- **Verificación de archivos de fuentes:**
+- **Detener servidor:**
   ```powershell
-  Get-FileHash docs\fuentes\* -Algorithm SHA256
+  pwsh -File .\scripts\detener_mariadb.ps1
   ```
 
-### En el Destino de la Aplicación (`sistema/`, a partir de Etapa 02)
-- **Instalación de Laravel 11:**
-  ```powershell
-  Set-Location -LiteralPath 'E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team'
-  composer create-project laravel/laravel:^11.0 sistema --prefer-dist
-  ```
-- **Ejecución de migraciones y tests:**
-  ```powershell
-  Set-Location -LiteralPath 'E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team\sistema'
-  php artisan test
-  ```
-- **Compilación de assets:**
-  ```powershell
-  Set-Location -LiteralPath 'E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team\sistema'
-  npm.cmd run build
-  ```
-- **Servidor local de desarrollo:**
-  ```powershell
-  php artisan serve --port=8000
-  ```
+---
+
+## 3. Comandos Comprobados de Desarrollo
+
+### 3.1 Comandos de Base de Datos y Verificación
+Desde `sistema/`:
+```powershell
+# Inspección de conexión activa
+php artisan db:show
+
+# Monitor de tablas y estado
+php artisan db:table
+```
+
+### 3.2 Comandos de Frontend (Vite, Tailwind, Alpine, Chart.js)
+Desde `sistema/`:
+```powershell
+# Compilación para producción (activos locales sin CDN)
+npm.cmd run build
+
+# Servidor de desarrollo con recarga en vivo
+npm.cmd run dev
+```
+
+### 3.3 Comandos de Pruebas Automatizadas
+Desde `sistema/`:
+```powershell
+# Ejecución de la prueba de humo y salud
+php artisan test --filter=SmokeTest
+
+# Ejecución completa de la suite de pruebas
+php artisan test
+```
+
+### 3.4 Servidor Web de Desarrollo
+Desde `sistema/`:
+```powershell
+php artisan serve --port=8000
+```
+La aplicación queda accesible en: `http://localhost:8000`
+Ruta de salud del sistema: `http://localhost:8000/salud`

@@ -5,12 +5,12 @@ Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
 
 ## Resumen del Progreso
 
-- **Etapa activa:** Etapa 01 (completada y verificada) $\to$ Lista para Etapa 02.
+- **Etapa activa:** Etapa 02 (completada y verificada) $\to$ Lista para Etapa 03.
 - **Puertas de control:**
-  - G1 (Acceso y Seguridad): Pendiente.
-  - G2 (Operación y Auditoría): Pendiente.
-  - G3 (Indicadores, DW y Reportes): Pendiente.
-  - G4 (Entrega Final y Respaldo): Pendiente.
+  - G1 (Acceso y Seguridad): Pendiente (previsto tras Etapa 05).
+  - G2 (Operación y Auditoría): Pendiente (previsto tras Etapa 09).
+  - G3 (Indicadores, DW y Reportes): Pendiente (previsto tras Etapa 13).
+  - G4 (Entrega Final y Respaldo): Pendiente (previsto tras Etapa 18).
 - **Componente Power BI:** PREPARADO (pendiente de ejecución en Desktop según Decisión 7).
 
 ## Matriz de Estado por Etapa
@@ -18,9 +18,9 @@ Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
 | Etapa | Nombre | Estado | Dependencia | Entregables / Evidencia | Pendientes |
 | --- | --- | --- | --- | --- | --- |
 | 00 | Contexto y reglas | **Verificada** | Fuentes en docs/fuentes | `docs/inventario_fuentes.md`, `docs/contexto_validado.md`, `docs/protocolo_desarrollo.md`, `docs/plan_ejecucion.md`, `AGENTS.md` | Ninguno |
-| 01 | Especificación y aceptación | **Verificada** | 00 | `docs/especificacion.md`, `docs/matriz_trazabilidad.md`, `docs/contrato_indicadores.md` | Ninguno para etapa 01 |
-| 02 | Arquitectura y entorno | **Pendiente** | 01 | MariaDB 10.11 en `C:\mariadb-10.11:3307`, app en `sistema/`, `docs/entorno.md` | Configurar MariaDB portable y Laravel |
-| 03 | Base operativa y controles | **Pendiente** | 02 | Migraciones, triggers R1-R4, `control_revision`, `bitacora_motivo` | Scripts DDL |
+| 01 | Especificación y aceptación | **Verificada** | 00 | `docs/especificacion.md`, `docs/matriz_trazabilidad.md`, `docs/contrato_indicadores.md` | Ninguno |
+| 02 | Arquitectura y entorno | **Verificada** | 01 | MariaDB 10.11 en `C:\mariadb-10.11:3307`, app en `sistema/`, Tailwind/Alpine/Chart.js compilados, test de humo y salud | Ninguno para etapa 02 |
+| 03 | Base operativa y controles | **Pendiente** | 02 | Migraciones, triggers R1-R4, `control_revision`, `bitacora_motivo` | Scripts DDL y tests R1-R4 |
 | 04 | Muestra y procedencia | **Pendiente** | 03 | Seeders deterministas, `docs/datos_demostracion.md` | Muestra de 10 proyectos |
 | 05 | Autenticación y permisos | **Pendiente** | 04 | Modelo Authenticatable, Policies, tests HTTP (Gate G1) | Auth y sesiones |
 | 06 | Cartera y catálogos | **Pendiente** | G1 | CRUD proyectos y objetivos, control de concurrencia | Formularios y vistas |
