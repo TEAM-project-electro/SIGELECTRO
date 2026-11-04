@@ -246,9 +246,19 @@
                 <h2 class="text-base font-bold text-slate-900">Historial de Cortes Presupuestales</h2>
                 <p class="text-xs text-slate-500">Ejecución cronológica verificada con reglas R1 y R2</p>
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 bg-white border border-slate-200 rounded-md text-slate-700">
-                Total Cortes: {{ $proyecto->avances->count() }}
-            </span>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs font-semibold px-2.5 py-1 bg-white border border-slate-200 rounded-md text-slate-700">
+                    Total Cortes: {{ $proyecto->avances->count() }}
+                </span>
+                @if($proyecto->estado !== 'Cerrado')
+                    @can('create', [App\Models\AvancePresupuestal::class, $proyecto])
+                        <a href="{{ route('proyectos.avances.create', $proyecto) }}"
+                            class="px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-md text-xs font-medium transition shadow-sm">
+                            + Nuevo Corte Presupuestal
+                        </a>
+                    @endcan
+                @endif
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-xs">
@@ -259,6 +269,7 @@
                         <th class="px-4 py-3 text-right">Gasto Acumulado (S/)</th>
                         <th class="px-4 py-3 text-right">Desviación (S/)</th>
                         <th class="px-4 py-3 text-right">Desviación (%)</th>
+                        <th class="px-4 py-3 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white font-mono">
@@ -283,10 +294,32 @@
                             <td class="px-4 py-3 text-right font-bold {{ $desvPct > 0 ? 'text-rose-700' : ($desvPct < 0 ? 'text-emerald-700' : 'text-slate-700') }}">
                                 {{ ($desvPct > 0 ? '+' : '') . number_format($desvPct, 1) }}%
                             </td>
+                            <td class="px-4 py-3 text-center whitespace-nowrap space-x-2 font-sans">
+                                @if($proyecto->estado !== 'Cerrado')
+                                    @can('update', $av)
+                                        <a href="{{ route('avances.edit', $av) }}"
+                                            class="text-xs font-semibold text-blue-900 hover:underline">
+                                            Editar
+                                        </a>
+                                    @endcan
+                                    @can('delete', $av)
+                                        <form method="POST" action="{{ route('avances.destroy', $av) }}" class="inline"
+                                            onsubmit="return confirm('¿Está seguro de eliminar este corte presupuestal?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs font-semibold text-red-600 hover:underline">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    @endcan
+                                @else
+                                    <span class="text-slate-400 text-[11px] italic">Bloqueado</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-slate-400 font-sans">
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-400 font-sans">
                                 No se registran cortes presupuestales para este proyecto.
                             </td>
                         </tr>

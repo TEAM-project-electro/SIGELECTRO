@@ -141,4 +141,11 @@ Route::middleware('auth')->group(function () {
     })->name('hitos.update');
 
     Route::delete('/hitos/{hito}', [\App\Http\Controllers\HitoController::class, 'destroy'])->name('hitos.destroy');
+
+    // Gestión de Avances Presupuestales y Cortes (RF04 - Reglas R1 y R2)
+    Route::get('/proyectos/{proyecto}/avances/crear', [\App\Http\Controllers\AvancePresupuestalController::class, 'create'])->name('proyectos.avances.create');
+    Route::post('/proyectos/{proyecto}/avances', [\App\Http\Controllers\AvancePresupuestalController::class, 'store'])->name('proyectos.avances.store');
+    Route::get('/avances/{avance}/editar', [\App\Http\Controllers\AvancePresupuestalController::class, 'edit'])->name('avances.edit');
+    Route::put('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'update'])->name('avances.update');
+    Route::delete('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'destroy'])->name('avances.destroy');
 });
