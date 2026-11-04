@@ -25,7 +25,7 @@
                 </p>
             </div>
 
-            <div class="mt-4 sm:mt-0 flex space-x-2">
+            <div class="mt-4 sm:mt-0 flex flex-wrap items-center gap-2">
                 <a href="{{ route('proyectos.index') }}"
                     class="px-3.5 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
                     &larr; Volver a la Cartera
@@ -33,10 +33,30 @@
 
                 @can('update', $proyecto)
                     <a href="{{ route('proyectos.edit', $proyecto) }}"
-                        class="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
                         Editar Proyecto
                     </a>
                 @endcan
+
+                @if($proyecto->estado !== 'Cerrado')
+                    @can('cerrar', $proyecto)
+                        <form method="POST" action="{{ route('proyectos.cerrar', $proyecto) }}" class="inline"
+                            onsubmit="return confirm('¿Confirmar el cierre del proyecto? La Regla R3 exige que el 100% de los hitos de línea base estén concluidos.');">
+                            @csrf
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                                Cerrar Proyecto
+                            </button>
+                        </form>
+                    @endcan
+                @else
+                    @can('reabrir', $proyecto)
+                        <button type="button" onclick="document.getElementById('modalReabrir').classList.remove('hidden')"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                            Reabrir Proyecto
+                        </button>
+                    @endcan
+                @endif
             </div>
         </div>
 
@@ -122,9 +142,19 @@
                 <h2 class="text-base font-bold text-slate-900">Hitos del Proyecto</h2>
                 <p class="text-xs text-slate-500">Línea base y seguimiento de entregables</p>
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 bg-white border border-slate-200 rounded-md text-slate-700">
-                Total: {{ $proyecto->hitos->count() }}
-            </span>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs font-semibold px-2.5 py-1 bg-white border border-slate-200 rounded-md text-slate-700">
+                    Total: {{ $proyecto->hitos->count() }}
+                </span>
+                @if($proyecto->estado !== 'Cerrado')
+                    @can('create', [App\Models\Hito::class, $proyecto])
+                        <a href="{{ route('proyectos.hitos.create', $proyecto) }}"
+                            class="px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-md text-xs font-medium transition shadow-sm">
+                            + Nuevo Hito
+                        </a>
+                    @endcan
+                @endif
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-xs">
@@ -136,6 +166,7 @@
                         <th class="px-4 py-3 text-center">Fecha Cierre</th>
                         <th class="px-4 py-3 text-left">Evidencia / Entregable</th>
                         <th class="px-4 py-3 text-center">Estado</th>
+                        <th class="px-4 py-3 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -173,10 +204,32 @@
                                     <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">Pendiente</span>
                                 @endif
                             </td>
+                            <td class="px-4 py-3 text-center whitespace-nowrap space-x-2">
+                                @if($proyecto->estado !== 'Cerrado')
+                                    @can('update', $hito)
+                                        <a href="{{ route('hitos.edit', $hito) }}"
+                                            class="text-xs font-semibold text-blue-900 hover:underline">
+                                            Editar / Cerrar
+                                        </a>
+                                    @endcan
+                                    @can('delete', $hito)
+                                        <form method="POST" action="{{ route('hitos.destroy', $hito) }}" class="inline"
+                                            onsubmit="return confirm('¿Está seguro de eliminar este hito?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs font-semibold text-red-600 hover:underline">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    @endcan
+                                @else
+                                    <span class="text-slate-400 text-[11px] italic">Bloqueado por cierre</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">
                                 No hay hitos registrados para este proyecto.
                             </td>
                         </tr>
@@ -241,6 +294,44 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Modal de Reapertura de Proyecto (Requiere Motivo Obligatorio) -->
+<div id="modalReabrir" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Reabrir Proyecto PGD {{ $proyecto->codigo_pgd }}</h3>
+            <button type="button" onclick="document.getElementById('modalReabrir').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed">
+            La reapertura cambia el estado de <strong>Cerrado</strong> a <strong>En curso</strong>. Conforme al contrato técnico y la <strong>Regla R3</strong>, es estrictamente obligatorio justificar el motivo para el registro auditable en la tabla <code class="bg-slate-100 px-1 py-0.5 rounded text-blue-900">bitacora_motivo</code>.
+        </p>
+
+        <form method="POST" action="{{ route('proyectos.reabrir', $proyecto) }}" class="space-y-4">
+            @csrf
+            <div>
+                <label for="motivo" class="block text-xs font-semibold uppercase text-slate-700 mb-1">
+                    Motivo Justificativo de la Reapertura *
+                </label>
+                <textarea name="motivo" id="motivo" rows="3" required minlength="5" maxlength="255"
+                    placeholder="Especifique la resolución, acta de comité o requerimiento técnico que sustenta la reapertura..."
+                    class="w-full text-xs border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:ring-blue-600 focus:border-blue-600"></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modalReabrir').classList.add('hidden')"
+                    class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                    Confirmar Reapertura
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

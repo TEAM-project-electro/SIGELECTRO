@@ -10,7 +10,12 @@ class MuestraProcedenciaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Asegurar que la base tenga la muestra canónica sembrada
+        // Asegurar que la base tenga exclusivamente la muestra canónica sembrada
+        DB::connection('mysql')->table('hito')
+            ->where('descripcion', 'like', 'Recepción y homologación%')
+            ->orWhere('descripcion', 'like', 'Mantenimiento preventivo adicional%')
+            ->orWhere('descripcion', 'like', 'Hito temporal para prueba%')
+            ->delete();
         $this->seed();
     }
 

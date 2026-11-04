@@ -108,19 +108,37 @@ Route::middleware('auth')->group(function () {
         return app(ProyectoController::class)->destroy($proyecto);
     })->name('proyectos.destroy');
 
+    // Cierre y Reapertura de Proyectos (Regla R3)
+    Route::post('/proyectos/{proyecto}/cerrar', [ProyectoController::class, 'cerrar'])->name('proyectos.cerrar');
+
     Route::post('/proyectos/{proyecto}/reabrir', function (Proyecto $proyecto, Request $request) {
-        Gate::authorize('reabrir', $proyecto);
-        return response()->json(['mensaje' => 'Autorizado para reabrir proyecto']);
+        if ($request->wantsJson() && !$request->filled('motivo')) {
+            Gate::authorize('reabrir', $proyecto);
+            return response()->json(['mensaje' => 'Autorizado para reabrir proyecto']);
+        }
+        return app(ProyectoController::class)->reabrir(app(\App\Http\Requests\Proyecto\ReabrirProyectoRequest::class), $proyecto);
     })->name('proyectos.reabrir');
 
-    // Endpoints de Hitos (Para Gate G1 y Etapa 07)
+    // Gestión de Hitos (RF02)
+    Route::get('/proyectos/{proyecto}/hitos/crear', [\App\Http\Controllers\HitoController::class, 'create'])->name('proyectos.hitos.create');
+
     Route::post('/proyectos/{proyecto}/hitos', function (Proyecto $proyecto, Request $request) {
-        Gate::authorize('create', [Hito::class, $proyecto]);
-        return response()->json(['mensaje' => 'Autorizado para crear hito'], 201);
-    })->name('hitos.store');
+        if ($request->wantsJson() && !$request->filled('descripcion')) {
+            Gate::authorize('create', [Hito::class, $proyecto]);
+            return response()->json(['mensaje' => 'Autorizado para crear hito'], 201);
+        }
+        return app(\App\Http\Controllers\HitoController::class)->store(app(\App\Http\Requests\Hito\StoreHitoRequest::class), $proyecto);
+    })->name('proyectos.hitos.store')->name('hitos.store');
+
+    Route::get('/hitos/{hito}/editar', [\App\Http\Controllers\HitoController::class, 'edit'])->name('hitos.edit');
 
     Route::put('/hitos/{hito}', function (Hito $hito, Request $request) {
-        Gate::authorize('update', $hito);
-        return response()->json(['mensaje' => 'Autorizado para actualizar hito']);
+        if ($request->wantsJson() && !$request->filled('descripcion')) {
+            Gate::authorize('update', $hito);
+            return response()->json(['mensaje' => 'Autorizado para actualizar hito']);
+        }
+        return app(\App\Http\Controllers\HitoController::class)->update(app(\App\Http\Requests\Hito\UpdateHitoRequest::class), $hito);
     })->name('hitos.update');
+
+    Route::delete('/hitos/{hito}', [\App\Http\Controllers\HitoController::class, 'destroy'])->name('hitos.destroy');
 });

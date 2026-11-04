@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Proyecto\CerrarProyectoRequest;
+use App\Http\Requests\Proyecto\ReabrirProyectoRequest;
 use App\Http\Requests\Proyecto\StoreProyectoRequest;
 use App\Http\Requests\Proyecto\UpdateProyectoRequest;
 use App\Models\ObjetivoGd;
@@ -214,5 +216,71 @@ class ProyectoController extends Controller
 
         return redirect()->route('proyectos.index')
             ->with('success', "Proyecto {$codigoPgd} eliminado correctamente.");
+    }
+
+    /**
+     * Realiza el cierre formal del proyecto verificando la Regla R3.
+     */
+    public function cerrar(CerrarProyectoRequest $request, Proyecto $proyecto): mixed
+    {
+        $idResponsable = Auth::id();
+        $motivo = "Cierre formal de proyecto PGD {$proyecto->codigo_pgd}";
+
+        try {
+            DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update([
+                        'estado' => 'Cerrado',
+                        'fecha_actualizacion' => now(),
+                    ]);
+            }, $motivo);
+        } catch (QueryException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $e->getMessage()], 422);
+            }
+            return redirect()->route('proyectos.show', $proyecto)
+                ->with('error', 'No se pudo cerrar el proyecto: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['mensaje' => 'Proyecto cerrado exitosamente']);
+        }
+
+        return redirect()->route('proyectos.show', $proyecto)
+            ->with('success', "El proyecto {$proyecto->codigo_pgd} ha sido cerrado formalmente tras verificar el 100% de hitos de línea base concluidos.");
+    }
+
+    /**
+     * Reabre un proyecto cerrado requiriendo motivo obligatorio (Solo Administrador).
+     */
+    public function reabrir(ReabrirProyectoRequest $request, Proyecto $proyecto): mixed
+    {
+        $idResponsable = Auth::id();
+        $motivo = $request->motivo;
+
+        try {
+            DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
+                DB::connection('escritor')->table('proyecto')
+                    ->where('id_proyecto', $proyecto->id_proyecto)
+                    ->update([
+                        'estado' => 'En curso',
+                        'fecha_actualizacion' => now(),
+                    ]);
+            }, $motivo);
+        } catch (QueryException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $e->getMessage()], 422);
+            }
+            return redirect()->route('proyectos.show', $proyecto)
+                ->with('error', 'Error al reabrir el proyecto: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['mensaje' => 'Proyecto reabierto exitosamente']);
+        }
+
+        return redirect()->route('proyectos.show', $proyecto)
+            ->with('success', "El proyecto {$proyecto->codigo_pgd} ha sido reabierto exitosamente. Motivo registrado en la bitácora.");
     }
 }
