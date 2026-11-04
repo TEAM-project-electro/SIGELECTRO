@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('tablero');
 
+    // Módulo de Auditoría y Trazabilidad (RF05 - Solo Administrador)
+    Route::get('/auditoria', [\App\Http\Controllers\AuditoriaController::class, 'index'])->name('auditoria.index');
+
     // Catálogo de Objetivos PGD
     Route::get('/objetivos', [ObjetivoGdController::class, 'index'])->name('objetivos.index');
 

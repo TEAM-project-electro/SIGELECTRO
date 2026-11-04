@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\AvancePresupuestal;
+use App\Models\BitacoraCambio;
 use App\Models\Hito;
 use App\Models\ObjetivoGd;
 use App\Models\Proyecto;
 use App\Policies\AvancePresupuestalPolicy;
+use App\Policies\BitacoraCambioPolicy;
 use App\Policies\HitoPolicy;
 use App\Policies\ObjetivoGdPolicy;
 use App\Policies\ProyectoPolicy;
@@ -32,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Hito::class, HitoPolicy::class);
         Gate::policy(AvancePresupuestal::class, AvancePresupuestalPolicy::class);
         Gate::policy(ObjetivoGd::class, ObjetivoGdPolicy::class);
+        Gate::policy(BitacoraCambio::class, BitacoraCambioPolicy::class);
     }
 }

@@ -31,6 +31,9 @@
                 <nav class="hidden md:flex space-x-4 text-sm font-medium">
                     <a href="{{ route('tablero') }}" class="px-3 py-2 rounded-md hover:bg-blue-800 text-white transition">Tablero Gerencial</a>
                     <a href="{{ route('proyectos.index') }}" class="px-3 py-2 rounded-md hover:bg-blue-800 text-blue-100 transition">Cartera de Proyectos</a>
+                    @if(Auth::check() && Auth::user()->esAdmin())
+                        <a href="{{ route('auditoria.index') }}" class="px-3 py-2 rounded-md hover:bg-blue-800 text-blue-100 transition">Auditoría</a>
+                    @endif
                     <a href="{{ route('salud') }}" class="px-3 py-2 rounded-md hover:bg-blue-800 text-blue-100 transition">Diagnóstico Motor</a>
                 </nav>
 
