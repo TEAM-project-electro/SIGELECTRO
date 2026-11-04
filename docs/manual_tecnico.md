@@ -18,7 +18,7 @@ flowchart TD
         PowerBI["Microsoft Power BI Desktop (Conexión CSV / MySQL)"]
     end
 
-    subgraph Aplicacion["Capa de Negocio y Control (Laravel 11.57.1 / PHP 8.3)"]
+    subgraph Aplicacion["Capa de Negocio y Control (Laravel 12.71.0 / PHP 8.3)"]
         Routes["Enrutador Seguro y Rate Limiter (Max 5 login/min)"]
         Policies["Políticas de Autorización (Admin, Resp, Consulta)"]
         Controllers["Controladores Web y API JSON"]
@@ -170,7 +170,7 @@ erDiagram
 - **Restricción de Reapertura:** Exige que la variable de sesión `@motivo_cambio` esté presente; de lo contrario aborta con `SIGNAL SQLSTATE '45000'`. El motivo se persiste en `bitacora_motivo`.
 
 ### Regla R4: Auditoría e Inmutabilidad de Bitácora
-- **Implementación:** Trigger `trg_bitacora_cambio_before_insert` y procedimientos `sp_registrar_cambio`.
+- **Implementación:** Triggers de negocio con `sig_definer` y procedimiento `sp_registrar_cambio`.
 - **Seguridad:** Requiere obligatoriamente `@id_responsable` en la sesión de base de datos.
 - **Inmutabilidad:** La cuenta de aplicación `sig_escritor` tiene revocado expresamente el permiso de `UPDATE` y `DELETE` sobre `bitacora_cambio`.
 
@@ -236,7 +236,7 @@ Cumpliendo con la **Decisión 5** del contrato maestro, el sistema aplica el pri
 | :--- | :--- | :--- | :--- | :--- |
 | `sig_migrador` | `127.0.0.1` | `seguimiento_gd%`, `dw_%` | `ALL PRIVILEGES` | Migraciones Artisan, DDL y respaldos lógicos. |
 | `sig_definer` | `127.0.0.1` | `seguimiento_gd%` | `ALL PRIVILEGES` | Definer seguro de triggers y stored procedures. |
-| `sig_auth` | `127.0.0.1` | `seguimiento_gd` | `SELECT` en `responsable`, `sessions` | Proveedor de autenticación Laravel Auth. |
+| `sig_auth` | `127.0.0.1` | `seguimiento_gd` | `SELECT` de seis columnas de identidad en `responsable` | Proveedor de autenticación Laravel Auth. |
 | `sig_lector` | `127.0.0.1` | `seguimiento_gd` | `SELECT` en todas las tablas y vistas | Consultas de lectura gerencial y catálogos. |
 | `sig_escritor` | `127.0.0.1` | `seguimiento_gd` | `SELECT, INSERT, UPDATE, DELETE` (sin UPDATE/DELETE en `bitacora_cambio`) | Transacciones de negocio y mutaciones. |
 | `sig_etl` | `127.0.0.1` | `dw_seguimiento_gd` | `SELECT, INSERT, UPDATE, DELETE, EXECUTE` | Ejecución del procedimiento `sp_etl_cargar`. |

@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Responsable extends Authenticatable
 {
-    protected $connection = 'auth';
+    protected $connection = 'lector';
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('sin_credenciales', function ($query) {
+            if ($query->getModel()->getConnectionName() !== 'auth') {
+                $query->select('id_responsable', 'usuario', 'activo', 'perfil', 'nombre', 'area');
+            }
+        });
+    }
     protected $table = 'responsable';
     protected $primaryKey = 'id_responsable';
     public $timestamps = false;

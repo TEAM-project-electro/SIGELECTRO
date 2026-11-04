@@ -107,7 +107,7 @@ return new class extends Migration
                 -- 2. Captura de revisión técnica de origen
                 SELECT IFNULL(version, 1) INTO v_rev
                 FROM {$origenDb}.control_revision
-                WHERE id = 1 LIMIT 1;
+                WHERE id = 1 LIMIT 1 FOR UPDATE;
 
                 UPDATE etl_control SET revision_origen = v_rev WHERE id_carga = v_id_carga;
 
@@ -116,7 +116,9 @@ return new class extends Migration
                     LEAST(2023, IFNULL(MIN(YEAR(fecha_reporte)), 2023)),
                     GREATEST(2027, IFNULL(MAX(YEAR(fecha_reporte)), 2027))
                 INTO v_min_anio, v_max_anio
-                FROM {$origenDb}.avance_presupuestal;
+                FROM (SELECT fecha_reporte FROM {$origenDb}.avance_presupuestal
+                      UNION ALL SELECT fecha_prevista FROM {$origenDb}.hito
+                      UNION ALL SELECT fecha_cierre FROM {$origenDb}.hito WHERE fecha_cierre IS NOT NULL) fechas;
 
                 CALL sp_cargar_dim_tiempo(v_min_anio, v_max_anio);
 
@@ -141,7 +143,7 @@ return new class extends Migration
 
                 -- 4.3 dim_proyecto
                 INSERT INTO dim_proyecto (
-                    id_proyecto, codigo_pgd, nombre, monto, rango_monto, anio_inicio, anio_fin, estado_actual, es_activo, fuente
+                    id_proyecto, codigo_pgd, nombre, monto, rango_monto, anio_inicio, anio_fin, estado_actual, es_activo, fuente, id_objetivo, id_responsable
                 )
                 SELECT
                     id_proyecto,
@@ -157,7 +159,7 @@ return new class extends Migration
                     anio_fin,
                     estado,
                     IF(estado IN ('Pendiente', 'En curso'), 1, 0),
-                    fuente
+                    fuente, id_objetivo, id_responsable
                 FROM {$origenDb}.proyecto
                 ON DUPLICATE KEY UPDATE
                     codigo_pgd = VALUES(codigo_pgd),
@@ -168,11 +170,16 @@ return new class extends Migration
                     anio_fin = VALUES(anio_fin),
                     estado_actual = VALUES(estado_actual),
                     es_activo = VALUES(es_activo),
-                    fuente = VALUES(fuente);
+                    fuente = VALUES(fuente), id_objetivo = VALUES(id_objetivo), id_responsable = VALUES(id_responsable);
 
                 -- 5. Carga de Hechos
                 DELETE FROM fact_hito;
                 DELETE FROM fact_avance_proyecto;
+
+                -- Retirar sólo dimensiones desaparecidas, manteniendo las claves de las vigentes.
+                DELETE dp FROM dim_proyecto dp LEFT JOIN {$origenDb}.proyecto p ON p.id_proyecto = dp.id_proyecto WHERE p.id_proyecto IS NULL;
+                DELETE dob FROM dim_objetivo dob LEFT JOIN {$origenDb}.objetivo_gd o ON o.id_objetivo = dob.id_objetivo WHERE o.id_objetivo IS NULL;
+                DELETE dr FROM dim_responsable dr LEFT JOIN {$origenDb}.responsable r ON r.id_responsable = dr.id_responsable WHERE r.id_responsable IS NULL;
 
                 -- 5.1 Carga fact_avance_proyecto
                 INSERT INTO fact_avance_proyecto (
@@ -270,11 +277,7 @@ return new class extends Migration
 
                 SET v_filas_hito = ROW_COUNT();
 
-                COMMIT;
-
-                -- 6. Liberar lock y cerrar exitosamente en etl_control
-                DO RELEASE_LOCK('sig_etl_mutex');
-
+                -- 6. Publicar revisión y estado junto con dimensiones y hechos.
                 UPDATE etl_control
                 SET estado = 'Completado',
                     fecha_fin = NOW(),
@@ -282,6 +285,9 @@ return new class extends Migration
                     filas_hito = v_filas_hito,
                     mensaje = 'Carga ETL completada exitosamente'
                 WHERE id_carga = v_id_carga;
+
+                COMMIT;
+                DO RELEASE_LOCK('sig_etl_mutex');
 
             END;
         ");

@@ -30,7 +30,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Auth::provider('responsable', function ($app, array $config) {
+            return new \App\Auth\ResponsableProvider($app['hash'], $config['model']);
+        });
         Gate::policy(Proyecto::class, ProyectoPolicy::class);
+        Gate::policy(\App\Models\Responsable::class, \App\Policies\ResponsablePolicy::class);
         Gate::policy(Hito::class, HitoPolicy::class);
         Gate::policy(AvancePresupuestal::class, AvancePresupuestalPolicy::class);
         Gate::policy(ObjetivoGd::class, ObjetivoGdPolicy::class);

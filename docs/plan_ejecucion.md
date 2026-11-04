@@ -4,6 +4,8 @@
 
 ## 1. Orden de Etapas y Puertas de Control (Gates)
 
+Actualización 04/11/2026: la tabla siguiente conserva el plan inicial. El estado ejecutado vigente está en [estado_desarrollo.md](estado_desarrollo.md) y [correcciones_auditoria_2026-11-04.md](correcciones_auditoria_2026-11-04.md); el núcleo se encuentra implementado y probado, con Power BI pendiente de ejecución.
+
 | Etapa | Descripción del resultado | Dependencia | Control asociado | Estado |
 | --- | --- | --- | --- | --- |
 | 00 | Inventario de fuentes, derivados contractuales y diagnóstico de entorno | Documentos fuente | Pre-condición | En curso |
@@ -42,4 +44,4 @@
 
 ## 3. Próximo paso exacto
 
-Completar la aceptación de la **Etapa 00** (estado de desarrollo, pruebas ejecutadas, decisiones iniciales y `AGENTS.md`) y luego pasar a la **Etapa 01: especificación y aceptación**.
+El núcleo corregido puede iniciarse con `pwsh -File scripts/arrancar.ps1` desde raíz, sin resembra. La preparación BI permanece pendiente de apertura y conciliación DAX real; seguir `docs/bi/guia_power_bi.md` y registrar resultados observados.

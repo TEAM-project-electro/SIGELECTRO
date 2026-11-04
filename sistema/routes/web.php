@@ -87,9 +87,13 @@ Route::middleware('auth')->group(function () {
 
     // Catálogo de Objetivos PGD
     Route::get('/objetivos', [ObjetivoGdController::class, 'index'])->name('objetivos.index');
+    Route::post('/objetivos', [ObjetivoGdController::class, 'store'])->name('objetivos.store');
+    Route::put('/objetivos/{objetivo}', [ObjetivoGdController::class, 'update'])->name('objetivos.update');
 
     // Administración de Usuarios y Responsables (Solo Administrador)
     Route::get('/usuarios', [\App\Http\Controllers\ResponsableController::class, 'index'])->name('usuarios.index');
+    Route::post('/usuarios', [\App\Http\Controllers\ResponsableController::class, 'store'])->name('usuarios.store');
+    Route::put('/usuarios/{responsable}', [\App\Http\Controllers\ResponsableController::class, 'update'])->name('usuarios.update');
     Route::patch('/usuarios/{responsable}/activo', [\App\Http\Controllers\ResponsableController::class, 'toggleActivo'])->name('usuarios.activo');
 
     // Gestión de Cartera de Proyectos PGD

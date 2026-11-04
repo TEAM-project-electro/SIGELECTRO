@@ -93,6 +93,7 @@ class ProyectoController extends Controller
         $motivo = mb_substr("Creación de proyecto PGD {$request->codigo_pgd}", 0, 200);
 
         $idProyecto = DatabaseTransactionService::run($idResponsable, function () use ($request) {
+            Gate::authorize('create', Proyecto::class);
             return DB::connection('escritor')->table('proyecto')->insertGetId([
                 'codigo_pgd' => $request->codigo_pgd,
                 'nombre' => $request->nombre,
@@ -155,64 +156,29 @@ class ProyectoController extends Controller
      */
     public function update(UpdateProyectoRequest $request, Proyecto $proyecto): mixed
     {
-        // 1. Control de Concurrencia Optimista
-        // Verificamos si la fecha_actualizacion en BD coincide con la esperada
-        $proyectoActual = DB::connection('escritor')->table('proyecto')
-            ->where('id_proyecto', $proyecto->id_proyecto)
-            ->first();
-
-        if (!$proyectoActual) {
-            abort(404, 'Proyecto no encontrado.');
-        }
-
-        // A01: Comprobación estricta en servidor para rol Responsable
-        $user = $request->user();
-        if ($user && $user->esResponsable()) {
-            if ((float) $request->monto !== (float) $proyectoActual->monto ||
-                (int) $request->id_responsable !== (int) $proyectoActual->id_responsable ||
-                (int) $request->id_objetivo !== (int) $proyectoActual->id_objetivo ||
-                (int) $request->anio_inicio !== (int) $proyectoActual->anio_inicio ||
-                (int) $request->anio_fin !== (int) $proyectoActual->anio_fin) {
-                abort(403, 'Acción no autorizada: Solo el Administrador puede modificar presupuesto, asignación de responsable u objetivos del proyecto.');
+        $motivo = trim((string) $request->input('motivo_cambio', ''));
+        DatabaseTransactionService::run(Auth::id(), function ($db) use ($request, $proyecto, $motivo) {
+            DatabaseTransactionService::verificarRevision($request->integer('revision_esperada'));
+            $actual = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+            Gate::authorize('update', $actual);
+            if ($actual->getRawOriginal('fecha_actualizacion') !== $request->fecha_actualizacion_esperada) {
+                throw ValidationException::withMessages(['concurrencia' => 'El proyecto cambió. Recargue antes de guardar.']);
             }
-        }
-
-        if ($proyectoActual->fecha_actualizacion !== $request->fecha_actualizacion_esperada) {
-            throw ValidationException::withMessages([
-                'concurrencia' => 'Conflicto de concurrencia: El proyecto fue modificado por otro usuario mientras lo editabas. Por favor recarga la página para verificar los últimos cambios.',
+            if ($request->user()->esResponsable()) {
+                foreach (['monto', 'id_responsable', 'id_objetivo', 'anio_inicio', 'anio_fin'] as $campo) {
+                    abort_if((string) $actual->$campo != (string) $request->input($campo), 403, 'Campo reservado al Administrador.');
+                }
+            }
+            if ((float) $request->monto < (float) $actual->monto && mb_strlen($motivo) < 5) {
+                throw ValidationException::withMessages(['motivo_cambio' => 'La reducción requiere justificación.']);
+            }
+            $db->table('proyecto')->where('id_proyecto', $actual->id_proyecto)->update([
+                'nombre'=>$request->nombre, 'monto'=>$request->monto, 'anio_inicio'=>$request->anio_inicio,
+                'anio_fin'=>$request->anio_fin, 'id_objetivo'=>$request->id_objetivo,
+                'id_responsable'=>$request->id_responsable, 'fuente'=>$request->fuente ?? $actual->fuente,
+                'fecha_actualizacion'=>now(),
             ]);
-        }
-
-        $idResponsable = Auth::id();
-        $esReduccionMonto = (float) $request->monto < (float) $proyectoActual->monto;
-
-        if ($esReduccionMonto) {
-            $motivo = mb_substr(trim((string) $request->motivo_cambio), 0, 200);
-            if (mb_strlen($motivo) < 5) {
-                throw ValidationException::withMessages([
-                    'motivo_cambio' => 'Al reducir el presupuesto del proyecto es obligatorio registrar una justificación detallada de al menos 5 caracteres.',
-                ]);
-            }
-        } else {
-            $motivo = $request->filled('motivo_cambio')
-                ? mb_substr(trim((string) $request->motivo_cambio), 0, 200)
-                : mb_substr("Actualización de datos del proyecto PGD {$proyecto->codigo_pgd}", 0, 200);
-        }
-
-        DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
-            DB::connection('escritor')->table('proyecto')
-                ->where('id_proyecto', $proyecto->id_proyecto)
-                ->update([
-                    'nombre' => $request->nombre,
-                    'monto' => $request->monto,
-                    'anio_inicio' => $request->anio_inicio,
-                    'anio_fin' => $request->anio_fin,
-                    'id_objetivo' => $request->id_objetivo,
-                    'id_responsable' => $request->id_responsable,
-                    'fuente' => $request->fuente ?? 'Cartera PGD 2023 a 2026',
-                    'fecha_actualizacion' => now(),
-                ]);
-        }, $motivo);
+        }, $motivo !== '' ? $motivo : 'Actualización de proyecto', proyectosIds: [$proyecto->id_proyecto]);
 
         if ($request->wantsJson()) {
             $proyectoActualizado = Proyecto::with(['objetivo', 'responsable'])->find($proyecto->id_proyecto);
@@ -236,13 +202,14 @@ class ProyectoController extends Controller
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
+                Gate::authorize('delete', Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto));
                 DB::connection('escritor')->table('proyecto')
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->delete();
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             // Manejo de restricción de clave foránea (ON DELETE RESTRICT)
-            if (str_contains($e->getMessage(), '1451') || str_contains($e->getMessage(), 'foreign key constraint fails')) {
+            if ((int) ($e->errorInfo[1] ?? 0) === 1451) {
                 if (request()->wantsJson()) {
                     return response()->json(['error' => "No se puede eliminar el proyecto {$codigoPgd} porque tiene hitos o avances presupuestales asociados. Debe desvincularlos primero."], 422);
                 }
@@ -270,19 +237,20 @@ class ProyectoController extends Controller
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
+                Gate::authorize('cerrar', Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto));
                 DB::connection('escritor')->table('proyecto')
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->update([
                         'estado' => 'Cerrado',
                         'fecha_actualizacion' => now(),
                     ]);
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => $e->getMessage()], 422);
+                return response()->json(['error' => \App\Services\ErroresNegocio::mensaje($e)], 422);
             }
             return redirect()->route('proyectos.show', $proyecto)
-                ->with('error', 'No se pudo cerrar el proyecto: ' . $e->getMessage());
+                ->with('error', 'No se pudo cerrar el proyecto: ' . \App\Services\ErroresNegocio::mensaje($e));
         }
 
         if ($request->wantsJson()) {
@@ -303,19 +271,20 @@ class ProyectoController extends Controller
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
+                Gate::authorize('reabrir', Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto));
                 DB::connection('escritor')->table('proyecto')
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->update([
                         'estado' => 'En curso',
                         'fecha_actualizacion' => now(),
                     ]);
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => $e->getMessage()], 422);
+                return response()->json(['error' => \App\Services\ErroresNegocio::mensaje($e)], 422);
             }
             return redirect()->route('proyectos.show', $proyecto)
-                ->with('error', 'Error al reabrir el proyecto: ' . $e->getMessage());
+                ->with('error', 'Error al reabrir el proyecto: ' . \App\Services\ErroresNegocio::mensaje($e));
         }
 
         if ($request->wantsJson()) {

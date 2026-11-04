@@ -109,7 +109,7 @@ if ($envContent -notmatch "APP_KEY=base64:") {
 
 # 5. Migraciones y Seeders
 Write-Host "5. Ejecutando migraciones y siembra canonica..." -ForegroundColor Yellow
-& php artisan migrate --seed --force
+& php artisan migrate --database=mysql --seed --force
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Fallo la ejecucion de migraciones o siembra."
     exit 1

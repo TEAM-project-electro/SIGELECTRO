@@ -13,9 +13,12 @@ abstract class TestCase extends BaseTestCase
 
         // Salvaguarda obligatoria de aislamiento (Hallazgo A02):
         // Garantizar que toda prueba se ejecute exclusivamente contra esquemas descartables (*_test o *_restaurada).
-        $activeDb = config('database.connections.lector.database') ?: config('database.connections.mysql.database');
-        if (!str_ends_with($activeDb, '_test') && !str_ends_with($activeDb, '_restaurada')) {
-            throw new RuntimeException("PELIGRO DE AISLAMIENTO (A02): Los tests intentaron ejecutarse contra '{$activeDb}'. Las pruebas deben ejecutarse exclusivamente sobre bases de prueba terminadas en '_test' o '_restaurada'.");
+        foreach (['mysql','lector','auth','escritor','dw_migrador','dw_etl','dw_lector'] as $nombre) {
+            $db = \Illuminate\Support\Facades\DB::connection($nombre);
+            $activeDb = $db->getDatabaseName();
+            if (!str_ends_with($activeDb, '_test') || $db->selectOne('SELECT DATABASE() d')->d !== $activeDb) {
+                throw new RuntimeException("PELIGRO DE AISLAMIENTO: {$nombre} no apunta al esquema de prueba esperado.");
+            }
         }
     }
 }

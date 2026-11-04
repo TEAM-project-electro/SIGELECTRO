@@ -15,6 +15,7 @@ class UpdateHitoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'revision_esperada' => ['required', 'integer', 'min:1'],
             'descripcion' => ['required', 'string', 'max:150'],
             'fecha_prevista' => ['required', 'date'],
             'fecha_cierre' => ['nullable', 'date'],

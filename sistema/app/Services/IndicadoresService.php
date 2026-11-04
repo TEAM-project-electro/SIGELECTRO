@@ -103,6 +103,16 @@ class IndicadoresService
             }
         }
 
+        $revision = DB::connection('lector')->table('control_revision')->where('id', 1)->value('version') ?? 1;
+        return $this->evaluarDatos($proyectosRaw, $hitosPorProyecto, $avancesPorProyecto, $filtros, $fechaCorteParam, (int) $revision);
+        });
+    }
+
+    /** Calcula sin consultar bases, usando el snapshot completo del origen elegido. */
+    public function evaluarDatos($proyectosRaw, array $hitosPorProyecto, array $avancesPorProyecto, array $filtros, ?string $fechaCorteParam, int $revision): array
+    {
+        $modo = $filtros['modo'] ?? self::MODO_CORTE_COMUN;
+        $totalProyectos = $proyectosRaw->count();
         // 3. Procesar proyecto por proyecto según la modalidad temporal
         $proyectosCalculados = [];
         $fechasEfectivas = [];
@@ -270,7 +280,7 @@ class IndicadoresService
                 'responsable' => [
                     'id_responsable' => $p->id_responsable,
                     'nombre' => $p->responsable_nombre,
-                    'usuario' => $p->responsable_usuario,
+                    'usuario' => ($p->responsable_usuario ?? null),
                 ],
                 'fecha_evaluacion' => $fechaEval,
                 'hitos' => [
@@ -342,7 +352,7 @@ class IndicadoresService
         }
 
         // Revisión de datos técnica bajo el mismo snapshot de lectura
-        $revision = DB::connection('lector')->table('control_revision')->where('id', 1)->value('version') ?? 1;
+
 
         $fechaMinReporte = !empty($fechasEfectivas) ? min($fechasEfectivas) : null;
         $fechaMaxReporte = !empty($fechasEfectivas) ? max($fechasEfectivas) : null;
@@ -403,6 +413,5 @@ class IndicadoresService
             ],
             'proyectos' => $proyectosCalculados,
         ];
-        });
     }
 }

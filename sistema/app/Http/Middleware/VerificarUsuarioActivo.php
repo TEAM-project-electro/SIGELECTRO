@@ -20,7 +20,7 @@ class VerificarUsuarioActivo
             $user = Auth::user();
 
             // Consultar el estado activo en tiempo real mediante la conexión auth
-            $activo = DB::connection('auth')
+            $activo = DB::connection('lector')
                 ->table('responsable')
                 ->where('id_responsable', $user->id_responsable)
                 ->value('activo');

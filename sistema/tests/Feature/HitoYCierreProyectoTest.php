@@ -147,6 +147,7 @@ class HitoYCierreProyectoTest extends TestCase
         $this->actingAs($ana);
 
         $response = $this->put("/hitos/{$hito->id_hito}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'descripcion' => $hito->descripcion . ' - Concluido',
             'fecha_prevista' => $hito->fecha_prevista,
             'fecha_cierre' => '2024-10-15',

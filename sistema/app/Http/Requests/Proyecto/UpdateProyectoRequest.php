@@ -15,6 +15,7 @@ class UpdateProyectoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'revision_esperada' => ['required', 'integer', 'min:1'],
             'nombre' => ['required', 'string', 'max:150'],
             'monto' => ['required', 'numeric', 'min:0'],
             'anio_inicio' => ['required', 'integer', 'min:2020', 'max:2035'],

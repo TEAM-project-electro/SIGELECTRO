@@ -1,5 +1,15 @@
 # Manual de Usuario — SIG Electrocentro S. A.
 
+## Actualización operativa del 04/11/2026
+
+El Administrador dispone de **Usuarios** y **Objetivos** en la navegación. Puede crear/editar usuarios, sus perfiles y credenciales; la clave nueva es opcional al editar. Desactivar exige una justificación de 5 a 200 caracteres. No se permite desactivar ni degradar al último Administrador activo. El usuario desactivado pierde acceso en su siguiente petición.
+
+La edición de proyecto, hito y corte conserva la revisión que estaba abierta. Si otra operación la cambia, se rechaza el guardado: vuelva a cargar y revise los datos antes de reenviar. Nunca se sobrescribe el cambio ajeno silenciosamente. La revisión es global; puede ser necesario recargar aunque el cambio afecte otro proyecto.
+
+El origen **DW** respeta los mismos filtros y fechas que el operativo. En corte común, carecer de un corte financiero exacto excluye solo las finanzas, sin ocultar el proyecto ni sus hitos. En último reporte se utiliza el máximo reporte de cada proyecto que no supera la fecha límite. Revise la advertencia de DW desactualizado y ejecute ETL con perfil Administrador antes de comparar.
+
+Power BI sigue preparado parcialmente; las cifras SQL esperadas no son evidencia de ejecución DAX.
+
 **Sistema de Información Gerencial para el Seguimiento de la Cartera de Gobierno Digital**  
 **Organización:** Electrocentro S. A. (Cartera PGD 2023–2026, 10 proyectos por S/ 8,623,550.00)  
 **Fecha de Publicación:** 4 de noviembre de 2026  

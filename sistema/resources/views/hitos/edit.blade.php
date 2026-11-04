@@ -1,30 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
-    <div class="sm:flex sm:items-center sm:justify-between">
+<div class="max-w-2xl mx-auto space-y-6" x-data="{ submitting: false }">
+
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between">
         <div>
-            <div class="flex items-center space-x-2">
-                <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-brand-50 text-brand-800 border border-brand-200">
                     PGD {{ $proyecto->codigo_pgd }}
                 </span>
-                <h1 class="text-2xl font-bold text-slate-900">Editar Hito</h1>
+                <span class="text-xs text-slate-400">&bull; Actualización de Hito</span>
             </div>
-            <p class="text-sm text-slate-500 mt-1">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Editar / Cerrar Hito
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
                 Proyecto: <span class="font-semibold text-slate-700">{{ $proyecto->nombre }}</span>
             </p>
         </div>
-        <div class="mt-4 sm:mt-0">
-            <a href="{{ route('proyectos.show', $proyecto) }}" class="text-sm font-medium text-blue-900 hover:underline">
-                &larr; Volver al proyecto
-            </a>
-        </div>
+        <a href="{{ route('proyectos.show', $proyecto) }}"
+           class="px-3.5 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 shadow-xs transition">
+            &larr; Volver al Proyecto
+        </a>
     </div>
 
+    <!-- Errores de Validación -->
     @if ($errors->any())
-        <div class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-r text-rose-800 text-sm">
-            <p class="font-bold">Corrige los errores antes de continuar:</p>
-            <ul class="list-disc list-inside mt-1 text-xs">
+        <div class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-r-xl text-rose-900 text-xs shadow-xs" role="alert">
+            <p class="font-bold flex items-center mb-1">
+                <svg class="w-4 h-4 mr-1.5 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Corrige los siguientes campos:
+            </p>
+            <ul class="list-disc list-inside space-y-0.5 text-rose-800 pl-1">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -32,70 +42,90 @@
         </div>
     @endif
 
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <form method="POST" action="{{ route('hitos.update', $hito) }}" class="space-y-5">
+    <div class="bg-white p-6 sm:p-7 rounded-xl border border-slate-200/90 shadow-xs">
+        <form method="POST" action="{{ route('hitos.update', $hito) }}" class="space-y-5" @submit="submitting = true">
             @csrf
             @method('PUT')
+            <input type="hidden" name="revision_esperada" value="{{ old('revision_esperada', \Illuminate\Support\Facades\DB::table('control_revision')->where('id', 1)->value('version')) }}">
 
             <div>
-                <label for="descripcion" class="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                    Descripción del Hito *
+                <label for="descripcion" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Descripción del Hito <span class="text-rose-500">*</span>
                 </label>
-                <input type="text" name="descripcion" id="descripcion" value="{{ old('descripcion', $hito->descripcion) }}" required
-                    class="w-full text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-blue-600 focus:border-blue-600">
+                <input type="text" name="descripcion" id="descripcion" value="{{ old('descripcion', $hito->descripcion) }}" required maxlength="150"
+                    class="w-full text-xs sm:text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-brand-500 focus:border-brand-500">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="fecha_prevista" class="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                        Fecha Prevista *
+                    <label for="fecha_prevista" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Fecha Prevista <span class="text-rose-500">*</span>
                     </label>
                     <input type="date" name="fecha_prevista" id="fecha_prevista"
                         value="{{ old('fecha_prevista', $hito->fecha_prevista) }}" required
-                        class="w-full text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-blue-600 focus:border-blue-600">
+                        class="w-full text-xs sm:text-sm font-mono border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-brand-500 focus:border-brand-500">
                 </div>
 
                 <div>
-                    <label for="fecha_cierre" class="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                        Fecha de Cierre (Registrar para dar por concluido)
+                    <label for="fecha_cierre" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Fecha Real de Cierre
                     </label>
                     <input type="date" name="fecha_cierre" id="fecha_cierre"
                         value="{{ old('fecha_cierre', $hito->fecha_cierre) }}"
-                        class="w-full text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-blue-600 focus:border-blue-600">
+                        class="w-full text-xs sm:text-sm font-mono border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-brand-500 focus:border-brand-500">
+                    <p class="text-[11px] text-slate-400 mt-1">Registrar para dar el hito por formalmente concluido.</p>
                 </div>
             </div>
 
             <div>
-                <label for="evidencia" class="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                    Evidencia o Entregable
+                <label for="evidencia" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Evidencia o Referencia Documental
                 </label>
-                <input type="text" name="evidencia" id="evidencia" value="{{ old('evidencia', $hito->evidencia) }}"
-                    placeholder="Referencia de conformidad o enlace a documento"
-                    class="w-full text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-blue-600 focus:border-blue-600">
+                <input type="text" name="evidencia" id="evidencia" value="{{ old('evidencia', $hito->evidencia) }}" maxlength="200"
+                    placeholder="Referencia de conformidad o número de informe de recepción"
+                    class="w-full text-xs sm:text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-brand-500 focus:border-brand-500">
             </div>
 
-            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <label class="flex items-start space-x-3 cursor-pointer">
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <input type="hidden" name="en_linea_base" value="0">
+                <label class="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" name="en_linea_base" value="1"
                         {{ old('en_linea_base', $hito->en_linea_base) ? 'checked' : '' }}
-                        class="w-4 h-4 text-blue-600 border-slate-300 rounded mt-0.5 focus:ring-blue-500">
+                        class="w-4 h-4 text-brand-700 border-slate-300 rounded mt-0.5 focus:ring-brand-500">
                     <div>
-                        <span class="text-sm font-bold text-slate-800">Pertenece a la Línea Base del Proyecto</span>
-                        <p class="text-xs text-slate-500 mt-0.5">
+                        <span class="text-xs font-bold text-slate-900 block">Pertenece a la Línea Base del Proyecto</span>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
                             Si está marcado, se computa dentro del cálculo oficial de porcentaje de avance y auditoría de cierre R3.
                         </p>
                     </div>
                 </label>
             </div>
 
-            <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
+            <div>
+                <label for="motivo_cambio" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Motivo de la Modificación
+                </label>
+                <input type="text" name="motivo_cambio" id="motivo_cambio" value="{{ old('motivo_cambio') }}" maxlength="200"
+                    placeholder="Obligatorio (mínimo 5 caracteres) si modifica la pertenencia a la línea base..."
+                    class="w-full text-xs sm:text-sm border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white focus:ring-brand-500 focus:border-brand-500">
+                <p class="text-[11px] text-slate-400 mt-1">Se registrará en la bitácora técnica de motivos R4.</p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                 <a href="{{ route('proyectos.show', $proyecto) }}"
-                    class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                     Cancelar
                 </a>
-                <button type="submit"
-                    class="px-5 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-sm font-medium transition shadow">
-                    Actualizar Hito
+                <button type="submit" :disabled="submitting"
+                    class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition shadow-xs disabled:opacity-75">
+                    <svg x-show="!submitting" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <svg x-show="submitting" x-cloak class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span x-text="submitting ? 'Guardando...' : 'Actualizar Hito'">Actualizar Hito</span>
                 </button>
             </div>
         </form>

@@ -1,27 +1,27 @@
 ﻿id_hecho_hito,sk_proyecto,sk_objetivo,sk_responsable,sk_tiempo_previsto,sk_tiempo_cierre,id_hito,id_proyecto,descripcion,en_linea_base,concluido,vencido,dias_desfase,concluido_a_tiempo,tiene_evidencia,estado_hito
-807,1,1,1,20230315,20230315,2,1,"Adquisicion de equipamiento de seguridad",1,1,0,0,1,1,Concluido
-808,1,1,1,20230815,,1,1,"Hito dependiente",1,0,1,,0,0,Vencido
-809,1,1,1,20240915,,3,1,"Instalacion y configuracion en sede central",1,0,1,,0,0,Vencido
-810,2,5,1,20230430,20230428,4,2,"Terminos de referencia y contratacion",1,1,0,-2,1,1,Concluido
-811,2,5,1,20240531,20240530,5,2,"Pase a produccion Sprint 1 a 6",1,1,0,-1,1,1,Concluido
-812,2,5,1,20251130,,6,2,"Entrega de paquetes de automatizacion FONAFE",1,0,0,,0,0,"En plazo"
-813,3,4,3,20230830,20230825,7,3,"Estudio de ingenieria y tendido en subestaciones",1,1,0,-5,1,1,Concluido
-814,3,4,3,20240215,,8,3,"Prueba piloto de enlace redundante microondas",0,0,0,,0,0,Vencido
-815,4,6,3,20230630,20230625,9,4,"Definicion de alcance y Business Blueprint",1,1,0,-5,1,1,Concluido
-816,4,6,3,20231215,20231210,10,4,"Configuracion base del modulo financiero FICO",1,1,0,-5,1,1,Concluido
-817,4,6,3,20240830,,11,4,"Migracion de datos historicos maestros",1,0,1,,0,0,Vencido
-818,4,6,3,20250630,,12,4,"Capacitacion a usuarios clave de operaciones",1,0,0,,0,0,"En plazo"
-819,5,3,1,20230515,20230510,13,5,"Actualizacion de resolucion de conformacion de comite",1,1,0,-5,1,1,Concluido
-820,5,3,1,20231130,20231128,14,5,"Aprobacion del reglamento interno de gobernanza digital",1,1,0,-2,1,1,Concluido
-821,6,2,1,20230731,20230720,15,6,"Diagnostico de brechas digitales del personal",1,1,0,-11,1,1,Concluido
-822,6,2,1,20240430,20240425,16,6,"Ejecucion de talleres de herramientas colaborativas",1,1,0,-5,1,1,Concluido
-823,6,2,1,20251031,,17,6,"Programa de certificacion en gestion agil y datos",1,0,0,,0,0,"En plazo"
-824,7,4,3,20230930,20230915,18,7,"Plan de direccionamiento y evaluacion de routers de borde",1,1,0,-15,1,1,Concluido
-825,7,4,3,20240331,20240328,19,7,"Habilitacion de dual stack en servidores de servicios web",1,1,0,-3,1,1,Concluido
-826,7,4,3,20250531,,20,7,"Migracion total de subredes zonales Huancayo y Tarma",1,0,0,,0,0,"En plazo"
-827,8,5,1,20230630,20230615,21,8,"Identificacion y clasificacion de datasets institucionales",1,1,0,-15,1,1,Concluido
-828,8,5,1,20231031,20231025,22,8,"Publicacion en plataforma nacional de datos abiertos",1,1,0,-6,1,1,Concluido
-829,9,1,1,20230531,20230520,23,9,"Analisis de riesgos de seguridad de informacion (SoA)",1,1,0,-11,1,1,Concluido
-830,9,1,1,20231215,20231212,24,9,"Auditoria externa y obtencion de certificacion ISO 27001",1,1,0,-3,1,1,Concluido
-831,10,5,1,20230831,20230820,25,10,"Desarrollo e integracion con sistema de tramite documentario",1,1,0,-11,1,1,Concluido
-832,10,5,1,20240531,,26,10,"Implementacion de casilla electronica y notificaciones",1,0,1,,0,0,Vencido
+1422,1,1,1,20230315,20230315,2,1,"Adquisicion de equipamiento de seguridad",1,1,0,0,1,1,Concluido
+1423,1,1,1,20230815,20241001,1,1,"Hito dependiente - Concluido",1,1,1,413,0,1,Concluido
+1424,1,1,1,20240915,,3,1,"Instalacion y configuracion en sede central",1,0,1,,0,0,Vencido
+1425,2,5,1,20230430,20230428,4,2,"Terminos de referencia y contratacion",1,1,0,-2,1,1,Concluido
+1426,2,5,1,20240531,20240530,5,2,"Pase a produccion Sprint 1 a 6",1,1,0,-1,1,1,Concluido
+1427,2,5,1,20251130,,6,2,"Entrega de paquetes de automatizacion FONAFE",1,0,0,,0,0,"En plazo"
+1428,3,4,3,20230830,20230825,7,3,"Estudio de ingenieria y tendido en subestaciones",1,1,0,-5,1,1,Concluido
+1429,3,4,3,20240215,,8,3,"Prueba piloto de enlace redundante microondas",0,0,0,,0,0,Vencido
+1430,4,6,3,20230630,20230625,9,4,"Definicion de alcance y Business Blueprint",1,1,0,-5,1,1,Concluido
+1431,4,6,3,20231215,20231210,10,4,"Configuracion base del modulo financiero FICO",1,1,0,-5,1,1,Concluido
+1432,4,6,3,20240830,,11,4,"Migracion de datos historicos maestros",1,0,1,,0,0,Vencido
+1433,4,6,3,20250630,,12,4,"Capacitacion a usuarios clave de operaciones",1,0,0,,0,0,"En plazo"
+1434,5,3,1,20230515,20230510,13,5,"Actualizacion de resolucion de conformacion de comite",1,1,0,-5,1,1,Concluido
+1435,5,3,1,20231130,20231128,14,5,"Aprobacion del reglamento interno de gobernanza digital",1,1,0,-2,1,1,Concluido
+1436,6,2,1,20230731,20230720,15,6,"Diagnostico de brechas digitales del personal",1,1,0,-11,1,1,Concluido
+1437,6,2,1,20240430,20240425,16,6,"Ejecucion de talleres de herramientas colaborativas",1,1,0,-5,1,1,Concluido
+1438,6,2,1,20251031,,17,6,"Programa de certificacion en gestion agil y datos",1,0,0,,0,0,"En plazo"
+1439,7,4,3,20230930,20230915,18,7,"Plan de direccionamiento y evaluacion de routers de borde",1,1,0,-15,1,1,Concluido
+1440,7,4,3,20240331,20240328,19,7,"Habilitacion de dual stack en servidores de servicios web",1,1,0,-3,1,1,Concluido
+1441,7,4,3,20250531,,20,7,"Migracion total de subredes zonales Huancayo y Tarma",1,0,0,,0,0,"En plazo"
+1442,8,5,1,20230630,20230615,21,8,"Identificacion y clasificacion de datasets institucionales",1,1,0,-15,1,1,Concluido
+1443,8,5,1,20231031,20231025,22,8,"Publicacion en plataforma nacional de datos abiertos",1,1,0,-6,1,1,Concluido
+1444,9,1,1,20230531,20230520,23,9,"Analisis de riesgos de seguridad de informacion (SoA)",1,1,0,-11,1,1,Concluido
+1445,9,1,1,20231215,20231212,24,9,"Auditoria externa y obtencion de certificacion ISO 27001",1,1,0,-3,1,1,Concluido
+1446,10,5,1,20230831,20230820,25,10,"Desarrollo e integracion con sistema de tramite documentario",1,1,0,-11,1,1,Concluido
+1447,10,5,1,20240531,,26,10,"Implementacion de casilla electronica y notificaciones",1,0,1,,0,0,Vencido

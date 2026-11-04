@@ -176,6 +176,7 @@ class CarteraProyectoTest extends TestCase
         $this->actingAs($ana);
 
         $response = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'nombre' => 'Renovacion de Servidores - Actualizado',
             'monto' => $proyecto005->monto,
             'anio_inicio' => $proyecto005->anio_inicio,
@@ -196,6 +197,7 @@ class CarteraProyectoTest extends TestCase
 
         // A01: Verificar que si el Responsable intenta alterar el monto, es rechazado
         $respMonto = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'nombre' => 'Intento no autorizado de cambiar presupuesto',
             'monto' => 999999.00,
             'anio_inicio' => $proyecto005->anio_inicio,
@@ -221,6 +223,7 @@ class CarteraProyectoTest extends TestCase
         $fechaDesfasada = '2020-01-01 00:00:00';
 
         $response = $this->put("/proyectos/{$proyecto005->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'nombre' => 'Intento con Concurrencia Desfasada',
             'monto' => $proyecto005->monto,
             'anio_inicio' => $proyecto005->anio_inicio,

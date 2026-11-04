@@ -47,7 +47,7 @@ class LoginRequest extends FormRequest
             'activo' => 1,
         ];
 
-        if (!Auth::attempt($credentials, $this->boolean('remember'))) {
+        if (!Auth::attempt($credentials)) {
             RateLimiter::hit($this->throttleKey(), 60);
 
             throw ValidationException::withMessages([

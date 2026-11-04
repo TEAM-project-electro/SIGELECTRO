@@ -7,6 +7,15 @@ use Throwable;
 
 class DatabaseTransactionService
 {
+    public static function verificarRevision(int $esperada): void
+    {
+        $actual = (int) DB::connection('escritor')->table('control_revision')->where('id', 1)->value('version');
+        if ($esperada !== $actual) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'concurrencia' => 'Los datos cambiaron. Recargue la pantalla antes de guardar.',
+            ]);
+        }
+    }
     /**
      * Ejecuta una operación de escritura de negocio dentro de una transacción atómica
      * aplicando el protocolo canónico de bloqueos (Decisión 6):
@@ -36,6 +45,15 @@ class DatabaseTransactionService
 
             // 2. Orden global de bloqueos: primero revisión central (FOR UPDATE)
             $db->select('SELECT id, version FROM control_revision WHERE id = 1 FOR UPDATE');
+
+            // Una autorización anterior al bloqueo no garantiza que el actor siga vigente.
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                $actor = $db->table('responsable')->select('id_responsable','activo','perfil')->where('id_responsable', $idResponsable)->first();
+                abort_unless($actor && (int) $actor->activo === 1, 403, 'La cuenta ya no está activa.');
+                $usuario = \Illuminate\Support\Facades\Auth::user();
+                $usuario->perfil = $actor->perfil;
+                $usuario->activo = (bool) $actor->activo;
+            }
 
             // 3. Proyectos ordenados por ID (FOR UPDATE) para prevenir deadlocks
             if (!empty($proyectosIds)) {

@@ -43,6 +43,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+foreach ($schema in @($DatabaseTarget, $DwDatabaseTarget)) {
+    if ($schema -notmatch '^[a-z][a-z0-9_]*$') { throw 'Nombre de esquema inválido.' }
+}
+if ($DatabaseTarget -eq $DwDatabaseTarget) { throw 'Los dos esquemas deben ser distintos.' }
 
 # Resolver raíz del proyecto
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -61,7 +65,7 @@ if (-not $Password) {
 }
 
 if (-not $Password) {
-    $Password = "Migrador2026!"
+    throw "Configure DB_PASSWORD en el entorno privado o indique -Password."
 }
 
 # A08: Salvaguarda contra sobrescritura accidental de cualquier base operativa
@@ -168,56 +172,18 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host " [OK]" -ForegroundColor Green
 
-# 4. Asegurar privilegios minimos granulares por tabla y columna (A08)
-Write-Host "Configurando privilegios tecnicos minimos sobre esquemas restaurados..."
-$hosts = @("localhost", "127.0.0.1")
-$grantsSql = ""
-
-foreach ($h in $hosts) {
-    # 4.1 sig_escritor: acceso de escritura en tablas de negocio, solo SELECT/INSERT en auditoría, sin UPDATE/DELETE
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.proyecto TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.hito TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE ON $DatabaseTarget.avance_presupuestal TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, UPDATE ON $DatabaseTarget.control_revision TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE ON $DatabaseTarget.responsable TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE ON $DatabaseTarget.objetivo_gd TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT ON $DatabaseTarget.bitacora_cambio TO 'sig_escritor'@'$h';`n"
-    $grantsSql += "GRANT SELECT, INSERT ON $DatabaseTarget.bitacora_motivo TO 'sig_escritor'@'$h';`n"
-
-    # 4.2 sig_lector: lectura de tablas de negocio y auditoria; lectura de columnas en responsable SIN clave_hash
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.proyecto TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.hito TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.avance_presupuestal TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.objetivo_gd TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.control_revision TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.bitacora_cambio TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.bitacora_motivo TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT ON $DatabaseTarget.v_indicadores_proyecto TO 'sig_lector'@'$h';`n"
-    $grantsSql += "GRANT SELECT (id_responsable, nombre, area, perfil, usuario, activo) ON $DatabaseTarget.responsable TO 'sig_lector'@'$h';`n"
-
-    # 4.3 sig_auth: columnas de autenticacion estrictas
-    $grantsSql += "GRANT SELECT (id_responsable, usuario, clave_hash, activo, perfil, nombre, area) ON $DatabaseTarget.responsable TO 'sig_auth'@'$h';`n"
-
-    # 4.4 sig_etl: manipulacion de hechos y ejecucion de rutinas en DW
-    $grantsSql += "GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON $DwDatabaseTarget.* TO 'sig_etl'@'$h';`n"
-
-    # 4.5 bi_lector: solo lectura de vistas y hechos en DW
-    $grantsSql += "GRANT SELECT ON $DwDatabaseTarget.* TO 'bi_lector'@'$h';`n"
+# 4. Reconciliar permisos, retirando también los grants amplios heredados del destino.
+$prevAdminUser = $env:SIG_ADMIN_USER
+$prevAdminPassword = $env:SIG_ADMIN_PASSWORD
+try {
+    $env:SIG_ADMIN_USER = $User
+    $env:SIG_ADMIN_PASSWORD = $Password
+    & php (Join-Path $ScriptDir 'ajustar_permisos.php') $DatabaseTarget $DwDatabaseTarget $HostName $Port
+    if ($LASTEXITCODE -ne 0) { throw 'Falló la reconciliación de privilegios de restauración.' }
+} finally {
+    $env:SIG_ADMIN_USER = $prevAdminUser
+    $env:SIG_ADMIN_PASSWORD = $prevAdminPassword
 }
-
-$mysqlArgsGrants = @(
-    "-h", $HostName,
-    "-P", $Port,
-    "-u", $User,
-    "-p$Password",
-    "-e", $grantsSql
-)
-& $mysqlBin $mysqlArgsGrants
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Error configurando privilegios tecnicos en MariaDB"
-    exit 1
-}
-
 Write-Host "----------------------------------------------------------" -ForegroundColor Cyan
 Write-Host "Restauracion completada con exito." -ForegroundColor Green
 Write-Host "Esquemas activos y listos para verificacion:" -ForegroundColor Green

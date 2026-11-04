@@ -1,5 +1,15 @@
 # Registro de Pruebas Ejecutadas
 
+## Verificación independiente vigente — 04/11/2026
+
+La sesión de corrección ejecutó realmente `php artisan test --no-ansi` dentro de `sistema/`: **133 passed (1441 assertions), 35.55 s, salida 0**. Se configuraron y comprobaron siete conexiones `_test`, con pruebas adicionales sobre `_restaurada`. La compilación `npm.cmd run build` pasó (66 módulos). La revisión sintáctica final comprobó 83 archivos PHP sin errores.
+
+Se ejecutaron migraciones 000005–000009, ETL, exportación BI, respaldo y restauración real en `seguimiento_gd_restaurada`/`dw_seguimiento_gd_restaurada`. `GateG4RestauracionTest` inicia sesión sobre la copia, crea/consulta un hito auditado, ejecuta ETL y prueba escritura denegada a Consulta; verifica que el escritor no pueda actualizar ni borrar ninguna de las dos bitácoras.
+
+`CorreccionesAuditoriaTest` añade conciliación de 2 modos × 5 fechas × 7 combinaciones de filtros; ausencia de corte exacto, edición obsoleta, CSRF activo, revocación de sesión, administración y degradación del último administrador, motivos, auditoría de alta/usuario, rollback ETL, mutex, calendario extendido y depuración de dimensiones eliminadas. Las tres pruebas concurrentes mantienen A abierta mientras B espera un bloqueo real y recibe 1205 antes del commit; luego comprueban la regla con el estado confirmado.
+
+Evidencias locales de la ejecución: `sistema/storage/pruebas_integrales.txt` y `sistema/storage/paridad_corregida.jsonl` (ignoradas por Git). Véase [informe vigente](correcciones_auditoria_2026-11-04.md). Los registros siguientes son históricos y no acreditan DAX ni cobertura total por sí solos.
+
 Fecha de inicio: 3 de noviembre de 2026.
 Entorno de ejecución: Windows 11 / PowerShell 7.4.5.
 

@@ -2,8 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
+@layer utilities {
+    /* Utilidades para números y cifras tabulares */
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
 @media print {
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
     .no-print {
         display: none !important;
+    }
+    .page-break-inside-avoid {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
     }
 }

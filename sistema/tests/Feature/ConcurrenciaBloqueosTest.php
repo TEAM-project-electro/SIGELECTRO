@@ -13,6 +13,21 @@ use Tests\TestCase;
 
 class ConcurrenciaBloqueosTest extends TestCase
 {
+    private function comprobarEspera(PDO $pdo): void
+    {
+        $pdo->exec('SET innodb_lock_wait_timeout = 1');
+        $pdo->beginTransaction();
+        $inicio = microtime(true);
+        try {
+            $pdo->query('SELECT id FROM control_revision WHERE id = 1 FOR UPDATE')->fetch();
+            $this->fail('La segunda conexión no debe pasar el bloqueo mantenido por A.');
+        } catch (\PDOException $e) {
+            $this->assertEquals(1205, $e->errorInfo[1]);
+            $this->assertGreaterThanOrEqual(0.8, microtime(true) - $inicio);
+        } finally {
+            $pdo->rollBack();
+        }
+    }
     private function crearPdoEscritor(): PDO
     {
         $db = config('database.connections.escritor.database');
@@ -47,10 +62,13 @@ class ConcurrenciaBloqueosTest extends TestCase
                 $db->table('avance_presupuestal')->whereIn('id_proyecto', $ids)->delete();
                 $db->table('proyecto')->whereIn('id_proyecto', $ids)->delete();
             }
-            $db->table('responsable')->where('usuario', 'admindos_test')->delete();
-            $db->statement("SET @id_responsable = NULL;");
-        } catch (\Throwable $e) {
-            // Ignorar
+            $adminIds = $db->table('responsable')->where('usuario', 'admindos_test')->pluck('id_responsable');
+            $cambios = $db->table('bitacora_cambio')->whereIn('id_responsable',$adminIds)->pluck('id_cambio');
+            $db->table('bitacora_motivo')->whereIn('id_cambio',$cambios)->delete();
+            $db->table('bitacora_cambio')->whereIn('id_cambio',$cambios)->delete();
+            $db->table('responsable')->whereIn('id_responsable', $adminIds)->delete();
+        } finally {
+            $db->statement("SET @id_responsable = NULL, @motivo_cambio = NULL;");
         }
     }
 
@@ -86,6 +104,7 @@ class ConcurrenciaBloqueosTest extends TestCase
         $pdoA->exec("UPDATE proyecto SET estado = 'Cerrado', fecha_actualizacion = NOW() WHERE id_proyecto = {$idProyecto}");
 
         // 3. Conexión A hace commit cerrando el proyecto
+        $this->comprobarEspera($pdoB);
         $pdoA->commit();
 
         // 4. Conexión B intenta insertar un hito en el proyecto ahora cerrado; debe fallar por trg_hito_bi
@@ -129,6 +148,7 @@ class ConcurrenciaBloqueosTest extends TestCase
             INSERT INTO avance_presupuestal (id_proyecto, fecha_reporte, presupuesto_planificado, gasto_acumulado)
             VALUES ({$idProyecto}, '2024-03-31', 40000, 50000)
         ");
+        $this->comprobarEspera($pdoB);
         $pdoA->commit();
 
         // Conexión B intenta insertar corte posterior al 2024-06-30 con gasto menor de S/ 30,000 (Violación R2)
@@ -173,7 +193,12 @@ class ConcurrenciaBloqueosTest extends TestCase
         $this->assertNotNull($admin1);
 
         // Desactivar al admin 1
-        UsuarioService::cambiarEstado($admin1->id_responsable, 0, 'Desactivar primer admin');
+        $pdo->beginTransaction();
+        $pdo->query('SELECT id FROM control_revision WHERE id = 1 FOR UPDATE')->fetch();
+        $pdo->exec('UPDATE responsable SET activo = 0 WHERE id_responsable = '.$admin1->id_responsable);
+        $this->comprobarEspera($this->crearPdoEscritor());
+        $pdo->commit();
+        $this->actingAs(Responsable::findOrFail($idAdmin2));
 
         // Intentar desactivar al admin 2 (que ahora es el único administrador activo)
         $rechazado = false;

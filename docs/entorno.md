@@ -1,6 +1,7 @@
 # Configuración del Entorno y Comandos Comprobados
 
 Fecha de verificación: 3 de noviembre de 2026.
+Actualización comprobada 04/11/2026: Laravel 12.71.0, PHP 8.3.28, PHPUnit 11.5.57 y MariaDB 10.11.11 en puerto 3307. Suite: 133 pruebas y 1,441 aserciones; compilación Vite aprobada. Véase el informe de corrección vigente.
 Referencia canónica: [PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md](../PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md).
 
 ---
@@ -50,7 +51,7 @@ Desde la raíz del proyecto:
   ```powershell
   pwsh -File .\scripts\arrancar.ps1
   ```
-- **Ejecución de la suite completa de pruebas (116 tests):**
+- **Ejecución de la suite completa de pruebas (133 tests):**
   ```powershell
   pwsh -File .\scripts\probar.ps1
   ```

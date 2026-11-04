@@ -335,22 +335,31 @@ return new class extends Migration
         DB::connection('mysql')->unprepared("
             CREATE DEFINER = 'sig_definer'@'localhost' TRIGGER trg_responsable_ai AFTER INSERT ON responsable FOR EACH ROW
             BEGIN
-                DECLARE v_actor INT;
-                SET v_actor = @id_responsable;
-                IF v_actor IS NULL OR NOT EXISTS (SELECT 1 FROM responsable WHERE id_responsable = v_actor) THEN
-                    SET v_actor = NEW.id_responsable;
+                IF @id_responsable IS NULL OR NOT EXISTS (SELECT 1 FROM responsable WHERE id_responsable = @id_responsable) THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Defina un actor existente antes de crear usuarios.';
                 END IF;
-                INSERT INTO bitacora_cambio (tabla_afectada, id_registro, campo, valor_anterior, valor_nuevo, fecha_hora, id_responsable)
-                VALUES ('responsable', NEW.id_responsable, 'CREACION', NULL, NEW.usuario, NOW(), v_actor);
+                CALL sp_registrar_cambio('responsable', NEW.id_responsable, 'CREACION', NULL, NEW.usuario);
             END;
         ");
 
         DB::connection('mysql')->unprepared("DROP TRIGGER IF EXISTS trg_responsable_au;");
+        DB::connection('mysql')->unprepared("DROP TRIGGER IF EXISTS trg_responsable_bu;");
+        DB::connection('mysql')->unprepared("
+            CREATE DEFINER = 'sig_definer'@'localhost' TRIGGER trg_responsable_bu BEFORE UPDATE ON responsable FOR EACH ROW
+            BEGIN
+                IF OLD.activo = 1 AND NEW.activo = 0 AND (@motivo_cambio IS NULL OR CHAR_LENGTH(TRIM(@motivo_cambio)) < 5 OR CHAR_LENGTH(@motivo_cambio) > 200) THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Desactivar un usuario requiere motivo de 5 a 200 caracteres.';
+                END IF;
+            END;
+        ");
         DB::connection('mysql')->unprepared("
             CREATE DEFINER = 'sig_definer'@'localhost' TRIGGER trg_responsable_au AFTER UPDATE ON responsable FOR EACH ROW
             BEGIN
                 IF NEW.activo <> OLD.activo THEN
                     CALL sp_registrar_cambio('responsable', NEW.id_responsable, 'activo', CAST(OLD.activo AS CHAR), CAST(NEW.activo AS CHAR));
+                END IF;
+                IF NEW.usuario <> OLD.usuario THEN
+                    CALL sp_registrar_cambio('responsable', NEW.id_responsable, 'usuario', OLD.usuario, NEW.usuario);
                 END IF;
                 IF NEW.nombre <> OLD.nombre THEN
                     CALL sp_registrar_cambio('responsable', NEW.id_responsable, 'nombre', OLD.nombre, NEW.nombre);

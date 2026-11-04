@@ -154,7 +154,8 @@ class GateG1AutenticacionTest extends TestCase
         $this->postJson('/proyectos', ['nombre' => 'Test'])->assertStatus(403);
 
         // Actualizar proyecto -> 403
-        $this->putJson("/proyectos/{$proyecto->id_proyecto}", ['nombre' => 'Modificado'])->assertStatus(403);
+        $this->putJson("/proyectos/{$proyecto->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),'nombre' => 'Modificado'])->assertStatus(403);
 
         // Eliminar proyecto -> 403
         $this->deleteJson("/proyectos/{$proyecto->id_proyecto}")->assertStatus(403);
@@ -166,7 +167,8 @@ class GateG1AutenticacionTest extends TestCase
         $this->postJson("/proyectos/{$proyecto->id_proyecto}/hitos", ['descripcion' => 'Test'])->assertStatus(403);
 
         // Actualizar hito -> 403
-        $this->putJson("/hitos/{$hito->id_hito}", ['descripcion' => 'Modificado'])->assertStatus(403);
+        $this->putJson("/hitos/{$hito->id_hito}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),'descripcion' => 'Modificado'])->assertStatus(403);
     }
 
     /**
@@ -183,6 +185,7 @@ class GateG1AutenticacionTest extends TestCase
 
         $this->actingAs($ana);
         $response = $this->putJson("/proyectos/{$proyecto005->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'nombre' => 'Nombre Actualizado',
             'monto' => $proyecto005->monto,
             'anio_inicio' => $proyecto005->anio_inicio,
@@ -210,6 +213,7 @@ class GateG1AutenticacionTest extends TestCase
 
         $this->actingAs($ana);
         $response = $this->putJson("/proyectos/{$proyecto011->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'nombre' => 'Intento No Autorizado',
         ]);
 
@@ -231,7 +235,8 @@ class GateG1AutenticacionTest extends TestCase
         $this->actingAs($ana);
 
         // Actualizar proyecto cerrado -> 403
-        $this->putJson("/proyectos/{$proyecto014->id_proyecto}", ['nombre' => 'Cambio'])->assertStatus(403);
+        $this->putJson("/proyectos/{$proyecto014->id_proyecto}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),'nombre' => 'Cambio'])->assertStatus(403);
 
         // Agregar hito a proyecto cerrado -> 403
         $this->postJson("/proyectos/{$proyecto014->id_proyecto}/hitos", ['descripcion' => 'Nuevo'])->assertStatus(403);

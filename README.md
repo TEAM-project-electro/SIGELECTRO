@@ -4,7 +4,7 @@
 **Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00)  
 **Institución:** Universidad Nacional de Huancavelica — Escuela Profesional de Ingeniería de Sistemas  
 **Asignatura:** Sistema de Información Gerencial (8vo Ciclo)  
-**Estado Oficial:** **Compuertas G1 a G4 Ratificadas — Núcleo Académico Verificado al 100%; Power BI en Estado PREPARADO Parcialmente (Pendiente de Ejecución y Conciliación DAX en Desktop)**
+**Estado actual:** Correcciones del núcleo aplicadas y verificadas con 133 pruebas / 1,441 aserciones. Power BI preparado parcialmente; ejecución y conciliación DAX pendientes. Ver [informe vigente](docs/correcciones_auditoria_2026-11-04.md).
 
 ---
 
@@ -13,7 +13,7 @@
 El sistema ha sido probado y certificado en entorno Windows 10/11 con las siguientes versiones de software:
 
 - **PHP:** 8.2 o superior (PHP 8.3.28 comprobado) con extensiones `pdo_mysql`, `mbstring`, `openssl`, `intl`, `bcmath`, `fileinfo`.
-- **Framework Web:** Laravel 11.x (PHP 8.3). Seleccionado en la Decisión 4 por compatibilidad y estabilidad en el entorno local con PHP 8.3.28; la actualización técnica a Laravel 12.x queda programada en la hoja de ruta post-auditoría sin impacto en el modelo de datos.
+- **Framework Web:** Laravel 12.71.0, actualizado y probado con PHP 8.3.28; PHPUnit 11.5.57 y lockfile actualizado.
 - **Composer:** 2.8+ (Composer 2.9.2 comprobado).
 - **Node.js:** v18+ (v24.19.0 comprobado) con `npm`.
 - **Motor de Base de Datos:** MariaDB 10.11 portable ejecutándose en `127.0.0.1:3307` (esquemas `seguimiento_gd` y `dw_seguimiento_gd`).
@@ -92,7 +92,7 @@ Cumpliendo con la **Decisión 5** del contrato canónico, el sistema aplica segr
 
 ## 6. Estado de las Puertas de Control (Gates) y Batería de Pruebas
 
-El sistema ha superado y ratificado con éxito el 100% de las compuertas de aceptación exigidas tras subsanar integralmente los 15 hallazgos de auditoría (A01 a A15):
+Las comprobaciones automatizadas del núcleo se detallan en el [informe de corrección](docs/correcciones_auditoria_2026-11-04.md). No equivalen a aceptación institucional ni a ejecución de Power BI:
 
 - **Gate G1 (Acceso y Seguridad):** Autenticación de tres perfiles, control por políticas de servidor con bloqueo estricto de campos de presupuesto para el Responsable (A01), middleware de usuario activo en cada petición (A09), protección contra fuerza bruta y sesiones aisladas. *(Ratificada)*.
 - **Gate G2 (Operación y Auditoría):** Reglas R1 (límites presupuestales y protección ante reducciones), R2 (monotonicidad devengada), R3 (cierre con hitos LB cerrados, reapertura con motivo obligatorio), R4 (auditoría forzosa en inserción, modificación y eliminación de todas las entidades operativas, protegiendo contraseñas y con inmutabilidad estricta) y pruebas de concurrencia pesimistas/optimistas deterministas (A03, A04, A05). *(Ratificada)*.
@@ -100,8 +100,8 @@ El sistema ha superado y ratificado con éxito el 100% de las compuertas de acep
 - **Gate G4 (Entrega y Respaldo):** Restauración comprobada sobre bases nuevas descartables con remapeo de origen en DW y privilegios mínimos reales (A08), conciliación del 100% de conteos y montos, y guion de sustentación preparado. *(Ratificada)*.
 
 ```text
-Tests:    119 passed (769 assertions)
-Duration: 12.71s (100% de cobertura funcional en esquema aislado _test)
+Tests:    133 passed (1441 assertions)
+Duration: 35.55s (esquemas aislados _test y pruebas de restauración)
 ```
 
 ---
@@ -137,5 +137,5 @@ proyecto team/
     estado_desarrollo.md                  # Matriz de avance y certificación de etapas
     pruebas_ejecutadas.md                 # Registro histórico de pruebas y evidencias
     bi/                                   # Artefactos para Microsoft Power BI
-  sistema/                                # Aplicación Laravel 11 (monolito modular)
+  sistema/                                # Aplicación Laravel 12 (monolito modular)
 ```

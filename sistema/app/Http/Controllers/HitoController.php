@@ -40,6 +40,10 @@ class HitoController extends Controller
 
         try {
             $idHito = DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('create', [Hito::class, $padre]);
+
                 $id = DB::connection('escritor')->table('hito')->insertGetId([
                     'id_proyecto' => $proyecto->id_proyecto,
                     'descripcion' => $request->descripcion,
@@ -55,14 +59,14 @@ class HitoController extends Controller
                     ->update(['fecha_actualizacion' => now()]);
 
                 return $id;
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => 'Error de motor: ' . $e->getMessage()], 422);
+                return response()->json(['error' => 'Error de motor: ' . \App\Services\ErroresNegocio::mensaje($e)], 422);
             }
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error de motor: ' . $e->getMessage());
+                ->with('error', 'Error de motor: ' . \App\Services\ErroresNegocio::mensaje($e));
         }
 
         if ($request->wantsJson()) {
@@ -108,6 +112,11 @@ class HitoController extends Controller
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($request, $hito, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('update', Hito::on('escritor')->findOrFail($hito->getKey()));
+                DatabaseTransactionService::verificarRevision($request->integer('revision_esperada'));
+
                 DB::connection('escritor')->table('hito')
                     ->where('id_hito', $hito->id_hito)
                     ->update([
@@ -122,14 +131,14 @@ class HitoController extends Controller
                 DB::connection('escritor')->table('proyecto')
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->update(['fecha_actualizacion' => now()]);
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => 'Error al actualizar el hito: ' . $e->getMessage()], 422);
+                return response()->json(['error' => 'Error al actualizar el hito: ' . \App\Services\ErroresNegocio::mensaje($e)], 422);
             }
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error al actualizar el hito: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar el hito: ' . \App\Services\ErroresNegocio::mensaje($e));
         }
 
         if ($request->wantsJson()) {
@@ -160,6 +169,10 @@ class HitoController extends Controller
         $motivo = mb_substr("Eliminación de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
         DatabaseTransactionService::run($idResponsable, function () use ($hito, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('delete', Hito::on('escritor')->findOrFail($hito->getKey()));
+
             DB::connection('escritor')->table('hito')
                 ->where('id_hito', $hito->id_hito)
                 ->delete();
@@ -170,7 +183,7 @@ class HitoController extends Controller
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->update(['fecha_actualizacion' => now()]);
             }
-        }, $motivo);
+        }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
 
         if (request()->wantsJson()) {
             return response()->json(['mensaje' => 'Hito eliminado correctamente.'], 200);

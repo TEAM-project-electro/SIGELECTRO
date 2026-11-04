@@ -18,11 +18,16 @@ export default {
             colors: {
                 brand: {
                     50: '#f0f5fa',
-                    100: '#e1ecf5',
-                    200: '#c3d9eb',
-                    500: '#1e6091',
-                    700: '#003366', // Azul oscuro institucional Electrocentro
-                    900: '#001a33',
+                    100: '#e0ecf6',
+                    200: '#b9d5ec',
+                    300: '#84b5de',
+                    400: '#4a90cd',
+                    500: '#2270b2',
+                    600: '#145593',
+                    700: '#003366', // Azul institucional oficial Electrocentro
+                    800: '#08284d',
+                    900: '#0b1d36', // Sidebar navy profundo
+                    950: '#071223',
                 }
             }
         },

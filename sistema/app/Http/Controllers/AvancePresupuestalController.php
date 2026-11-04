@@ -43,6 +43,10 @@ class AvancePresupuestalController extends Controller
 
         try {
             $idAvance = DatabaseTransactionService::run($idResponsable, function () use ($request, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('create', [AvancePresupuestal::class, $padre]);
+
                 $id = DB::connection('escritor')->table('avance_presupuestal')->insertGetId([
                     'id_proyecto' => $proyecto->id_proyecto,
                     'fecha_reporte' => $request->fecha_reporte,
@@ -56,10 +60,10 @@ class AvancePresupuestalController extends Controller
                     ->update(['fecha_actualizacion' => now()]);
 
                 return $id;
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
-            $msg = $e->getMessage();
-            if (str_contains($msg, '1062') || str_contains($msg, 'uq_avance_proyecto_fecha')) {
+            $msg = \App\Services\ErroresNegocio::mensaje($e);
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
                 $errorMsg = "Ya existe un corte presupuestal registrado para la fecha {$request->fecha_reporte}.";
             } elseif (str_contains($msg, 'menor que el de un reporte anterior')) {
                 $errorMsg = 'Regla R2: El gasto acumulado no puede ser menor que el de un reporte cronológico anterior.';
@@ -115,6 +119,11 @@ class AvancePresupuestalController extends Controller
 
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($request, $avance, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('update', AvancePresupuestal::on('escritor')->findOrFail($avance->getKey()));
+                DatabaseTransactionService::verificarRevision($request->integer('revision_esperada'));
+
                 DB::connection('escritor')->table('avance_presupuestal')
                     ->where('id_avance', $avance->id_avance)
                     ->update([
@@ -128,14 +137,14 @@ class AvancePresupuestalController extends Controller
                         ->where('id_proyecto', $proyecto->id_proyecto)
                         ->update(['fecha_actualizacion' => now()]);
                 }
-            }, $motivo);
+            }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
         } catch (QueryException $e) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => 'Error al actualizar el corte presupuestal: ' . $e->getMessage()], 422);
+                return response()->json(['error' => 'Error al actualizar el corte presupuestal: ' . \App\Services\ErroresNegocio::mensaje($e)], 422);
             }
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error al actualizar el corte presupuestal: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar el corte presupuestal: ' . \App\Services\ErroresNegocio::mensaje($e));
         }
 
         if ($request->wantsJson()) {
@@ -166,6 +175,10 @@ class AvancePresupuestalController extends Controller
         $motivo = mb_substr("Eliminación de corte presupuestal #{$avance->id_avance} en proyecto {$proyecto->codigo_pgd}", 0, 200);
 
         DatabaseTransactionService::run($idResponsable, function () use ($avance, $proyecto) {
+                $padre = Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto);
+                abort_if($padre->estado === 'Cerrado', 403, 'El proyecto está cerrado.');
+                Gate::authorize('delete', AvancePresupuestal::on('escritor')->findOrFail($avance->getKey()));
+
             DB::connection('escritor')->table('avance_presupuestal')
                 ->where('id_avance', $avance->id_avance)
                 ->delete();
@@ -176,7 +189,7 @@ class AvancePresupuestalController extends Controller
                     ->where('id_proyecto', $proyecto->id_proyecto)
                     ->update(['fecha_actualizacion' => now()]);
             }
-        }, $motivo);
+        }, $motivo, proyectosIds: [$proyecto->id_proyecto]);
 
         if (request()->wantsJson()) {
             return response()->json(['mensaje' => 'Corte presupuestal eliminado correctamente.'], 200);

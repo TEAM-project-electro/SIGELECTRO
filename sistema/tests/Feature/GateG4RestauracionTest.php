@@ -7,6 +7,52 @@ use Tests\TestCase;
 
 class GateG4RestauracionTest extends TestCase
 {
+    public function test_permisos_restaurados_impiden_modificar_o_borrar_auditoria(): void
+    {
+        foreach (['bitacora_cambio','bitacora_motivo'] as $tabla) {
+            foreach (['UPDATE '.$tabla.' SET id_cambio=id_cambio WHERE 1=0', 'DELETE FROM '.$tabla.' WHERE 1=0'] as $sql) {
+                $sql=str_replace($tabla,'seguimiento_gd_restaurada.'.$tabla,$sql);
+                try { DB::connection('escritor')->statement($sql); $this->fail('Permiso de auditoría demasiado amplio.'); }
+                catch (\Illuminate\Database\QueryException $e) { $this->assertEquals(1142,$e->errorInfo[1]); }
+            }
+        }
+    }
+
+    public function test_recorrido_http_y_etl_sobre_restauracion_independiente(): void
+    {
+        $original=config('database.connections');
+        $nombres=['mysql','lector','auth','escritor','dw_migrador','dw_etl','dw_lector'];
+        $idHito=null;
+        try {
+            foreach ($nombres as $nombre) {
+                config(["database.connections.{$nombre}.database"=>str_starts_with($nombre,'dw_') ? 'dw_seguimiento_gd_restaurada' : 'seguimiento_gd_restaurada']);
+                DB::purge($nombre);
+            }
+            \Illuminate\Support\Facades\Auth::forgetGuards();
+            $this->post('/login',['usuario'=>'msalas','clave'=>'Admin2026!'])->assertRedirect('/tablero');
+            $this->get('/tablero')->assertOk();
+            $respuesta=$this->postJson('/proyectos/1/hitos',['descripcion'=>'Recorrido HTTP restaurado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0]);
+            $respuesta->assertCreated();
+            $idHito=$respuesta->json('id_hito');
+            $this->get('/proyectos/1')->assertOk()->assertSee('Recorrido HTTP restaurado');
+            $this->assertTrue(DB::table('bitacora_cambio')->where('tabla_afectada','hito')->where('id_registro',$idHito)->exists());
+            $this->assertTrue(app(\App\Services\EtlService::class)->ejecutar()['exito']);
+            $this->assertTrue(DB::connection('dw_lector')->table('fact_hito')->where('id_hito',$idHito)->exists());
+            $this->post('/logout')->assertRedirect('/login');
+            $this->post('/login',['usuario'=>'cgarcia','clave'=>'Consulta2026!'])->assertRedirect('/tablero');
+            $this->postJson('/proyectos/1/hitos',['descripcion'=>'Denegado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0])->assertForbidden();
+        } finally {
+            if ($idHito) {
+                DB::connection('escritor')->statement('SET @id_responsable=1');
+                DB::connection('escritor')->table('hito')->where('id_hito',$idHito)->delete();
+                DB::connection('escritor')->statement('SET @id_responsable=NULL, @motivo_cambio=NULL');
+                app(\App\Services\EtlService::class)->ejecutar();
+            }
+            config(['database.connections'=>$original]);
+            foreach ($nombres as $nombre) DB::purge($nombre);
+            \Illuminate\Support\Facades\Auth::forgetGuards();
+        }
+    }
     /**
      * Verificar que los scripts de respaldo y restauración existen y generaron volcados válidos.
      */

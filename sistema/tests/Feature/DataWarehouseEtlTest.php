@@ -136,9 +136,9 @@ class DataWarehouseEtlTest extends TestCase
         $this->assertEquals($kpiOp['desviacion_presupuestal']['gasto_acumulado'], (float) $dw->total_gasto);
 
         // Tolerancia de 0.01 pp en porcentajes
-        $this->assertEqualsWithDelta($kpiOp['avance_hitos']['valor'], (float) $dw->avance_hitos_pct, 0.05);
-        $this->assertEqualsWithDelta($kpiOp['proyectos_retraso']['valor'], (float) $dw->porcentaje_retraso, 0.05);
-        $this->assertEqualsWithDelta($kpiOp['desviacion_presupuestal']['valor'], (float) $dw->desviacion_presupuestal_pct, 0.05);
+        $this->assertEqualsWithDelta($kpiOp['avance_hitos']['valor'], (float) $dw->avance_hitos_pct, 0.01);
+        $this->assertEqualsWithDelta($kpiOp['proyectos_retraso']['valor'], (float) $dw->porcentaje_retraso, 0.01);
+        $this->assertEqualsWithDelta($kpiOp['desviacion_presupuestal']['valor'], (float) $dw->desviacion_presupuestal_pct, 0.01);
     }
 
     /**

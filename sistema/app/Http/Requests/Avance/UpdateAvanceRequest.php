@@ -19,6 +19,7 @@ class UpdateAvanceRequest extends FormRequest
         $montoMax = $proyecto ? (float) $proyecto->monto : 0;
 
         return [
+            'revision_esperada' => ['required', 'integer', 'min:1'],
             'presupuesto_planificado' => ['required', 'numeric', 'min:0', "max:{$montoMax}"],
             'gasto_acumulado' => ['required', 'numeric', 'min:0', "max:{$montoMax}"],
         ];

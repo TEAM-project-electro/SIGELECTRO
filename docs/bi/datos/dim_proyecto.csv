@@ -1,11 +1,11 @@
-﻿sk_proyecto,id_proyecto,codigo_pgd,nombre,monto,rango_monto,anio_inicio,anio_fin,estado_actual,es_activo,fuente
-1,1,005,"Equipos de ciberseguridad",500000.00,"500k a 1M",2023,2024,"En curso",1,"Cartera PGD 2023 a 2026"
-2,2,010,"Servicio Software Factory (FONAFE 5)",2383550.00,"Mayor a 1M",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026"
-3,3,011,"Enlaces de fibra optica en subestaciones",2500000.00,"Mayor a 1M",2023,2025,"En curso",1,"Cartera PGD 2023 a 2026"
-4,4,013,"Implementacion de SAP S/4 HANA",2000000.00,"Mayor a 1M",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026"
-5,5,014,"Actualizacion del marco de gobierno e incorporacion del Comite de Gobierno Digital",120000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026"
-6,6,017,"Fortalecimiento de las competencias digitales del personal",300000.00,"Menor a 500k",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026"
-7,7,020,"Transicion al protocolo IPv6",400000.00,"Menor a 500k",2023,2025,"En curso",1,"Cartera PGD 2023 a 2026"
-8,8,022,"Publicacion de datos abiertos en la Plataforma Nacional de Datos Abiertos",108000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026"
-9,9,023,"Implementacion y certificacion del sistema de gestion de seguridad de la informacion (NTP ISO/IEC 27001:2014)",212000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026"
-10,10,024,"Mesa de partes digital integrada al sistema de gestion documental",100000.00,"Menor a 500k",2023,2023,"En curso",1,"Cartera PGD 2023 a 2026"
+﻿sk_proyecto,id_proyecto,codigo_pgd,nombre,monto,rango_monto,anio_inicio,anio_fin,estado_actual,es_activo,fuente,id_objetivo,id_responsable
+1,1,005,"Equipos de ciberseguridad",500000.00,"500k a 1M",2023,2024,"En curso",1,"Cartera PGD 2023 a 2026",1,1
+2,2,010,"Servicio Software Factory (FONAFE 5)",2383550.00,"Mayor a 1M",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026",5,1
+3,3,011,"Enlaces de fibra optica en subestaciones",2500000.00,"Mayor a 1M",2023,2025,"En curso",1,"Cartera PGD 2023 a 2026",4,3
+4,4,013,"Implementacion de SAP S/4 HANA",2000000.00,"Mayor a 1M",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026",6,3
+5,5,014,"Actualizacion del marco de gobierno e incorporacion del Comite de Gobierno Digital",120000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026",3,1
+6,6,017,"Fortalecimiento de las competencias digitales del personal",300000.00,"Menor a 500k",2023,2026,"En curso",1,"Cartera PGD 2023 a 2026",2,1
+7,7,020,"Transicion al protocolo IPv6",400000.00,"Menor a 500k",2023,2025,"En curso",1,"Cartera PGD 2023 a 2026",4,3
+8,8,022,"Publicacion de datos abiertos en la Plataforma Nacional de Datos Abiertos",108000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026",5,1
+9,9,023,"Implementacion y certificacion del sistema de gestion de seguridad de la informacion (NTP ISO/IEC 27001:2014)",212000.00,"Menor a 500k",2023,2023,Cerrado,0,"Cartera PGD 2023 a 2026",1,1
+10,10,024,"Mesa de partes digital integrada al sistema de gestion documental",100000.00,"Menor a 500k",2023,2023,"En curso",1,"Cartera PGD 2023 a 2026",5,1

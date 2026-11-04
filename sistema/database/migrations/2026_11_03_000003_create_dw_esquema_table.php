@@ -33,6 +33,8 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS dim_proyecto (
                 sk_proyecto INT NOT NULL AUTO_INCREMENT,
                 id_proyecto INT NOT NULL,
+                id_objetivo INT NULL,
+                id_responsable INT NULL,
                 codigo_pgd VARCHAR(10) NOT NULL,
                 nombre VARCHAR(200) NOT NULL,
                 monto DECIMAL(12,2) NOT NULL,

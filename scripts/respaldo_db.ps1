@@ -46,7 +46,7 @@ if (-not $Password) {
 }
 
 if (-not $Password) {
-    $Password = "Migrador2026!"
+    throw "Configure DB_PASSWORD en el entorno privado o indique -Password."
 }
 
 # Verificar binario mariadb-dump

@@ -1,44 +1,22 @@
 # Estado de Desarrollo del SIG de Electrocentro
 
-Fecha de última actualización: 4 de noviembre de 2026.
-Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
+## Estado vigente — corrección independiente del 04/11/2026
 
-## Resumen del Progreso
+Asistente: ChatGPT/Codex, PowerShell local. Etapa 20 completada para las falencias verificadas del núcleo; etapa 21 revalidada mediante pruebas. Contrato maestro sin cambios.
 
-- **Etapa activa:** Etapa 20 (completada y verificada) — PROYECTO AUDITADO Y COMPUERTAS RATIFICADAS.
-- **Puertas de control:**
-  - G1 (Acceso y Seguridad): Superada y Ratificada (Políticas de campo estrictas, rate-limiting y middleware de usuario activo).
-  - G2 (Operación y Auditoría): Superada y Ratificada (Inmutabilidad, R1 a R4 en triggers completos con DEFINER, pruebas concurrentes deterministas).
-  - G3 (Indicadores, DW y Reportes): Superada y Ratificada (Oráculo exacto $\le 0.01$ pp, paridad relacional vs DW con filtros dinámicos, semántica estricta y exportación protegida).
-  - G4 (Entrega Final y Respaldo): Superada y Ratificada (Restauración independiente en esquema descartable con remapeo y privilegios mínimos reales).
-- **Componente Power BI:** PREPARADO parcialmente (archivos importables y modelo listos; ejecución interactiva y conciliación DAX pendientes en Power BI Desktop).
+- Laravel 12.71.0 / PHP 8.3.28 / MariaDB 10.11.11 en 3307.
+- Suite final: **133 pruebas, 1,441 aserciones, 35.55 s, salida 0**.
+- Núcleo: correcciones A01–A11 y A13–A15 aplicadas; controles de acceso, auditoría, bloqueo/edición obsoleta, DW, ETL y restauración comprobados en pruebas. No se afirma cobertura absoluta ni aceptación institucional.
+- A12 / Power BI: **PREPARADO parcialmente**. CSV y manifiesto actualizados; pendientes archivo real, ejecución y conciliación DAX. RF07 sigue omitido por alcance; no se amplió la importación CSV.
+- G1–G3: controles automatizados de acceso, operaciones y conciliación aprobados. G4: respaldo/restauración y recorrido HTTP/ETL de copia aprobados. No se ratifica una entrega integral de BI.
+- Evidencia y alcance exacto: [correcciones_auditoria_2026-11-04.md](correcciones_auditoria_2026-11-04.md), [pruebas_ejecutadas.md](pruebas_ejecutadas.md), [decisión técnica](decisiones/2026-11-04_subsanacion_auditoria.md).
+- Próximo paso: ejecutar en Power BI los casos indicados en `docs/bi/guia_power_bi.md` y registrar resultados observados. Para repetir núcleo: `pwsh -File scripts/probar.ps1` desde raíz; no instalar ni resembrar la base de trabajo para arrancar.
+- Git: cambios locales sin commit ni publicación; informes de auditoría anteriores conservados como evidencia histórica.
 
-## Matriz de Estado por Etapa
+## Registro de Cambios y Bloqueos — histórico
 
-| Etapa | Nombre | Estado | Dependencia | Entregables / Evidencia | Pendientes |
-| --- | --- | --- | --- | --- | --- |
-| 00 | Contexto y reglas | **Verificada** | Fuentes en docs/fuentes | `docs/inventario_fuentes.md`, `docs/contexto_validado.md`, `docs/protocolo_desarrollo.md`, `docs/plan_ejecucion.md`, `AGENTS.md` | Ninguno |
-| 01 | Especificación y aceptación | **Verificada** | 00 | `docs/especificacion.md`, `docs/matriz_trazabilidad.md`, `docs/contrato_indicadores.md` | Ninguno |
-| 02 | Arquitectura y entorno | **Verificada** | 01 | MariaDB 10.11 en `C:\mariadb-10.11:3307`, app en `sistema/`, Tailwind/Alpine/Chart.js compilados, test de humo y salud | Ninguno |
-| 03 | Base operativa y controles | **Verificada** | 02 | 6 tablas, 41 columnas, 2 extensiones (`control_revision`, `bitacora_motivo`), triggers R1-R4, suite de 16 tests de reglas | Ninguno para etapa 03 |
-| 04 | Muestra y procedencia | **Verificada** | 03 | Seeders deterministas e idempotentes (10 proyectos S/ 8.62M, 6 OGD, 4 responsables, 26 hitos, 24 cortes), `docs/datos_demostracion.md`, test de procedencia | Ninguno |
-| 05 | Autenticación y permisos | **Verificada (Gate G1 Superado)** | 04 | Modelo Authenticatable (`sig_auth`), `LoginController`, Policies (`ProyectoPolicy`, `HitoPolicy`, `AvancePresupuestalPolicy`), rate limiting, 11 tests HTTP de compuerta G1 aprobados | Ninguno |
-| 06 | Cartera y catálogos | **Verificada** | G1 | CRUD proyectos y catálogo OGD, control de concurrencia optimista, protección FK (`ON DELETE RESTRICT`), suite de 10 tests `CarteraProyectoTest` aprobados | Ninguno |
-| 07 | Hitos, línea base y cierre | **Verificada** | 06 | Gestión de hitos (`RF02`), distinción de línea base (`en_linea_base`), regla R3 de cierre formal y reapertura con motivo obligatorio auditado en `bitacora_motivo`, suite `HitoYCierreProyectoTest` de 11 tests aprobados | Ninguno |
-| 08 | Avances presupuestales | **Verificada** | 07 | Seguimiento financiero (`RF04`), reglas R1 (límites presupuestales) y R2 (monotonicidad cronológica no decreciente), bloqueo en proyectos cerrados, suite `AvancePresupuestalTest` de 11 tests aprobados | Ninguno |
-| 09 | Auditoría y consistencia | **Verificada (Gate G2 Superada)** | 08 | Matriz de auditoría, bitácora protegida (Gate G2), inmutabilidad contra UPDATE/DELETE, regla R4 y limpieza en finally | Ninguno |
-| 10 | Motor de indicadores | **Verificada** | G2 | Servicio de cálculo `IndicadoresService`, ambos modos temporales (`CORTE_COMUN`, `ULTIMO_REPORTE`), validación oráculo independiente al 30/06/2024 (tol <= 0.01 pp) | Ninguno |
-| 11 | Data Warehouse y ETL | **Verificada** | 10 | Esquema dimensional `dw_seguimiento_gd`, procedimiento transaccional `sp_etl_cargar`, 6 vistas analíticas, cuentas `sig_etl` y `bi_lector` | Ninguno |
-| 12 | Tablero e interfaz | **Verificada** | 11 | Vistas Blade interactivas (`tablero.blade.php`), 4 tarjetas de KPIs, gráficos Chart.js, switch de origen Operativo vs DW, alertas RF08 (0.08 s) | Ninguno |
-| 13 | Reportes y exportación | **Verificada (Gate G3 Superada)** | 12 | Exportador CSV UTF-8 con BOM y mitigación contra CSV Injection, vista de impresión A4 apaisada/PDF con aviso de mutaciones concurrentes | Ninguno |
-| 14 | Preparación de Power BI | **Verificada (BI Preparado)** | G3 | 8 CSVs con BOM en `docs/bi/datos/`, manifiesto JSON, `modelo_power_bi.md`, `medidas_DAX.txt`, `guia_power_bi.md` y conciliación DAX vs SQL | Ninguno |
-| 15 | Importación CSV (opcional) | **Fuera de alcance** | Núcleo OK | Delimitación canónica documentada para priorizar robustez del núcleo y entrega | Por decisión de alcance |
-| 16 | Alertas (opcional) | **Verificada** | Núcleo OK | Lista de alertas integrada en Tablero (`tablero.blade.php`) y DW (`v_alertas`, `v_calidad_datos`) | Verificado en E12 y E11 |
-| 17 | Validación integral | **Verificada** | 14 | `docs/informe_validacion.md`, evaluación de 8 escenarios canónicos, 109 pruebas aprobadas al 100% | Ninguno |
-| 18 | Respaldo y entrega | **Verificada (Gate G4 Superada - Entrega Final)** | 17 | Scripts `respaldo_db.ps1`, `restaurar_db.ps1`, `instalar.ps1`, `arrancar.ps1`, `probar.ps1`, test `GateG4RestauracionTest`, `README.md`, `manual_usuario.md`, `manual_tecnico.md`, `informe_cierre.md` | Ninguno |
-| 20 | Subsanación de auditoría A01-A15 | **Verificada (G1 a G4 Ratificadas)** | 18 | Subsanación integral de los 15 hallazgos de auditoría: permisos de campo (A01), aislamiento en testing (A02), pruebas concurrentes deterministas (A03), triggers con DEFINER y auditoría completa INSERT/UPDATE/DELETE (A04/A05), filtros dinámicos en DW (A06), atomicidad y mutex ETL (A07), restauración independiente con privilegios mínimos reales (A08), middleware de usuario activo y protección último admin (A09), endpoints reales (A10), semántica estricta Sin datos vs No aplica (A11), catálogo DAX dinámico (A12), aclaración horas (A13), roadmap Laravel 12 (A14), motivos sensibles y refresco temporal (A15). Suite de 119 pruebas pasando al 100% (769 aserciones). | Ninguno |
+Las certificaciones y cifras de sesiones anteriores que siguen a continuación son registros históricos; prevalece el estado vigente anterior y el informe de corrección independiente.
 
-## Registro de Cambios y Bloqueos
 - **2026-11-03:**
   - Extraídas las fuentes de `Prompts_SIG_Electrocentro_Codex.zip` hacia `docs/fuentes/` con verificación de hashes.
   - Creado repositorio local Git en `E:\8VO CICLO\SISTEMA DE INFORMACIÓN GERENCIAL\proyecto team`.
@@ -79,7 +57,31 @@ Asistente / Entorno: Antigravity IDE / PowerShell 7.4.5 (Windows 11).
       - `docs/informe_cierre.md`: informe final de cierre académico con matriz de RF01 a RF08 cumplidos al 100%, balance de 114 horas efectivas vs 120 estimadas (-5.0%), guion de demostración académica de 8 a 10 minutos detallado segundo a segundo, banco de respuestas técnicas y declaración del estado de Power BI ("Núcleo académico verificado al 100%; Power BI en estado PREPARADO").
     - Ejecutada la batería completa final de pruebas: **116 pruebas aprobadas al 100% (755 aserciones) en 10.28 segundos**.
     - **Compuerta Gate G4 oficialmente superada.** Entrega académica del SIG Electrocentro completada satisfactoriamente.
-  - **2026-11-04 (Etapa 20: Subsanación Integral de Hallazgos de Auditoría A01-A15 y Ratificación de Compuertas G1 a G4):**
+  - **2026-11-04 (Modernización Integral del Frontend Gerencial e Interfaz de Usuario):**
+  - **Dirección Visual e Identidad:** Aplicada una identidad sobria e institucional para Electrocentro S. A. Paleta corporativa azul marino (`brand-50` a `brand-950`), fondos neutros de alto contraste, tipografía tabular (`tabular-nums`) para cifras e importes en soles (PEN), bordes suaves y distintivos semánticos con texto explícito (no dependientes únicamente del color).
+  - **Eliminación Total de Dependencias Externas (Cero CDNs):**
+    - Retiradas las llamadas externas a `cdn.tailwindcss.com` en `reportes/imprimir.blade.php` y a `cdn.jsdelivr.net` en `tablero.blade.php`.
+    - Compilación 100% local a través de Vite (`public/build/assets/app-*.css` 66.8 kB y `public/build/assets/app-*.js` 324.5 kB) integrando Tailwind CSS, Alpine.js y Chart.js local (`window.Chart`).
+  - **Componentes Blade Reutilizables:**
+    - `components/badge.blade.php`: Variantes semánticas (primary, success, warning, danger, neutral, info, purple) y tamaños.
+    - `components/card.blade.php`: Contenedor uniforme con ranuras para título, subtítulo, insignia, acciones, cuerpo y pie.
+    - `components/stat-card.blade.php`: Tarjeta ejecutiva para KPIs con bordes semánticos, ícono y cifras tabulares.
+    - `components/alert.blade.php`: Notificaciones descartables y callouts contextuales.
+    - `components/empty-state.blade.php`: Estado visual ante filtros vacíos o ausencia de registros.
+    - `components/button.blade.php`: Botones de acción y enlaces tipificados consistentes.
+  - **Vistas y Módulos Rediseñados:**
+    - **Estructura y Navegación:** `layouts/app.blade.php`, `layouts/guest.blade.php`, `layouts/partials/sidebar-nav.blade.php`, `layouts/partials/sidebar-user.blade.php`. Navegación lateral fija en escritorio y menú móvil off-canvas reactivo con Alpine.js (`x-data="{ sidebarOpen: false }"`), migas de pan dinámicas, indicador de sección activa y cierre de sesión seguro.
+    - **Login Institucional:** `auth/login.blade.php` con tarjeta institucional dividida, toggle para visibilidad de contraseña, protección contra doble envío (`@submit="submitting = true"`), y botones de autocompletado para perfiles demostrativos (`msalas`, `aquispe`, `cgarcia`).
+    - **Tablero Gerencial:** `tablero.blade.php` con selector temporal (`CORTE_COMUN` y `ULTIMO_REPORTE`), conmutador en vivo entre esquema operativo y Data Mart (`OPERATIVO` vs `DW`), botón de recarga ETL con indicador de desactualización, 4 tarjetas de KPIs canónicos con cobertura y barras de progreso, gráficos interactivos Chart.js, tabla de cartera con código PGD tipificado y panel de alertas de calidad y cronograma (RF08).
+    - **Cartera y Detalle:** `proyectos/index.blade.php` (tarjetas métricas, barra de filtros, tabla detallada con soles formateados y estados textuales) y `proyectos/show.blade.php` (organización modular por información general, 4 tarjetas de indicadores del proyecto, tabla de hitos con badge de línea base y tabla de cortes presupuestales con modal para reapertura con motivo R3).
+    - **Formularios de Cartera, Hitos y Avances:** `proyectos/create.blade.php`, `proyectos/edit.blade.php`, `hitos/create.blade.php`, `hitos/edit.blade.php`, `avances/create.blade.php`, `avances/edit.blade.php`. Campos agrupados por propósito, bloqueo visual de campos restringidos a Administrador para el perfil Responsable (con nota explicativa), preservación de tokens de concurrencia optimista (`fecha_actualizacion_esperada`, `revision_esperada`) y motivo obligatorio para reapertura o ajuste de línea base.
+    - **Usuarios y Objetivos:** `usuarios/index.blade.php` (directorio de usuarios con métricas de rol, estado y modales Alpine para crear y editar) y `objetivos/index.blade.php` (tarjetas estratégicas de los 6 OGD con desglose presupuestal y modal de edición).
+    - **Bitácora de Auditoría:** `auditoria/index.blade.php` con tarjetas de métricas por entidad, filtros por tabla, ID, actor y rango de fechas (`fecha_desde`, `fecha_hasta`), visualización estructurada de mutaciones (valor anterior tachado en rojo suave &rarr; valor nuevo en verde negrita) y justificación de cambio (motivo R3/R4).
+    - **Reporte Imprimible:** `reportes/imprimir.blade.php` optimizado para A4 horizontal con reglas `@media print`, encabezado institucional formal, metadatos de emisión y revisión (`vX`), paridad exacta frente al tablero, y bloques de firmas para el Comité de Gobierno Digital y la Gerencia de TI.
+  - **Verificación y Pruebas Automatizadas:**
+    - Compilación de Vite exitosa en 1.62 s.
+    - **133 pruebas aprobadas al 100% (1,441 aserciones)** en suite automatizada PHPUnit sobre MariaDB 10.11 aislado.
+    - Verificación HTTP en vivo de endpoints `/salud` (estado OPERATIVO), `/login`, `/tablero` y `/reportes/imprimir` certificando paridad, diseño responsivo y ausencia absoluta de enlaces a CDNs externos.
     - **A01 (Permisos por campo):** Validaciones estrictas en `UpdateProyectoRequest.php` y `ProyectoPolicy.php` impiden que el Responsable modifique `monto`, `id_responsable`, `id_objetivo`, `anio_inicio` y `anio_fin` (reservados exclusivamente para Administrador).
     - **A02 (Aislamiento de pruebas):** `.env.testing`, `phpunit.xml`, y salvaguarda en `TestCase.php` aíslan las pruebas exclusivamente contra esquemas descartables `*_test` o `*_restaurada`, garantizando la inmutabilidad de la base operativa.
     - **A03 (Concurrencia determinista):** Implementado `ConcurrenciaBloqueosTest.php` con 3 pruebas concurrentes reales: intento de inserción de hito durante cierre concurrente de proyecto, monotonía R2 de avances en transacciones paralelas, y protección concurrente del último administrador activo.

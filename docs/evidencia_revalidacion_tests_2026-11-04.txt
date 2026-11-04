@@ -1,0 +1,157 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Feature\AvancePresupuestalTest
+  ✓ titular registra corte presupuestal valido                                                                   0.32s  
+  ✓ regla r1 rechaza planificado mayor al monto                                                                  0.10s  
+  ✓ regla r1 rechaza gasto mayor al monto                                                                        0.12s  
+  ✓ regla r2 rechaza gasto menor al corte anterior                                                               0.13s  
+  ✓ regla r2 rechaza corte intermedio con gasto superior al posterior                                            0.08s  
+  ✓ unicidad fecha reporte por proyecto                                                                          0.10s  
+  ✓ rechazo registro corte en proyecto cerrado                                                                   0.08s  
+  ✓ responsable ajeno recibe 403 al registrar avance                                                             0.13s  
+  ✓ perfil consulta recibe 403 en avances                                                                        0.12s  
+  ✓ titular edita corte presupuestal                                                                             0.13s  
+  ✓ administrador elimina corte presupuestal                                                                     0.11s  
+
+   PASS  Tests\Feature\BaseOperativaReglasTest
+  ✓ r1 rechaza presupuesto planificado mayor al monto total                                                      0.22s  
+  ✓ r1 rechaza gasto acumulado mayor al monto total                                                              0.22s  
+  ✓ r1 reforzada rechaza reducir monto por debajo de cortes existentes                                           0.21s  
+  ✓ r2 rechaza gasto menor al reporte cronologico anterior                                                       0.23s  
+  ✓ r2 rechaza corte intermedio con gasto superior al corte posterior                                            0.24s  
+  ✓ r3 reforzada rechaza cierre de proyecto con cero hitos de linea base                                         0.21s  
+  ✓ r3 rechaza cierre con hitos de linea base abiertos                                                           0.20s  
+  ✓ r3 permite cierre cuando todos los hitos de linea base estan cerrados                                        0.25s  
+  ✓ r3 reapertura requiere motivo obligatorio                                                                    0.21s  
+  ✓ r3 reapertura exitosa con motivo guarda en bitacora motivo                                                   0.24s  
+  ✓ r4 rechaza modificacion sin id responsable                                                                   0.21s  
+  ✓ r4 limpieza estricta de actor y motivo tras excepcion                                                        0.24s  
+  ✓ r4 inmutabilidad de bitacora deniega update y delete en escritor                                             0.25s  
+  ✓ unicidad de codigo pgd rechaza duplicados                                                                    0.22s  
+  ✓ unicidad de avance por proyecto y fecha rechaza duplicados                                                   0.25s  
+  ✓ on delete restrict impide borrar proyecto con hitos                                                          0.23s  
+
+   PASS  Tests\Feature\CarteraProyectoTest
+  ✓ listado cartera accesible para usuarios autenticados                                                         0.11s  
+  ✓ filtro por estado cerrado                                                                                    0.12s  
+  ✓ permisos formulario creacion                                                                                 0.14s  
+  ✓ administrador crea nuevo proyecto                                                                            0.11s  
+  ✓ rechazo codigo pgd duplicado                                                                                 0.12s  
+  ✓ vista detalle proyecto                                                                                       0.12s  
+  ✓ responsable titular edita su proyecto                                                                        0.12s  
+  ✓ control concurrencia optimista detecta conflicto                                                             0.12s  
+  ✓ intento eliminar proyecto con hitos es bloqueado por fk                                                      0.10s  
+  ✓ catalogo objetivos pgd                                                                                       0.10s  
+
+   PASS  Tests\Feature\ConcurrenciaBloqueosTest
+  ✓ concurrencia cierre proyecto e insercion hito                                                                0.04s  
+  ✓ concurrencia avance presupuestal regla r2                                                                    0.06s  
+  ✓ proteccion concurrente ultimo administrador                                                                  0.08s  
+
+   PASS  Tests\Feature\DataWarehouseEtlTest
+  ✓ bi lector solo lectura deniega insert y update                                                               0.04s  
+  ✓ dim responsable no contiene usuario ni clave                                                                 0.03s  
+  ✓ etl idempotente conserva granularidad y conteos                                                              0.12s  
+  ✓ paridad analitica dw frente a motor operativo                                                                0.04s  
+  ✓ seis vistas analiticas accesibles y consistentes                                                             0.02s  
+  ✓ deteccion de desactualizacion de dw tras mutacion                                                            0.13s  
+  ✓ control de acceso endpoint ejecucion etl                                                                     0.08s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                                                                0.01s  
+
+   PASS  Tests\Feature\GateG1AutenticacionTest
+  ✓ invitados son redirigidos a login                                                                            0.08s  
+  ✓ pantalla login es accesible                                                                                  0.08s  
+  ✓ login exitoso para cada perfil                                                                               0.09s  
+  ✓ login falla con credenciales invalidas                                                                       0.28s  
+  ✓ bloqueo por fuerza bruta rate limiting                                                                       1.10s  
+  ✓ logout cierra sesion e invalida                                                                              0.10s  
+  ✓ perfil consulta recibe 403 en todas las mutaciones                                                           0.09s  
+  ✓ responsable titular puede actualizar su proyecto en curso                                                    0.09s  
+  ✓ responsable recibe 403 en proyecto ajeno                                                                     0.09s  
+  ✓ responsable recibe 403 en proyecto cerrado                                                                   0.11s  
+  ✓ administrador autorizado para operaciones privilegiadas                                                      0.10s  
+
+   PASS  Tests\Feature\GateG2AuditoriaConsistenciaTest
+  ✓ inmutabilidad bitacora cambio rechaza update en sig escritor                                                 0.08s  
+  ✓ inmutabilidad bitacora cambio rechaza delete en sig escritor                                                 0.09s  
+  ✓ inmutabilidad bitacora motivo rechaza update en sig escritor                                                 0.08s  
+  ✓ inmutabilidad bitacora motivo rechaza delete en sig escritor                                                 0.07s  
+  ✓ regla r4 rechaza mutacion sin id responsable                                                                 0.09s  
+  ✓ limpieza estricta de actor y motivo tras transaccion exitosa                                                 0.08s  
+  ✓ limpieza estricta de actor y motivo tras excepcion                                                           0.08s  
+  ✓ control de acceso exclusivo a modulo auditoria                                                               0.11s  
+  ✓ filtros de busqueda en bitacora                                                                              0.12s  
+  ✓ reapertura de proyecto audita motivo en bitacora                                                             0.11s  
+
+   PASS  Tests\Feature\GateG3ReportesExportacionTest
+  ✓ control de acceso a reportes para todos los perfiles                                                         0.10s  
+  ✓ paridad entre tablero y vista imprimible                                                                     0.07s  
+  ✓ descarga csv estructura y conteos                                                                            0.05s  
+  ✓ mitigacion inyeccion csv injection                                                                           0.05s  
+  ✓ deteccion discrepancia de revision en reporte                                                                0.04s  
+  ✓ seguridad ausencia de secretos en reportes                                                                   0.09s  
+  ✓ filtros combinados en exportacion                                                                            0.06s  
+
+   PASS  Tests\Feature\GateG4RestauracionTest
+  ✓ scripts de respaldo y restauracion existen                                                                   0.01s  
+  ✓ esquema operativo restaurado tiene las 6 tablas y extensiones                                                0.03s  
+  ✓ esquema operativo restaurado tiene triggers y rutinas                                                        0.06s  
+  ✓ esquema dw restaurado tiene dimensiones hechos y vistas                                                      0.04s  
+  ✓ conteos y montos concilian al 100 por ciento                                                                 0.03s  
+  ✓ paridad exacta de los cuatro indicadores en esquema restaurado                                               0.03s  
+  ✓ recorrido minimo funcional sobre esquema restaurado                                                          0.05s  
+
+   PASS  Tests\Feature\HitoYCierreProyectoTest
+  ✓ titular crea hito en su proyecto                                                                             0.12s  
+  ✓ crear hito fuera de linea base                                                                               0.08s  
+  ✓ responsable ajeno recibe 403 al crear hito                                                                   0.09s  
+  ✓ rechazo creacion hito en proyecto cerrado                                                                    0.11s  
+  ✓ titular actualiza y cierra hito                                                                              0.13s  
+  ✓ regla r3 impide cierre con hitos abiertos                                                                    0.08s  
+  ✓ regla r3 permite cierre con todos los hitos lb cerrados                                                      0.13s  
+  ✓ responsable no puede reabrir proyecto                                                                        0.12s  
+  ✓ reapertura requiere motivo obligatorio                                                                       0.11s  
+  ✓ administrador reabre proyecto con motivo y se audita                                                         0.12s  
+  ✓ administrador elimina hito                                                                                   0.09s  
+
+   PASS  Tests\Feature\IndicadoresMotorTest
+  ✓ oraculo canonico independiente corte comun 2024 06 30                                                        0.06s  
+  ✓ vencimiento exacto en dia del corte no cuenta como retraso                                                   0.06s  
+  ✓ cierre exacto en dia del corte cuenta como concluido                                                         0.06s  
+  ✓ denominador presupuestal cero produce no aplica                                                              0.06s  
+  ✓ cartera filtro vacio produce sin datos                                                                       0.04s  
+  ✓ modo ultimo reporte por proyecto toma maximo corte                                                           0.04s  
+  ✓ calculo cartera canonica completa                                                                            0.04s  
+  ✓ endpoint indicadores consulta requiere autenticacion y responde json                                         0.06s  
+
+   PASS  Tests\Feature\MuestraProcedenciaTest
+  ✓ objetivos pgd completos                                                                                      0.08s  
+  ✓ responsables sembrados                                                                                       0.07s  
+  ✓ cartera 10 proyectos y presupuesto total                                                                     0.10s  
+  ✓ hitos y linea base                                                                                           0.10s  
+  ✓ avances presupuestales                                                                                       0.08s  
+  ✓ vista indicadores proyecto                                                                                   0.08s  
+
+   PASS  Tests\Feature\PowerBiPreparacionTest
+  ✓ archivos de datos bi y manifiesto existen y tienen bom                                                       0.01s  
+  ✓ documentos de modelo dax y guia power bi existen                                                             0.01s  
+
+   PASS  Tests\Feature\SmokeTest
+  ✓ pagina de salud responde y verifica mariadb 10 11                                                            0.03s  
+  ✓ ruta raiz responde correctamente                                                                             0.01s  
+
+   PASS  Tests\Feature\TableroGerencialTest
+  ✓ control de acceso al tablero para todos los perfiles                                                         0.05s  
+  ✓ tablero renderiza cuatro kpis canonicos                                                                      0.03s  
+  ✓ modalidades temporales en tablero                                                                            0.06s  
+  ✓ intercambio de origen operativo y dw                                                                         0.05s  
+  ✓ filtros de busqueda y estado vacio                                                                           0.05s  
+  ✓ tiempo de respuesta tablero menor a tres segundos                                                            0.04s  
+
+  Tests:    119 passed (769 assertions)
+  Duration: 13.32s
+

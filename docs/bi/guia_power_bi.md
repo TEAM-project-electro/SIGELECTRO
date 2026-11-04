@@ -36,7 +36,7 @@ Si se dispone del conector *MySQL Connector/NET* instalado en el sistema:
 4. Modo de conectividad: **Importar**.
 5. Credenciales técnicas:
    - Usuario: `bi_lector`
-   - Contraseña: `BiLector2026!` (según Decisión 5 y archivo `.env`).
+   - Contraseña: la configurada para `DW_BI_PASSWORD` en el entorno privado; no se publica en esta guía.
 6. Marcar las seis tablas del modelo dimensional (`dim_tiempo`, `dim_proyecto`, `dim_objetivo`, `dim_responsable`, `fact_avance_proyecto`, `fact_hito`) y las vistas `v_alertas` y `v_calidad_datos`.
 
 ---

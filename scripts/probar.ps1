@@ -29,3 +29,4 @@ if ($Filter) {
 } else {
     php artisan test
 }
+exit $LASTEXITCODE

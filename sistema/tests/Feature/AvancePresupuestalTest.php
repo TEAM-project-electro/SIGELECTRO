@@ -237,6 +237,7 @@ class AvancePresupuestalTest extends TestCase
         $this->actingAs($ana);
 
         $response = $this->put("/avances/{$corte->id_avance}", [
+            'revision_esperada' => DB::table('control_revision')->where('id', 1)->value('version'),
             'presupuesto_planificado' => 490000.00,
             'gasto_acumulado' => 460000.00,
         ]);

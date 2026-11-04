@@ -2,9 +2,9 @@
     "sistema": "SIG Electrocentro S. A.",
     "base_datos": "dw_seguimiento_gd",
     "cuenta_lectura": "bi_lector",
-    "fecha_extraccion": "2026-11-04 03:36:06",
-    "id_carga_etl": 27,
-    "revision_origen": 61,
+    "fecha_extraccion": "2026-11-04 11:40:36",
+    "id_carga_etl": 47,
+    "revision_origen": 300,
     "estado_carga_etl": "Completado",
     "tablas_exportadas": {
         "dim_tiempo": 1826,
