@@ -1,0 +1,24 @@
+{
+    "sistema": "SIG Electrocentro S. A.",
+    "base_datos": "dw_seguimiento_gd",
+    "cuenta_lectura": "bi_lector",
+    "fecha_extraccion": "2026-11-04 03:36:06",
+    "id_carga_etl": 27,
+    "revision_origen": 61,
+    "estado_carga_etl": "Completado",
+    "tablas_exportadas": {
+        "dim_tiempo": 1826,
+        "dim_proyecto": 10,
+        "dim_objetivo": 6,
+        "dim_responsable": 4,
+        "fact_avance_proyecto": 24,
+        "fact_hito": 26,
+        "v_alertas": 4,
+        "v_calidad_datos": 3
+    },
+    "compatibilidad_power_bi": {
+        "formato": "CSV UTF-8 con BOM",
+        "separador": "Coma (,)",
+        "lineas": "CRLF"
+    }
+}

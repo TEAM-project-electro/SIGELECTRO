@@ -1,0 +1,229 @@
+// ==============================================================================
+// CATÁLOGO DE MEDIDAS DAX - SIG ELECTROCENTRO S. A.
+// Sistema de Información Gerencial para Seguimiento de Cartera PGD
+// Fecha: 4 de noviembre de 2026
+// Referencia canónica: PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md (Etapa 10, 11, 14)
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// 1. MEDIDAS BASE DE CARTERA
+// ------------------------------------------------------------------------------
+
+[Total Proyectos Cartera] = 
+DISTINCTCOUNT(dim_proyecto[id_proyecto])
+
+[Monto Total Cartera] = 
+SUM(dim_proyecto[monto])
+
+[Total Proyectos Activos] = 
+CALCULATE(
+    DISTINCTCOUNT(dim_proyecto[id_proyecto]),
+    dim_proyecto[es_activo] = 1
+)
+
+[Proyectos Cerrados] = 
+CALCULATE(
+    DISTINCTCOUNT(dim_proyecto[id_proyecto]),
+    dim_proyecto[estado_actual] = "Cerrado"
+)
+
+[Proyectos En Curso] = 
+CALCULATE(
+    DISTINCTCOUNT(dim_proyecto[id_proyecto]),
+    dim_proyecto[estado_actual] = "En curso"
+)
+
+[Proyectos Pendientes] = 
+CALCULATE(
+    DISTINCTCOUNT(dim_proyecto[id_proyecto]),
+    dim_proyecto[estado_actual] = "Pendiente"
+)
+
+
+// ------------------------------------------------------------------------------
+// 2. KPI 1: AVANCE DE HITOS DE LÍNEA BASE (%)
+// Regla: 100 * Suma(hitos LB concluidos) / Suma(hitos LB totales)
+// PROHIBIDO promediar porcentajes individuales de proyectos.
+// ------------------------------------------------------------------------------
+
+[Hitos LB Totales] = 
+CALCULATE(
+    SUM(fact_avance_proyecto[hitos_linea_base]),
+    fact_avance_proyecto[es_ultimo_corte] = 1
+)
+
+[Hitos LB Concluidos] = 
+CALCULATE(
+    SUM(fact_avance_proyecto[hitos_concluidos]),
+    fact_avance_proyecto[es_ultimo_corte] = 1
+)
+
+[KPI 1 Avance Hitos LB %] = 
+VAR _Num = [Hitos LB Concluidos]
+VAR _Den = [Hitos LB Totales]
+RETURN
+IF(
+    ISBLANK(_Den) || _Den = 0,
+    BLANK(),
+    DIVIDE(_Num, _Den)
+)
+
+[KPI 1 Avance Hitos Formateado] = 
+VAR _Valor = [KPI 1 Avance Hitos LB %]
+RETURN
+IF(
+    ISBLANK(_Valor),
+    "No aplica",
+    FORMAT(_Valor, "0.00 %")
+)
+
+
+// ------------------------------------------------------------------------------
+// 3. KPI 2: PROYECTOS CON RETRASO (%)
+// Regla: 100 * Proyectos activos evaluables con >=1 hito LB vencido / Activos evaluables
+// ------------------------------------------------------------------------------
+
+[Proyectos Activos Evaluables] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]),
+    fact_avance_proyecto[es_ultimo_corte] = 1,
+    RELATED(dim_proyecto[es_activo]) = 1,
+    fact_avance_proyecto[hitos_linea_base] > 0
+)
+
+[Proyectos con Retraso Cantidad] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]),
+    fact_avance_proyecto[es_ultimo_corte] = 1,
+    RELATED(dim_proyecto[es_activo]) = 1,
+    fact_avance_proyecto[con_retraso] = 1
+)
+
+[KPI 2 Proyectos Retraso %] = 
+VAR _Num = [Proyectos con Retraso Cantidad]
+VAR _Den = [Proyectos Activos Evaluables]
+RETURN
+IF(
+    ISBLANK(_Den) || _Den = 0,
+    BLANK(),
+    DIVIDE(_Num, _Den)
+)
+
+[KPI 2 Proyectos Retraso Formateado] = 
+VAR _Valor = [KPI 2 Proyectos Retraso %]
+RETURN
+IF(
+    ISBLANK(_Valor),
+    "No aplica",
+    FORMAT(_Valor, "0.00 %")
+)
+
+
+// ------------------------------------------------------------------------------
+// 4. KPI 3: DESVIACIÓN PRESUPUESTAL (%)
+// Regla: 100 * (Suma Gasto - Suma Plan) / Suma Plan
+// Nota: Valores negativos indican gasto por debajo de lo planificado acumulado.
+// ------------------------------------------------------------------------------
+
+[Presupuesto Planificado al Corte] = 
+CALCULATE(
+    SUM(fact_avance_proyecto[presupuesto_planificado]),
+    fact_avance_proyecto[es_ultimo_corte] = 1
+)
+
+[Gasto Acumulado al Corte] = 
+CALCULATE(
+    SUM(fact_avance_proyecto[gasto_acumulado]),
+    fact_avance_proyecto[es_ultimo_corte] = 1
+)
+
+[Diferencia Gasto vs Plan (S/)] = 
+[Gasto Acumulado al Corte] - [Presupuesto Planificado al Corte]
+
+[KPI 3 Desviación Presupuestal %] = 
+VAR _Plan = [Presupuesto Planificado al Corte]
+VAR _Gasto = [Gasto Acumulado al Corte]
+RETURN
+IF(
+    ISBLANK(_Plan) || _Plan = 0,
+    BLANK(),
+    DIVIDE(_Gasto - _Plan, _Plan)
+)
+
+[KPI 3 Desviación Formateada] = 
+VAR _Valor = [KPI 3 Desviación Presupuestal %]
+VAR _Signo = IF(_Valor > 0, "+", "")
+RETURN
+IF(
+    ISBLANK(_Valor),
+    "No aplica",
+    _Signo & FORMAT(_Valor, "0.00 %")
+)
+
+
+// ------------------------------------------------------------------------------
+// 5. MEDIDAS DINÁMICAS CON SELECTOR DESCONECTADO DE CORTE (CORTE_COMUN)
+// Si se utiliza una tabla desconectada 'SelectorCorte'[FechaCorte]
+// ------------------------------------------------------------------------------
+
+[Gasto en Fecha Corte Seleccionada] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Gasto Acumulado al Corte],
+    CALCULATE(
+        SUM(fact_avance_proyecto[gasto_acumulado]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel
+    )
+)
+
+[Plan en Fecha Corte Seleccionada] = 
+VAR _FechaSel = SELECTEDVALUE(SelectorCorte[FechaCorte])
+RETURN
+IF(
+    ISBLANK(_FechaSel),
+    [Presupuesto Planificado al Corte],
+    CALCULATE(
+        SUM(fact_avance_proyecto[presupuesto_planificado]),
+        fact_avance_proyecto[fecha_reporte] = _FechaSel
+    )
+)
+
+[Desviación Presupuestal en Fecha Corte] = 
+VAR _Plan = [Plan en Fecha Corte Seleccionada]
+VAR _Gasto = [Gasto en Fecha Corte Seleccionada]
+RETURN
+IF(
+    ISBLANK(_Plan) || _Plan = 0,
+    BLANK(),
+    DIVIDE(_Gasto - _Plan, _Plan)
+)
+
+
+// ------------------------------------------------------------------------------
+// 6. METADATOS Y COBERTURAS INFORMADAS
+// ------------------------------------------------------------------------------
+
+[Cobertura Financiera Texto] = 
+VAR _Elegibles = CALCULATE(DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]), fact_avance_proyecto[es_ultimo_corte] = 1)
+VAR _Total = [Total Proyectos Cartera]
+RETURN
+FORMAT(_Elegibles, "0") & " de " & FORMAT(_Total, "0") & " proyectos con reporte"
+
+[Cobertura Hitos Texto] = 
+VAR _Elegibles = CALCULATE(DISTINCTCOUNT(fact_avance_proyecto[id_proyecto]), fact_avance_proyecto[es_ultimo_corte] = 1, fact_avance_proyecto[hitos_linea_base] > 0)
+VAR _Total = [Total Proyectos Cartera]
+RETURN
+FORMAT(_Elegibles, "0") & " de " & FORMAT(_Total, "0") & " proyectos con línea base"
+
+[Interpretación Desviación Texto] = 
+VAR _Desv = [KPI 3 Desviación Presupuestal %]
+RETURN
+SWITCH(
+    TRUE(),
+    ISBLANK(_Desv), "Sin datos suficientes para calcular desviación",
+    _Desv < 0, "Gasto acumulado por debajo del plan (no presupone ahorro definitivo)",
+    _Desv > 0, "Gasto acumulado por encima del presupuesto planificado al corte",
+    "Ejecución financiera exactamente alineada al plan"
+)

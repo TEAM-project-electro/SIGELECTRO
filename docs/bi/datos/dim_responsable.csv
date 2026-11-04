@@ -1,0 +1,5 @@
+﻿sk_responsable,id_responsable,nombre,area,perfil,es_activo
+1,1,"Ana Quispe",TIC,Responsable,1
+2,2,"Marta Salas",Planeamiento,Administrador,1
+3,3,"Luis Rojas",TIC,Responsable,1
+4,4,"Carlos Garcia","Comite de Gobierno Digital",Consulta,1

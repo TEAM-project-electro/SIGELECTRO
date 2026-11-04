@@ -1,0 +1,5 @@
+﻿tipo_alerta,severidad,detalle,codigo_pgd,proyecto,responsable
+"Hito vencido",ALTA,"Hito ""Hito dependiente"" venció el 1 y sigue sin cierre",005,"Equipos de ciberseguridad","Ana Quispe"
+"Hito vencido",ALTA,"Hito ""Instalacion y configuracion en sede central"" venció el 3 y sigue sin cierre",005,"Equipos de ciberseguridad","Ana Quispe"
+"Hito vencido",ALTA,"Hito ""Implementacion de casilla electronica y notificaciones"" venció el 26 y sigue sin cierre",024,"Mesa de partes digital integrada al sistema de gestion documental","Ana Quispe"
+"Hito vencido",ALTA,"Hito ""Migracion de datos historicos maestros"" venció el 11 y sigue sin cierre",013,"Implementacion de SAP S/4 HANA","Luis Rojas"

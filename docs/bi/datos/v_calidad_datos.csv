@@ -1,0 +1,4 @@
+﻿regla_calidad,casos_detectados,impacto
+"Proyectos sin hitos en línea base",0,"Proyectos que no definieron hitos de línea base evaluables"
+"Proyectos sin ningún corte presupuestal",0,"Proyectos sin historial de avance en fact_avance_proyecto"
+"Hitos cerrados sin evidencia",0,"Hitos con fecha de cierre pero sin comprobante de evidencia"
