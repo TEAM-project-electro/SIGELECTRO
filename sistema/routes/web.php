@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('tablero');
 
+    // Motor de Indicadores y Consulta (RF04 - Etapa 10)
+    Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');
+
     // Módulo de Auditoría y Trazabilidad (RF05 - Solo Administrador)
     Route::get('/auditoria', [\App\Http\Controllers\AuditoriaController::class, 'index'])->name('auditoria.index');
 
