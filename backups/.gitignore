@@ -1,0 +1,8 @@
+# Ignorar todos los volcados y respaldos SQL
+*.sql
+*.sql.gz
+*.bak
+*.dump
+
+# Conservar este archivo
+!.gitignore

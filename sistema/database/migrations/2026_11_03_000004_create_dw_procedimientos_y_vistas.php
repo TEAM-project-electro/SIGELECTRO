@@ -370,9 +370,9 @@ return new class extends Migration
             CREATE VIEW v_alertas AS
             -- Alerta 1: Hito de línea base vencido
             SELECT
-                'Hito vencido' AS tipo_alerta,
-                'ALTA' AS severidad,
-                CONCAT('Hito \"', fh.descripcion, '\" venció el ', fh.id_hito, ' y sigue sin cierre') AS detalle,
+                CONVERT('Hito vencido' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS tipo_alerta,
+                CONVERT('ALTA' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS severidad,
+                CONVERT(CONCAT('Hito \"', fh.descripcion, '\" venció el ', fh.id_hito, ' y sigue sin cierre') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS detalle,
                 dp.codigo_pgd,
                 dp.nombre AS proyecto,
                 dr.nombre AS responsable
@@ -383,9 +383,9 @@ return new class extends Migration
             UNION ALL
             -- Alerta 2: Hito concluido sin evidencia registrada
             SELECT
-                'Sin evidencia' AS tipo_alerta,
-                'MEDIA' AS severidad,
-                CONCAT('Hito \"', fh.descripcion, '\" cerrado sin referencia de evidencia') AS detalle,
+                CONVERT('Sin evidencia' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS tipo_alerta,
+                CONVERT('MEDIA' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS severidad,
+                CONVERT(CONCAT('Hito \"', fh.descripcion, '\" cerrado sin referencia de evidencia') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS detalle,
                 dp.codigo_pgd,
                 dp.nombre AS proyecto,
                 dr.nombre AS responsable
@@ -396,9 +396,9 @@ return new class extends Migration
             UNION ALL
             -- Alerta 3: Proyecto activo con retraso presupuestal (gasto > plan)
             SELECT
-                'Sobregasto' AS tipo_alerta,
-                'MEDIA' AS severidad,
-                CONCAT('Gasto supera al presupuesto planificado en S/ ', FORMAT(fa.diferencia_gasto, 2)) AS detalle,
+                CONVERT('Sobregasto' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS tipo_alerta,
+                CONVERT('MEDIA' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS severidad,
+                CONVERT(CONCAT('Gasto supera al presupuesto planificado en S/ ', FORMAT(fa.diferencia_gasto, 2)) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS detalle,
                 dp.codigo_pgd,
                 dp.nombre AS proyecto,
                 dr.nombre AS responsable

@@ -24,15 +24,35 @@ Para no entrar en conflicto con instalaciones existentes en el equipo (XAMPP Mar
 - **Esquemas creados:** `seguimiento_gd`, `dw_seguimiento_gd`, `seguimiento_gd_test`, `dw_seguimiento_gd_test`.
 - **Cuentas técnicas (Decisión 5):** `sig_migrador`, `sig_definer`, `sig_auth`, `sig_lector`, `sig_escritor`, `sig_etl`, `bi_lector`.
 
-### Scripts de Gestión de MariaDB
+### Scripts de Gestión y Operación
 Desde la raíz del proyecto:
-- **Iniciar servidor:**
+- **Iniciar servidor MariaDB:**
   ```powershell
   pwsh -File .\scripts\iniciar_mariadb.ps1
   ```
-- **Detener servidor:**
+- **Detener servidor MariaDB:**
   ```powershell
   pwsh -File .\scripts\detener_mariadb.ps1
+  ```
+- **Respaldo lógico completo (esquema operativo y DW en `backups/`):**
+  ```powershell
+  pwsh -File .\scripts\respaldo_db.ps1
+  ```
+- **Restauración y conciliación a esquemas de verificación:**
+  ```powershell
+  pwsh -File .\scripts\restaurar_db.ps1
+  ```
+- **Instalación y despliegue limpio (prerrequisitos, dependencias, siembra, compilación, DW y tests):**
+  ```powershell
+  pwsh -File .\scripts\instalar.ps1
+  ```
+- **Arranque del servidor web local (`http://localhost:8000`):**
+  ```powershell
+  pwsh -File .\scripts\arrancar.ps1
+  ```
+- **Ejecución de la suite completa de pruebas (116 tests):**
+  ```powershell
+  pwsh -File .\scripts\probar.ps1
   ```
 
 ---
