@@ -1,0 +1,223 @@
+[
+  {
+    "codigo": "P00",
+    "nombre": "Seguimiento gerencial de proyectos",
+    "categoria": "Visión integral",
+    "archivo": "P00_seguimiento_integral.bpmn",
+    "carriles": [
+      "Gestor autorizado",
+      "Sistema SIG"
+    ],
+    "objetivo": "Vista de contexto. El gestor puede registrar seguimiento de hitos o cortes y consultar resultados en cualquier orden. No representa una aprobación institucional ni una obligación de ejecutar todos los módulos en cada visita.",
+    "fuentes": [
+      "sistema/routes/web.php",
+      "sistema/app/Policies/ProyectoPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P01",
+    "nombre": "Acceso y cierre de sesión",
+    "categoria": "Soporte",
+    "archivo": "P01_acceso.bpmn",
+    "carriles": [
+      "Usuario: cualquier perfil",
+      "Sistema SIG"
+    ],
+    "objetivo": "Autenticación de Administrador, Responsable y Consulta. Cuenta activa, limitación de cinco intentos por usuario/IP, regeneración de sesión y cierre explícito. No hay registro público ni aprobación de acceso.",
+    "fuentes": [
+      "sistema/app/Http/Requests/Auth/LoginRequest.php",
+      "sistema/app/Http/Controllers/Auth/LoginController.php",
+      "sistema/app/Http/Middleware/VerificarUsuarioActivo.php"
+    ]
+  },
+  {
+    "codigo": "P02",
+    "nombre": "Registrar o editar proyectos",
+    "categoria": "Operación",
+    "archivo": "P02_cartera.bpmn",
+    "carriles": [
+      "Administrador / Responsable titular",
+      "Sistema SIG"
+    ],
+    "objetivo": "Alta reservada a Administrador; edición del Responsable sólo sobre su proyecto y campos permitidos. Código PGD único; monto no negativo; objetivo y responsable existentes. Reducción exige motivo y no puede invalidar cortes anteriores. La baja física es excepcional y no forma parte del flujo habitual de cartera; se bloquea si hay referencias.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ProyectoController.php",
+      "sistema/app/Http/Requests/Proyecto/UpdateProyectoRequest.php",
+      "sistema/app/Policies/ProyectoPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P03",
+    "nombre": "Gestionar hitos y línea base",
+    "categoria": "Operación",
+    "archivo": "P03_hitos_linea_base.bpmn",
+    "carriles": [
+      "Administrador / Responsable titular",
+      "Sistema SIG"
+    ],
+    "objetivo": "Proyecto no cerrado, permisos por propietario, revisión vigente al editar. Registrar descripción, fecha prevista, fecha de cierre y evidencia cuando corresponda. Cambiar pertenencia a línea base exige motivo explícito; no se inventa aprobación de un comité. Los hitos fuera de línea base no alteran avance ni retraso del KPI.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/HitoController.php",
+      "sistema/app/Http/Requests/Hito/UpdateHitoRequest.php",
+      "sistema/app/Policies/HitoPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P04",
+    "nombre": "Registrar o editar cortes presupuestales",
+    "categoria": "Operación",
+    "archivo": "P04_avance_presupuestal.bpmn",
+    "carriles": [
+      "Administrador / Responsable titular",
+      "Sistema SIG"
+    ],
+    "objetivo": "Proyecto no cerrado y usuario autorizado. R1: planificado/gasto no negativos ni superiores al monto del proyecto. R2: gasto acumulado no decreciente contra corte anterior y posterior. Fecha única por proyecto; edición con revisión esperada. Gasto mayor al plan está permitido si no excede el monto del proyecto. No se modelan desembolsos ni aprobaciones financieras.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/AvancePresupuestalController.php",
+      "sistema/app/Http/Requests/Avance/UpdateAvanceRequest.php",
+      "sistema/database/migrations/2026_11_03_000002_create_triggers_y_procedimientos.php"
+    ]
+  },
+  {
+    "codigo": "P05",
+    "nombre": "Cerrar formalmente un proyecto",
+    "categoria": "Operación",
+    "archivo": "P05_cierre_proyecto.bpmn",
+    "carriles": [
+      "Administrador / Responsable titular",
+      "Sistema SIG"
+    ],
+    "objetivo": "El cierre es una solicitud ejecutada por el titular o Administrador. No interviene un aprobador adicional. La regla implementada exige al menos un hito de línea base y ningún hito de línea base sin fecha de cierre.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ProyectoController.php",
+      "sistema/app/Http/Requests/Proyecto/CerrarProyectoRequest.php",
+      "sistema/database/migrations/2026_11_03_000002_create_triggers_y_procedimientos.php"
+    ]
+  },
+  {
+    "codigo": "P06",
+    "nombre": "Reabrir un proyecto cerrado",
+    "categoria": "Operación",
+    "archivo": "P06_reapertura.bpmn",
+    "carriles": [
+      "Administrador",
+      "Sistema SIG"
+    ],
+    "objetivo": "Sólo Administrador y sólo proyecto actualmente Cerrado. Motivo obligatorio auditado en bitacora_motivo. Operación atómica con actualización de revisión; un Responsable no puede reabrir su propio proyecto.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ProyectoController.php",
+      "sistema/app/Http/Requests/Proyecto/ReabrirProyectoRequest.php",
+      "sistema/app/Policies/ProyectoPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P07",
+    "nombre": "Consultar cartera e indicadores",
+    "categoria": "Operación",
+    "archivo": "P07_consulta_indicadores.bpmn",
+    "carriles": [
+      "Usuario: cualquier perfil",
+      "Sistema SIG"
+    ],
+    "objetivo": "Consultar la cartera con filtros de estado, responsable, objetivo, búsqueda y fecha. Elegir operativo o DW y modo temporal. No se guarda información de negocio ni se ejecuta ETL automáticamente.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/TableroController.php",
+      "sistema/app/Services/IndicadoresService.php",
+      "sistema/app/Services/EtlService.php"
+    ]
+  },
+  {
+    "codigo": "P08",
+    "nombre": "Generar y descargar reporte gerencial",
+    "categoria": "Operación",
+    "archivo": "P08_reportes.bpmn",
+    "carriles": [
+      "Usuario: cualquier perfil",
+      "Sistema SIG"
+    ],
+    "objetivo": "Reportar el mismo contexto seleccionado en el tablero. Formatos implementados: CSV UTF-8 BOM o vista imprimible para guardar PDF desde el navegador. Una variación de revisión se advierte; no se presenta como archivo idéntico silenciosamente.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ReporteController.php",
+      "sistema/resources/views/reportes/imprimir.blade.php"
+    ]
+  },
+  {
+    "codigo": "P09",
+    "nombre": "Actualizar el almacén de datos — ETL",
+    "categoria": "Soporte",
+    "archivo": "P09_actualizacion_dw.bpmn",
+    "carriles": [
+      "Administrador",
+      "Sistema SIG"
+    ],
+    "objetivo": "Carga manual desde la aplicación o comando local etl:cargar. Mantiene mutex y transacción para publicar dimensiones, hechos y revisión. No modela trabajo en Power BI ni una programación periódica no implementada.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/EtlController.php",
+      "sistema/app/Services/EtlService.php",
+      "sistema/database/migrations/2026_11_03_000004_create_dw_procedimientos_y_vistas.php"
+    ]
+  },
+  {
+    "codigo": "P10",
+    "nombre": "Administrar usuarios y perfiles",
+    "categoria": "Soporte",
+    "archivo": "P10_administracion_usuarios.bpmn",
+    "carriles": [
+      "Administrador",
+      "Sistema SIG"
+    ],
+    "objetivo": "Usuario único; perfiles Administrador/Responsable/Consulta. Clave requerida al crear y opcional al editar. Desactivar exige motivo de 5 a 200 caracteres. Bloquear revisión y administradores activos para impedir desactivar/degradar al último. El hash se guarda pero nunca se serializa ni aparece en auditoría. La desactivación revoca el acceso en la siguiente petición.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ResponsableController.php",
+      "sistema/app/Services/AdministrarUsuarios.php",
+      "sistema/app/Policies/ResponsablePolicy.php"
+    ]
+  },
+  {
+    "codigo": "P11",
+    "nombre": "Administrar objetivos de gobierno digital",
+    "categoria": "Soporte",
+    "archivo": "P11_catalogo_objetivos.bpmn",
+    "carriles": [
+      "Administrador",
+      "Sistema SIG"
+    ],
+    "objetivo": "El catálogo implementa alta y edición por Administrador. Los otros perfiles sólo consultan. Código único; descripción hasta 200 caracteres. El cambio incrementa la revisión para invalidar consultas y advertir desactualización del DW. No se modela una aprobación institucional ni una eliminación de catálogo no expuesta por rutas.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/ObjetivoGdController.php",
+      "sistema/app/Policies/ObjetivoGdPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P12",
+    "nombre": "Consultar trazabilidad de cambios",
+    "categoria": "Soporte",
+    "archivo": "P12_consulta_auditoria.bpmn",
+    "carriles": [
+      "Administrador",
+      "Sistema SIG"
+    ],
+    "objetivo": "La auditoría se genera automáticamente al cambiar negocio. Este proceso sólo consulta; no permite editar, borrar o aprobar eventos. No crea una segunda auditoría manual.",
+    "fuentes": [
+      "sistema/app/Http/Controllers/AuditoriaController.php",
+      "sistema/app/Policies/BitacoraCambioPolicy.php"
+    ]
+  },
+  {
+    "codigo": "P13",
+    "nombre": "Respaldar y verificar recuperación local",
+    "categoria": "Soporte técnico",
+    "archivo": "P13_respaldo_restauracion.bpmn",
+    "carriles": [
+      "Operador técnico local",
+      "Herramientas locales / MariaDB"
+    ],
+    "objetivo": "Proceso técnico operado desde PowerShell con cuenta migradora autorizada; no existe un botón web de respaldo ni se crea un cuarto perfil de aplicación. El camino normal restaura en esquemas descartables y nunca sobrescribe la operativa.",
+    "fuentes": [
+      "scripts/respaldo_db.ps1",
+      "scripts/restaurar_db.ps1",
+      "scripts/ajustar_permisos.php",
+      "sistema/tests/Feature/GateG4RestauracionTest.php"
+    ]
+  }
+]

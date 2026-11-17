@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P08_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P08_Process" name="Generar y descargar reporte gerencial" isExecutable="false">
+    <bpmn:documentation>Reportar el mismo contexto seleccionado en el tablero. Formatos implementados: CSV UTF-8 BOM o vista imprimible para guardar PDF desde el navegador. Una variación de revisión se advierte; no se presenta como archivo idéntico silenciosamente.
+Fuentes del sistema: sistema/app/Http/Controllers/ReporteController.php, sistema/resources/views/reportes/imprimir.blade.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P08_LaneSet">
+      <bpmn:lane id="P08_Lane0" name="Usuario: cualquier perfil">
+        <bpmn:flowNodeRef>P08_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Pedir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Recibir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P08_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P08_Contexto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Revision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Avisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Tipo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_CSV</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Imprimir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Merge2</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P08_I" name="Consulta disponible">
+      <bpmn:outgoing>P08_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P08_Pedir" name="Elegir CSV o vista de impresión">
+      <bpmn:incoming>P08_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P08_Contexto" name="Capturar filtros, origen y revisión">
+      <bpmn:incoming>P08_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P08_Leer" name="Consultar datos con ese contexto">
+      <bpmn:incoming>P08_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Revision" name="¿Coincide revisión solicitada?" gatewayDirection="Diverging" default="P08_Flow6">
+      <bpmn:incoming>P08_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P08_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P08_Avisar" name="Incluir aviso de datos cambiados">
+      <bpmn:incoming>P08_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Merge" name="Continuar generación" gatewayDirection="Converging">
+      <bpmn:incoming>P08_Flow5</bpmn:incoming>
+      <bpmn:incoming>P08_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="P08_Tipo" name="¿Formato solicitado?" gatewayDirection="Diverging" default="P08_Flow10">
+      <bpmn:incoming>P08_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow9</bpmn:outgoing>
+      <bpmn:outgoing>P08_Flow10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P08_CSV" name="Generar CSV con BOM y protección">
+      <bpmn:documentation>Neutralizar texto interpretable como fórmula sin alterar importes negativos legítimos. Incluir filtros, modo temporal, revisión y aviso de datos demostrativos; no exportar credenciales.</bpmn:documentation>
+      <bpmn:incoming>P08_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P08_Imprimir" name="Renderizar vista imprimible">
+      <bpmn:incoming>P08_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Merge2" name="Entregar salida" gatewayDirection="Converging">
+      <bpmn:incoming>P08_Flow11</bpmn:incoming>
+      <bpmn:incoming>P08_Flow12</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P08_Recibir" name="Descargar o imprimir documento">
+      <bpmn:incoming>P08_Flow13</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow14</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P08_Fin" name="Reporte obtenido">
+      <bpmn:incoming>P08_Flow14</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P08_Flow1" sourceRef="P08_I" targetRef="P08_Pedir"/>
+    <bpmn:sequenceFlow id="P08_Flow2" sourceRef="P08_Pedir" targetRef="P08_Contexto"/>
+    <bpmn:sequenceFlow id="P08_Flow3" sourceRef="P08_Contexto" targetRef="P08_Leer"/>
+    <bpmn:sequenceFlow id="P08_Flow4" sourceRef="P08_Leer" targetRef="P08_Revision"/>
+    <bpmn:sequenceFlow id="P08_Flow5" sourceRef="P08_Revision" targetRef="P08_Merge" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">revision_esperada == revision_actual</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P08_Flow6" sourceRef="P08_Revision" targetRef="P08_Avisar" name="No"/>
+    <bpmn:sequenceFlow id="P08_Flow7" sourceRef="P08_Avisar" targetRef="P08_Merge"/>
+    <bpmn:sequenceFlow id="P08_Flow8" sourceRef="P08_Merge" targetRef="P08_Tipo"/>
+    <bpmn:sequenceFlow id="P08_Flow9" sourceRef="P08_Tipo" targetRef="P08_CSV" name="CSV">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">formato == "CSV"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P08_Flow10" sourceRef="P08_Tipo" targetRef="P08_Imprimir" name="Impresión"/>
+    <bpmn:sequenceFlow id="P08_Flow11" sourceRef="P08_CSV" targetRef="P08_Merge2"/>
+    <bpmn:sequenceFlow id="P08_Flow12" sourceRef="P08_Imprimir" targetRef="P08_Merge2"/>
+    <bpmn:sequenceFlow id="P08_Flow13" sourceRef="P08_Merge2" targetRef="P08_Recibir"/>
+    <bpmn:sequenceFlow id="P08_Flow14" sourceRef="P08_Recibir" targetRef="P08_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P08_Collaboration">
+    <bpmn:participant id="P08_Pool" name="SIG Electrocentro — P08" processRef="P08_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P08_Diagram" name="Generar y descargar reporte gerencial">
+    <bpmndi:BPMNPlane id="P08_Plane" bpmnElement="P08_Collaboration">
+      <bpmndi:BPMNShape id="P08_PoolShape" bpmnElement="P08_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="2555" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_LaneShape0" bpmnElement="P08_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="2525" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_LaneShape1" bpmnElement="P08_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="2525" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_I_di" bpmnElement="P08_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Pedir_di" bpmnElement="P08_Pedir">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Contexto_di" bpmnElement="P08_Contexto">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Leer_di" bpmnElement="P08_Leer">
+        <dc:Bounds x="715.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Revision_di" bpmnElement="P08_Revision" isMarkerVisible="true">
+        <dc:Bounds x="970.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="845.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Avisar_di" bpmnElement="P08_Avisar">
+        <dc:Bounds x="1125.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Merge_di" bpmnElement="P08_Merge" isMarkerVisible="true">
+        <dc:Bounds x="1380.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1255.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Tipo_di" bpmnElement="P08_Tipo" isMarkerVisible="true">
+        <dc:Bounds x="1585.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1460.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_CSV_di" bpmnElement="P08_CSV">
+        <dc:Bounds x="1740.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Imprimir_di" bpmnElement="P08_Imprimir">
+        <dc:Bounds x="1740.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Merge2_di" bpmnElement="P08_Merge2" isMarkerVisible="true">
+        <dc:Bounds x="1995.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1870.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Recibir_di" bpmnElement="P08_Recibir">
+        <dc:Bounds x="2150.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Fin_di" bpmnElement="P08_Fin">
+        <dc:Bounds x="2412.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2355.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P08_Edge1" bpmnElement="P08_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge2" bpmnElement="P08_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge3" bpmnElement="P08_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="715.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge4" bpmnElement="P08_Flow4">
+        <di:waypoint x="865.0" y="480.0"/>
+        <di:waypoint x="970.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge5" bpmnElement="P08_Flow5">
+        <di:waypoint x="995.0" y="455.0"/>
+        <di:waypoint x="995.0" y="385"/>
+        <di:waypoint x="1405.0" y="385"/>
+        <di:waypoint x="1405.0" y="455.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="960.0" y="399.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge6" bpmnElement="P08_Flow6">
+        <di:waypoint x="995.0" y="505.0"/>
+        <di:waypoint x="995.0" y="570.0"/>
+        <di:waypoint x="1125.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="960.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge7" bpmnElement="P08_Flow7">
+        <di:waypoint x="1275.0" y="570.0"/>
+        <di:waypoint x="1327.5" y="570.0"/>
+        <di:waypoint x="1327.5" y="480.0"/>
+        <di:waypoint x="1380.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge8" bpmnElement="P08_Flow8">
+        <di:waypoint x="1430.0" y="480.0"/>
+        <di:waypoint x="1585.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge9" bpmnElement="P08_Flow9">
+        <di:waypoint x="1635.0" y="480.0"/>
+        <di:waypoint x="1740.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1652.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge10" bpmnElement="P08_Flow10">
+        <di:waypoint x="1610.0" y="505.0"/>
+        <di:waypoint x="1610.0" y="570.0"/>
+        <di:waypoint x="1740.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1575.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge11" bpmnElement="P08_Flow11">
+        <di:waypoint x="1890.0" y="480.0"/>
+        <di:waypoint x="1995.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge12" bpmnElement="P08_Flow12">
+        <di:waypoint x="1890.0" y="570.0"/>
+        <di:waypoint x="1942.5" y="570.0"/>
+        <di:waypoint x="1942.5" y="480.0"/>
+        <di:waypoint x="1995.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge13" bpmnElement="P08_Flow13">
+        <di:waypoint x="2020.0" y="455.0"/>
+        <di:waypoint x="2020.0" y="220.0"/>
+        <di:waypoint x="2150.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge14" bpmnElement="P08_Flow14">
+        <di:waypoint x="2300.0" y="220.0"/>
+        <di:waypoint x="2412.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

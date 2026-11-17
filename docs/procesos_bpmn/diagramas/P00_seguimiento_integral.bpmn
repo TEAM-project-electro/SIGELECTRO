@@ -1,0 +1,233 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P00_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P00_Process" name="Seguimiento gerencial de proyectos" isExecutable="false">
+    <bpmn:documentation>Vista de contexto. El gestor puede registrar seguimiento de hitos o cortes y consultar resultados en cualquier orden. No representa una aprobación institucional ni una obligación de ejecutar todos los módulos en cada visita.
+Fuentes del sistema: sistema/routes/web.php, sistema/app/Policies/ProyectoPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P00_LaneSet">
+      <bpmn:lane id="P00_Lane0" name="Gestor autorizado">
+        <bpmn:flowNodeRef>P00_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cartera</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Accion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Hitos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cortes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Consultar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cierre</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cerrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P00_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P00_Estado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P00_I" name="Necesidad de seguimiento">
+      <bpmn:outgoing>P00_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P00_Cartera" name="Seleccionar proyecto de cartera">
+      <bpmn:incoming>P00_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P00_Estado" name="Consultar estado y permisos">
+      <bpmn:incoming>P00_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P00_Accion" name="¿Qué acción corresponde?" gatewayDirection="Diverging" default="P00_Flow6">
+      <bpmn:incoming>P00_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P00_Hitos" name="Gestionar hitos — P03">
+      <bpmn:incoming>P00_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="P00_Cortes" name="Registrar corte — P04">
+      <bpmn:incoming>P00_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="P00_Consultar" name="Consultar indicadores — P07">
+      <bpmn:incoming>P00_Flow6</bpmn:incoming>
+      <bpmn:incoming>P00_Flow7</bpmn:incoming>
+      <bpmn:incoming>P00_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="P00_Cierre" name="¿Se solicita cerrar?" gatewayDirection="Diverging" default="P00_Flow12">
+      <bpmn:incoming>P00_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow11</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow12</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P00_Cerrar" name="Solicitar cierre formal — P05">
+      <bpmn:incoming>P00_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow13</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P00_Fin" name="Seguimiento realizado">
+      <bpmn:incoming>P00_Flow12</bpmn:incoming>
+      <bpmn:incoming>P00_Flow13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P00_Mostrar" name="Mostrar indicadores y cobertura">
+      <bpmn:incoming>P00_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="P00_Flow1" sourceRef="P00_I" targetRef="P00_Cartera"/>
+    <bpmn:sequenceFlow id="P00_Flow2" sourceRef="P00_Cartera" targetRef="P00_Estado"/>
+    <bpmn:sequenceFlow id="P00_Flow3" sourceRef="P00_Estado" targetRef="P00_Accion"/>
+    <bpmn:sequenceFlow id="P00_Flow4" sourceRef="P00_Accion" targetRef="P00_Hitos" name="Hitos">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">accion == "hitos"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow5" sourceRef="P00_Accion" targetRef="P00_Cortes" name="Presupuesto">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">accion == "presupuesto"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow6" sourceRef="P00_Accion" targetRef="P00_Consultar" name="Consulta"/>
+    <bpmn:sequenceFlow id="P00_Flow7" sourceRef="P00_Hitos" targetRef="P00_Consultar"/>
+    <bpmn:sequenceFlow id="P00_Flow8" sourceRef="P00_Cortes" targetRef="P00_Consultar"/>
+    <bpmn:sequenceFlow id="P00_Flow9" sourceRef="P00_Consultar" targetRef="P00_Mostrar"/>
+    <bpmn:sequenceFlow id="P00_Flow10" sourceRef="P00_Mostrar" targetRef="P00_Cierre"/>
+    <bpmn:sequenceFlow id="P00_Flow11" sourceRef="P00_Cierre" targetRef="P00_Cerrar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicita_cierre == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow12" sourceRef="P00_Cierre" targetRef="P00_Fin" name="No"/>
+    <bpmn:sequenceFlow id="P00_Flow13" sourceRef="P00_Cerrar" targetRef="P00_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P00_Collaboration">
+    <bpmn:participant id="P00_Pool" name="SIG Electrocentro — P00" processRef="P00_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P00_Diagram" name="Seguimiento gerencial de proyectos">
+    <bpmndi:BPMNPlane id="P00_Plane" bpmnElement="P00_Collaboration">
+      <bpmndi:BPMNShape id="P00_PoolShape" bpmnElement="P00_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="1940" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_LaneShape0" bpmnElement="P00_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="1910" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_LaneShape1" bpmnElement="P00_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="1910" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_I_di" bpmnElement="P00_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cartera_di" bpmnElement="P00_Cartera">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Estado_di" bpmnElement="P00_Estado">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Accion_di" bpmnElement="P00_Accion" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="195.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="125.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Hitos_di" bpmnElement="P00_Hitos">
+        <dc:Bounds x="920.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cortes_di" bpmnElement="P00_Cortes">
+        <dc:Bounds x="920.0" y="275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Consultar_di" bpmnElement="P00_Consultar">
+        <dc:Bounds x="1125.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cierre_di" bpmnElement="P00_Cierre" isMarkerVisible="true">
+        <dc:Bounds x="1380.0" y="195.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1255.0" y="125.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cerrar_di" bpmnElement="P00_Cerrar">
+        <dc:Bounds x="1535.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Fin_di" bpmnElement="P00_Fin">
+        <dc:Bounds x="1797.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1740.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Mostrar_di" bpmnElement="P00_Mostrar">
+        <dc:Bounds x="1330.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P00_Edge1" bpmnElement="P00_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge2" bpmnElement="P00_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge3" bpmnElement="P00_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="712.5" y="480.0"/>
+        <di:waypoint x="712.5" y="220.0"/>
+        <di:waypoint x="765.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge4" bpmnElement="P00_Flow4">
+        <di:waypoint x="815.0" y="220.0"/>
+        <di:waypoint x="920.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832.5" y="199.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge5" bpmnElement="P00_Flow5">
+        <di:waypoint x="790.0" y="245.0"/>
+        <di:waypoint x="790.0" y="310.0"/>
+        <di:waypoint x="920.0" y="310.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="256.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge6" bpmnElement="P00_Flow6">
+        <di:waypoint x="790.0" y="195.0"/>
+        <di:waypoint x="790.0" y="125"/>
+        <di:waypoint x="1200.0" y="125"/>
+        <di:waypoint x="1200.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="139.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge7" bpmnElement="P00_Flow7">
+        <di:waypoint x="1070.0" y="220.0"/>
+        <di:waypoint x="1125.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge8" bpmnElement="P00_Flow8">
+        <di:waypoint x="1070.0" y="310.0"/>
+        <di:waypoint x="1097.5" y="310.0"/>
+        <di:waypoint x="1097.5" y="220.0"/>
+        <di:waypoint x="1125.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge9" bpmnElement="P00_Flow9">
+        <di:waypoint x="1275.0" y="220.0"/>
+        <di:waypoint x="1302.5" y="220.0"/>
+        <di:waypoint x="1302.5" y="480.0"/>
+        <di:waypoint x="1330.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge10" bpmnElement="P00_Flow10">
+        <di:waypoint x="1405.0" y="445.0"/>
+        <di:waypoint x="1405.0" y="245.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge11" bpmnElement="P00_Flow11">
+        <di:waypoint x="1430.0" y="220.0"/>
+        <di:waypoint x="1535.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1447.5" y="199.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge12" bpmnElement="P00_Flow12">
+        <di:waypoint x="1405.0" y="195.0"/>
+        <di:waypoint x="1405.0" y="125"/>
+        <di:waypoint x="1815.0" y="125"/>
+        <di:waypoint x="1815.0" y="202.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1370.0" y="139.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge13" bpmnElement="P00_Flow13">
+        <di:waypoint x="1685.0" y="220.0"/>
+        <di:waypoint x="1797.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P12_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P12_Process" name="Consultar trazabilidad de cambios" isExecutable="false">
+    <bpmn:documentation>La auditoría se genera automáticamente al cambiar negocio. Este proceso sólo consulta; no permite editar, borrar o aprobar eventos. No crea una segunda auditoría manual.
+Fuentes del sistema: sistema/app/Http/Controllers/AuditoriaController.php, sistema/app/Policies/BitacoraCambioPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P12_LaneSet">
+      <bpmn:lane id="P12_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P12_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Elegir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P12_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P12_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Permitido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Denegado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P12_I" name="Necesidad de trazabilidad">
+      <bpmn:outgoing>P12_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P12_Elegir" name="Abrir auditoría y elegir filtros">
+      <bpmn:incoming>P12_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P12_Validar" name="Validar sesión y perfil">
+      <bpmn:incoming>P12_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P12_Permitido" name="¿Es Administrador?" gatewayDirection="Diverging" default="P12_Flow5">
+      <bpmn:incoming>P12_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P12_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P12_Denegado" name="Consulta denegada">
+      <bpmn:incoming>P12_Flow5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P12_Leer" name="Consultar eventos y motivos">
+      <bpmn:incoming>P12_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P12_Mostrar" name="Mostrar cambios sin credenciales">
+      <bpmn:incoming>P12_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P12_Revisar" name="Revisar actor, fecha y valores">
+      <bpmn:incoming>P12_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P12_Fin" name="Trazabilidad consultada">
+      <bpmn:incoming>P12_Flow8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P12_Flow1" sourceRef="P12_I" targetRef="P12_Elegir"/>
+    <bpmn:sequenceFlow id="P12_Flow2" sourceRef="P12_Elegir" targetRef="P12_Validar"/>
+    <bpmn:sequenceFlow id="P12_Flow3" sourceRef="P12_Validar" targetRef="P12_Permitido"/>
+    <bpmn:sequenceFlow id="P12_Flow4" sourceRef="P12_Permitido" targetRef="P12_Leer" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">perfil == "Administrador"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P12_Flow5" sourceRef="P12_Permitido" targetRef="P12_Denegado" name="No"/>
+    <bpmn:sequenceFlow id="P12_Flow6" sourceRef="P12_Leer" targetRef="P12_Mostrar"/>
+    <bpmn:sequenceFlow id="P12_Flow7" sourceRef="P12_Mostrar" targetRef="P12_Revisar"/>
+    <bpmn:sequenceFlow id="P12_Flow8" sourceRef="P12_Revisar" targetRef="P12_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P12_Collaboration">
+    <bpmn:participant id="P12_Pool" name="SIG Electrocentro — P12" processRef="P12_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P12_Diagram" name="Consultar trazabilidad de cambios">
+    <bpmndi:BPMNPlane id="P12_Plane" bpmnElement="P12_Collaboration">
+      <bpmndi:BPMNShape id="P12_PoolShape" bpmnElement="P12_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_LaneShape0" bpmnElement="P12_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_LaneShape1" bpmnElement="P12_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_I_di" bpmnElement="P12_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Elegir_di" bpmnElement="P12_Elegir">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Validar_di" bpmnElement="P12_Validar">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Permitido_di" bpmnElement="P12_Permitido" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Denegado_di" bpmnElement="P12_Denegado">
+        <dc:Bounds x="977.0" y="552.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="920.0" y="595.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Leer_di" bpmnElement="P12_Leer">
+        <dc:Bounds x="920.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Mostrar_di" bpmnElement="P12_Mostrar">
+        <dc:Bounds x="1125.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Revisar_di" bpmnElement="P12_Revisar">
+        <dc:Bounds x="1330.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Fin_di" bpmnElement="P12_Fin">
+        <dc:Bounds x="1592.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1535.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P12_Edge1" bpmnElement="P12_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge2" bpmnElement="P12_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge3" bpmnElement="P12_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge4" bpmnElement="P12_Flow4">
+        <di:waypoint x="815.0" y="480.0"/>
+        <di:waypoint x="920.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge5" bpmnElement="P12_Flow5">
+        <di:waypoint x="790.0" y="505.0"/>
+        <di:waypoint x="790.0" y="570.0"/>
+        <di:waypoint x="977.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge6" bpmnElement="P12_Flow6">
+        <di:waypoint x="1070.0" y="480.0"/>
+        <di:waypoint x="1125.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge7" bpmnElement="P12_Flow7">
+        <di:waypoint x="1275.0" y="480.0"/>
+        <di:waypoint x="1302.5" y="480.0"/>
+        <di:waypoint x="1302.5" y="220.0"/>
+        <di:waypoint x="1330.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge8" bpmnElement="P12_Flow8">
+        <di:waypoint x="1480.0" y="220.0"/>
+        <di:waypoint x="1592.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

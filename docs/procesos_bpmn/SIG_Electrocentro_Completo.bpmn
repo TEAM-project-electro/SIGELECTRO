@@ -1,0 +1,2999 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="SIG_Electrocentro_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro" exporterVersion="1.0"><bpmn:process id="P00_Process" name="Seguimiento gerencial de proyectos" isExecutable="false">
+    <bpmn:documentation>Vista de contexto. El gestor puede registrar seguimiento de hitos o cortes y consultar resultados en cualquier orden. No representa una aprobación institucional ni una obligación de ejecutar todos los módulos en cada visita.
+Fuentes del sistema: sistema/routes/web.php, sistema/app/Policies/ProyectoPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P00_LaneSet">
+      <bpmn:lane id="P00_Lane0" name="Gestor autorizado">
+        <bpmn:flowNodeRef>P00_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cartera</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Accion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Hitos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cortes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Consultar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cierre</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Cerrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P00_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P00_Estado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P00_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P00_I" name="Necesidad de seguimiento">
+      <bpmn:outgoing>P00_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P00_Cartera" name="Seleccionar proyecto de cartera">
+      <bpmn:incoming>P00_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P00_Estado" name="Consultar estado y permisos">
+      <bpmn:incoming>P00_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P00_Accion" name="¿Qué acción corresponde?" gatewayDirection="Diverging" default="P00_Flow6">
+      <bpmn:incoming>P00_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P00_Hitos" name="Gestionar hitos — P03">
+      <bpmn:incoming>P00_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="P00_Cortes" name="Registrar corte — P04">
+      <bpmn:incoming>P00_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="P00_Consultar" name="Consultar indicadores — P07">
+      <bpmn:incoming>P00_Flow6</bpmn:incoming>
+      <bpmn:incoming>P00_Flow7</bpmn:incoming>
+      <bpmn:incoming>P00_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="P00_Cierre" name="¿Se solicita cerrar?" gatewayDirection="Diverging" default="P00_Flow12">
+      <bpmn:incoming>P00_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow11</bpmn:outgoing>
+      <bpmn:outgoing>P00_Flow12</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P00_Cerrar" name="Solicitar cierre formal — P05">
+      <bpmn:incoming>P00_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow13</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P00_Fin" name="Seguimiento realizado">
+      <bpmn:incoming>P00_Flow12</bpmn:incoming>
+      <bpmn:incoming>P00_Flow13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P00_Mostrar" name="Mostrar indicadores y cobertura">
+      <bpmn:incoming>P00_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P00_Flow10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="P00_Flow1" sourceRef="P00_I" targetRef="P00_Cartera"/>
+    <bpmn:sequenceFlow id="P00_Flow2" sourceRef="P00_Cartera" targetRef="P00_Estado"/>
+    <bpmn:sequenceFlow id="P00_Flow3" sourceRef="P00_Estado" targetRef="P00_Accion"/>
+    <bpmn:sequenceFlow id="P00_Flow4" sourceRef="P00_Accion" targetRef="P00_Hitos" name="Hitos">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">accion == "hitos"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow5" sourceRef="P00_Accion" targetRef="P00_Cortes" name="Presupuesto">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">accion == "presupuesto"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow6" sourceRef="P00_Accion" targetRef="P00_Consultar" name="Consulta"/>
+    <bpmn:sequenceFlow id="P00_Flow7" sourceRef="P00_Hitos" targetRef="P00_Consultar"/>
+    <bpmn:sequenceFlow id="P00_Flow8" sourceRef="P00_Cortes" targetRef="P00_Consultar"/>
+    <bpmn:sequenceFlow id="P00_Flow9" sourceRef="P00_Consultar" targetRef="P00_Mostrar"/>
+    <bpmn:sequenceFlow id="P00_Flow10" sourceRef="P00_Mostrar" targetRef="P00_Cierre"/>
+    <bpmn:sequenceFlow id="P00_Flow11" sourceRef="P00_Cierre" targetRef="P00_Cerrar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicita_cierre == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P00_Flow12" sourceRef="P00_Cierre" targetRef="P00_Fin" name="No"/>
+    <bpmn:sequenceFlow id="P00_Flow13" sourceRef="P00_Cerrar" targetRef="P00_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P01_Process" name="Acceso y cierre de sesión" isExecutable="false">
+    <bpmn:documentation>Autenticación de Administrador, Responsable y Consulta. Cuenta activa, limitación de cinco intentos por usuario/IP, regeneración de sesión y cierre explícito. No hay registro público ni aprobación de acceso.
+Fuentes del sistema: sistema/app/Http/Requests/Auth/LoginRequest.php, sistema/app/Http/Controllers/Auth/LoginController.php, sistema/app/Http/Middleware/VerificarUsuarioActivo.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P01_LaneSet">
+      <bpmn:lane id="P01_Lane0" name="Usuario: cualquier perfil">
+        <bpmn:flowNodeRef>P01_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Cred</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Usar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Salir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P01_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P01_Intentos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Permitido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Bloq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Auth</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Ok</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Sesion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P01_Invalidar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P01_I" name="Usuario requiere acceso">
+      <bpmn:outgoing>P01_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P01_Cred" name="Ingresar usuario y clave">
+      <bpmn:incoming>P01_Flow1</bpmn:incoming>
+      <bpmn:incoming>P01_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P01_Intentos" name="Comprobar límite de intentos">
+      <bpmn:incoming>P01_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P01_Permitido" name="¿Intento permitido?" gatewayDirection="Diverging" default="P01_Flow5">
+      <bpmn:incoming>P01_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P01_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P01_Bloq" name="Acceso temporalmente limitado">
+      <bpmn:incoming>P01_Flow5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P01_Auth" name="Validar credenciales y activo">
+      <bpmn:incoming>P01_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P01_Ok" name="¿Identidad válida?" gatewayDirection="Diverging" default="P01_Flow8">
+      <bpmn:incoming>P01_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P01_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P01_Error" name="Informar error y contar intento">
+      <bpmn:incoming>P01_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P01_Sesion" name="Regenerar sesión y cargar perfil">
+      <bpmn:incoming>P01_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P01_Usar" name="Utilizar módulos autorizados">
+      <bpmn:incoming>P01_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="P01_Salir" name="Solicitar cierre de sesión">
+      <bpmn:incoming>P01_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P01_Invalidar" name="Invalidar sesión y token CSRF">
+      <bpmn:incoming>P01_Flow12</bpmn:incoming>
+      <bpmn:outgoing>P01_Flow13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="P01_Fin" name="Sesión cerrada">
+      <bpmn:incoming>P01_Flow13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P01_Flow1" sourceRef="P01_I" targetRef="P01_Cred"/>
+    <bpmn:sequenceFlow id="P01_Flow2" sourceRef="P01_Cred" targetRef="P01_Intentos"/>
+    <bpmn:sequenceFlow id="P01_Flow3" sourceRef="P01_Intentos" targetRef="P01_Permitido"/>
+    <bpmn:sequenceFlow id="P01_Flow4" sourceRef="P01_Permitido" targetRef="P01_Auth" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">limite_excedido == false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P01_Flow5" sourceRef="P01_Permitido" targetRef="P01_Bloq" name="No"/>
+    <bpmn:sequenceFlow id="P01_Flow6" sourceRef="P01_Auth" targetRef="P01_Ok"/>
+    <bpmn:sequenceFlow id="P01_Flow7" sourceRef="P01_Ok" targetRef="P01_Sesion" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">credenciales_validas &amp;&amp; cuenta_activa</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P01_Flow8" sourceRef="P01_Ok" targetRef="P01_Error" name="No"/>
+    <bpmn:sequenceFlow id="P01_Flow9" sourceRef="P01_Error" targetRef="P01_Cred"/>
+    <bpmn:sequenceFlow id="P01_Flow10" sourceRef="P01_Sesion" targetRef="P01_Usar"/>
+    <bpmn:sequenceFlow id="P01_Flow11" sourceRef="P01_Usar" targetRef="P01_Salir"/>
+    <bpmn:sequenceFlow id="P01_Flow12" sourceRef="P01_Salir" targetRef="P01_Invalidar"/>
+    <bpmn:sequenceFlow id="P01_Flow13" sourceRef="P01_Invalidar" targetRef="P01_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P02_Process" name="Registrar o editar proyectos" isExecutable="false">
+    <bpmn:documentation>Alta reservada a Administrador; edición del Responsable sólo sobre su proyecto y campos permitidos. Código PGD único; monto no negativo; objetivo y responsable existentes. Reducción exige motivo y no puede invalidar cortes anteriores. La baja física es excepcional y no forma parte del flujo habitual de cartera; se bloquea si hay referencias.
+Fuentes del sistema: sistema/app/Http/Controllers/ProyectoController.php, sistema/app/Http/Requests/Proyecto/UpdateProyectoRequest.php, sistema/app/Policies/ProyectoPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P02_LaneSet">
+      <bpmn:lane id="P02_Lane0" name="Administrador / Responsable titular">
+        <bpmn:flowNodeRef>P02_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P02_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P02_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P02_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P02_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P02_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P02_Datos" name="Registrar o editar ficha de proyecto">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P02_Flow1</bpmn:incoming>
+      <bpmn:incoming>P02_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P02_Validar" name="Validar código, datos y campos por perfil">
+      <bpmn:documentation>Alta reservada a Administrador; edición del Responsable sólo sobre su proyecto y campos permitidos. Código PGD único; monto no negativo; objetivo y responsable existentes. Reducción exige motivo y no puede invalidar cortes anteriores. La baja física es excepcional y no forma parte del flujo habitual de cartera; se bloquea si hay referencias.</bpmn:documentation>
+      <bpmn:incoming>P02_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P02_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P02_Flow5">
+      <bpmn:incoming>P02_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P02_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P02_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P02_Flow5</bpmn:incoming>
+      <bpmn:incoming>P02_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P02_Guardar" name="Guardar proyecto y auditoría">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P02_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P02_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P02_Flow8">
+      <bpmn:incoming>P02_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P02_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P02_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P02_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P02_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P02_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P02_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P02_Fin" name="Registro actualizado">
+      <bpmn:incoming>P02_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P02_Flow1" sourceRef="P02_Inicio" targetRef="P02_Datos"/>
+    <bpmn:sequenceFlow id="P02_Flow2" sourceRef="P02_Datos" targetRef="P02_Validar"/>
+    <bpmn:sequenceFlow id="P02_Flow3" sourceRef="P02_Validar" targetRef="P02_Valido"/>
+    <bpmn:sequenceFlow id="P02_Flow4" sourceRef="P02_Valido" targetRef="P02_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P02_Flow5" sourceRef="P02_Valido" targetRef="P02_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P02_Flow6" sourceRef="P02_Guardar" targetRef="P02_Confirmado"/>
+    <bpmn:sequenceFlow id="P02_Flow7" sourceRef="P02_Confirmado" targetRef="P02_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P02_Flow8" sourceRef="P02_Confirmado" targetRef="P02_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P02_Flow9" sourceRef="P02_Fallo" targetRef="P02_Corregir"/>
+    <bpmn:sequenceFlow id="P02_Flow10" sourceRef="P02_Corregir" targetRef="P02_Datos"/>
+    <bpmn:sequenceFlow id="P02_Flow11" sourceRef="P02_Resultado" targetRef="P02_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P03_Process" name="Gestionar hitos y línea base" isExecutable="false">
+    <bpmn:documentation>Proyecto no cerrado, permisos por propietario, revisión vigente al editar. Registrar descripción, fecha prevista, fecha de cierre y evidencia cuando corresponda. Cambiar pertenencia a línea base exige motivo explícito; no se inventa aprobación de un comité. Los hitos fuera de línea base no alteran avance ni retraso del KPI.
+Fuentes del sistema: sistema/app/Http/Controllers/HitoController.php, sistema/app/Http/Requests/Hito/UpdateHitoRequest.php, sistema/app/Policies/HitoPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P03_LaneSet">
+      <bpmn:lane id="P03_Lane0" name="Administrador / Responsable titular">
+        <bpmn:flowNodeRef>P03_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P03_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P03_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P03_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P03_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P03_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P03_Datos" name="Registrar hito, avance o cierre">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P03_Flow1</bpmn:incoming>
+      <bpmn:incoming>P03_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P03_Validar" name="Validar propiedad, fechas y línea base">
+      <bpmn:documentation>Proyecto no cerrado, permisos por propietario, revisión vigente al editar. Registrar descripción, fecha prevista, fecha de cierre y evidencia cuando corresponda. Cambiar pertenencia a línea base exige motivo explícito; no se inventa aprobación de un comité. Los hitos fuera de línea base no alteran avance ni retraso del KPI.</bpmn:documentation>
+      <bpmn:incoming>P03_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P03_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P03_Flow5">
+      <bpmn:incoming>P03_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P03_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P03_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P03_Flow5</bpmn:incoming>
+      <bpmn:incoming>P03_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P03_Guardar" name="Guardar hito, actividad y auditoría">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P03_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P03_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P03_Flow8">
+      <bpmn:incoming>P03_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P03_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P03_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P03_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P03_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P03_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P03_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P03_Fin" name="Registro actualizado">
+      <bpmn:incoming>P03_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P03_Flow1" sourceRef="P03_Inicio" targetRef="P03_Datos"/>
+    <bpmn:sequenceFlow id="P03_Flow2" sourceRef="P03_Datos" targetRef="P03_Validar"/>
+    <bpmn:sequenceFlow id="P03_Flow3" sourceRef="P03_Validar" targetRef="P03_Valido"/>
+    <bpmn:sequenceFlow id="P03_Flow4" sourceRef="P03_Valido" targetRef="P03_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P03_Flow5" sourceRef="P03_Valido" targetRef="P03_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P03_Flow6" sourceRef="P03_Guardar" targetRef="P03_Confirmado"/>
+    <bpmn:sequenceFlow id="P03_Flow7" sourceRef="P03_Confirmado" targetRef="P03_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P03_Flow8" sourceRef="P03_Confirmado" targetRef="P03_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P03_Flow9" sourceRef="P03_Fallo" targetRef="P03_Corregir"/>
+    <bpmn:sequenceFlow id="P03_Flow10" sourceRef="P03_Corregir" targetRef="P03_Datos"/>
+    <bpmn:sequenceFlow id="P03_Flow11" sourceRef="P03_Resultado" targetRef="P03_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P04_Process" name="Registrar o editar cortes presupuestales" isExecutable="false">
+    <bpmn:documentation>Proyecto no cerrado y usuario autorizado. R1: planificado/gasto no negativos ni superiores al monto del proyecto. R2: gasto acumulado no decreciente contra corte anterior y posterior. Fecha única por proyecto; edición con revisión esperada. Gasto mayor al plan está permitido si no excede el monto del proyecto. No se modelan desembolsos ni aprobaciones financieras.
+Fuentes del sistema: sistema/app/Http/Controllers/AvancePresupuestalController.php, sistema/app/Http/Requests/Avance/UpdateAvanceRequest.php, sistema/database/migrations/2026_11_03_000002_create_triggers_y_procedimientos.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P04_LaneSet">
+      <bpmn:lane id="P04_Lane0" name="Administrador / Responsable titular">
+        <bpmn:flowNodeRef>P04_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P04_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P04_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P04_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P04_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P04_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P04_Datos" name="Registrar o editar importes del corte">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P04_Flow1</bpmn:incoming>
+      <bpmn:incoming>P04_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P04_Validar" name="Validar unicidad y reglas R1–R2">
+      <bpmn:documentation>Proyecto no cerrado y usuario autorizado. R1: planificado/gasto no negativos ni superiores al monto del proyecto. R2: gasto acumulado no decreciente contra corte anterior y posterior. Fecha única por proyecto; edición con revisión esperada. Gasto mayor al plan está permitido si no excede el monto del proyecto. No se modelan desembolsos ni aprobaciones financieras.</bpmn:documentation>
+      <bpmn:incoming>P04_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P04_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P04_Flow5">
+      <bpmn:incoming>P04_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P04_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P04_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P04_Flow5</bpmn:incoming>
+      <bpmn:incoming>P04_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P04_Guardar" name="Guardar corte, actividad y auditoría">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P04_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P04_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P04_Flow8">
+      <bpmn:incoming>P04_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P04_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P04_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P04_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P04_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P04_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P04_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P04_Fin" name="Registro actualizado">
+      <bpmn:incoming>P04_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P04_Flow1" sourceRef="P04_Inicio" targetRef="P04_Datos"/>
+    <bpmn:sequenceFlow id="P04_Flow2" sourceRef="P04_Datos" targetRef="P04_Validar"/>
+    <bpmn:sequenceFlow id="P04_Flow3" sourceRef="P04_Validar" targetRef="P04_Valido"/>
+    <bpmn:sequenceFlow id="P04_Flow4" sourceRef="P04_Valido" targetRef="P04_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P04_Flow5" sourceRef="P04_Valido" targetRef="P04_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P04_Flow6" sourceRef="P04_Guardar" targetRef="P04_Confirmado"/>
+    <bpmn:sequenceFlow id="P04_Flow7" sourceRef="P04_Confirmado" targetRef="P04_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P04_Flow8" sourceRef="P04_Confirmado" targetRef="P04_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P04_Flow9" sourceRef="P04_Fallo" targetRef="P04_Corregir"/>
+    <bpmn:sequenceFlow id="P04_Flow10" sourceRef="P04_Corregir" targetRef="P04_Datos"/>
+    <bpmn:sequenceFlow id="P04_Flow11" sourceRef="P04_Resultado" targetRef="P04_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P05_Process" name="Cerrar formalmente un proyecto" isExecutable="false">
+    <bpmn:documentation>El cierre es una solicitud ejecutada por el titular o Administrador. No interviene un aprobador adicional. La regla implementada exige al menos un hito de línea base y ningún hito de línea base sin fecha de cierre.
+Fuentes del sistema: sistema/app/Http/Controllers/ProyectoController.php, sistema/app/Http/Requests/Proyecto/CerrarProyectoRequest.php, sistema/database/migrations/2026_11_03_000002_create_triggers_y_procedimientos.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P05_LaneSet">
+      <bpmn:lane id="P05_Lane0" name="Administrador / Responsable titular">
+        <bpmn:flowNodeRef>P05_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Solicitar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Atender</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P05_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P05_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Permiso</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Denegado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_LB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Completo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Observar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Guardar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P05_I" name="Proyecto candidato a cierre">
+      <bpmn:outgoing>P05_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P05_Solicitar" name="Solicitar cierre formal">
+      <bpmn:incoming>P05_Flow1</bpmn:incoming>
+      <bpmn:incoming>P05_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P05_Validar" name="Bloquear y revalidar permiso">
+      <bpmn:incoming>P05_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P05_Permiso" name="¿Puede cerrar este proyecto?" gatewayDirection="Diverging" default="P05_Flow5">
+      <bpmn:incoming>P05_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P05_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P05_Denegado" name="Cierre denegado">
+      <bpmn:incoming>P05_Flow5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P05_LB" name="Comprobar hitos de línea base">
+      <bpmn:incoming>P05_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P05_Completo" name="¿Hay línea base y todos cerrados?" gatewayDirection="Diverging" default="P05_Flow8">
+      <bpmn:incoming>P05_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P05_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P05_Observar" name="Revertir e informar pendientes">
+      <bpmn:incoming>P05_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P05_Atender" name="Actualizar hitos y revisar">
+      <bpmn:incoming>P05_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P05_Guardar" name="Cerrar y auditar en transacción">
+      <bpmn:documentation>Una transacción guarda estado Cerrado, actividad y auditoría; ante error se revierte y se informa, sin cierre parcial. El control de estado/permisos ocurre después del bloqueo.</bpmn:documentation>
+      <bpmn:incoming>P05_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="P05_Fin" name="Proyecto cerrado">
+      <bpmn:incoming>P05_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P05_Flow1" sourceRef="P05_I" targetRef="P05_Solicitar"/>
+    <bpmn:sequenceFlow id="P05_Flow2" sourceRef="P05_Solicitar" targetRef="P05_Validar"/>
+    <bpmn:sequenceFlow id="P05_Flow3" sourceRef="P05_Validar" targetRef="P05_Permiso"/>
+    <bpmn:sequenceFlow id="P05_Flow4" sourceRef="P05_Permiso" targetRef="P05_LB" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">permiso_cierre == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P05_Flow5" sourceRef="P05_Permiso" targetRef="P05_Denegado" name="No"/>
+    <bpmn:sequenceFlow id="P05_Flow6" sourceRef="P05_LB" targetRef="P05_Completo"/>
+    <bpmn:sequenceFlow id="P05_Flow7" sourceRef="P05_Completo" targetRef="P05_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">hitos_lb &gt; 0 &amp;&amp; hitos_lb_sin_cierre == 0</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P05_Flow8" sourceRef="P05_Completo" targetRef="P05_Observar" name="No"/>
+    <bpmn:sequenceFlow id="P05_Flow9" sourceRef="P05_Observar" targetRef="P05_Atender"/>
+    <bpmn:sequenceFlow id="P05_Flow10" sourceRef="P05_Atender" targetRef="P05_Solicitar"/>
+    <bpmn:sequenceFlow id="P05_Flow11" sourceRef="P05_Guardar" targetRef="P05_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P06_Process" name="Reabrir un proyecto cerrado" isExecutable="false">
+    <bpmn:documentation>Sólo Administrador y sólo proyecto actualmente Cerrado. Motivo obligatorio auditado en bitacora_motivo. Operación atómica con actualización de revisión; un Responsable no puede reabrir su propio proyecto.
+Fuentes del sistema: sistema/app/Http/Controllers/ProyectoController.php, sistema/app/Http/Requests/Proyecto/ReabrirProyectoRequest.php, sistema/app/Policies/ProyectoPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P06_LaneSet">
+      <bpmn:lane id="P06_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P06_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P06_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P06_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P06_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P06_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P06_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P06_Datos" name="Seleccionar proyecto e ingresar motivo">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P06_Flow1</bpmn:incoming>
+      <bpmn:incoming>P06_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P06_Validar" name="Validar perfil, estado y justificación">
+      <bpmn:documentation>Sólo Administrador y sólo proyecto actualmente Cerrado. Motivo obligatorio auditado en bitacora_motivo. Operación atómica con actualización de revisión; un Responsable no puede reabrir su propio proyecto.</bpmn:documentation>
+      <bpmn:incoming>P06_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P06_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P06_Flow5">
+      <bpmn:incoming>P06_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P06_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P06_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P06_Flow5</bpmn:incoming>
+      <bpmn:incoming>P06_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P06_Guardar" name="Reabrir a En curso y auditar">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P06_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P06_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P06_Flow8">
+      <bpmn:incoming>P06_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P06_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P06_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P06_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P06_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P06_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P06_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P06_Fin" name="Registro actualizado">
+      <bpmn:incoming>P06_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P06_Flow1" sourceRef="P06_Inicio" targetRef="P06_Datos"/>
+    <bpmn:sequenceFlow id="P06_Flow2" sourceRef="P06_Datos" targetRef="P06_Validar"/>
+    <bpmn:sequenceFlow id="P06_Flow3" sourceRef="P06_Validar" targetRef="P06_Valido"/>
+    <bpmn:sequenceFlow id="P06_Flow4" sourceRef="P06_Valido" targetRef="P06_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P06_Flow5" sourceRef="P06_Valido" targetRef="P06_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P06_Flow6" sourceRef="P06_Guardar" targetRef="P06_Confirmado"/>
+    <bpmn:sequenceFlow id="P06_Flow7" sourceRef="P06_Confirmado" targetRef="P06_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P06_Flow8" sourceRef="P06_Confirmado" targetRef="P06_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P06_Flow9" sourceRef="P06_Fallo" targetRef="P06_Corregir"/>
+    <bpmn:sequenceFlow id="P06_Flow10" sourceRef="P06_Corregir" targetRef="P06_Datos"/>
+    <bpmn:sequenceFlow id="P06_Flow11" sourceRef="P06_Resultado" targetRef="P06_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P07_Process" name="Consultar cartera e indicadores" isExecutable="false">
+    <bpmn:documentation>Consultar la cartera con filtros de estado, responsable, objetivo, búsqueda y fecha. Elegir operativo o DW y modo temporal. No se guarda información de negocio ni se ejecuta ETL automáticamente.
+Fuentes del sistema: sistema/app/Http/Controllers/TableroController.php, sistema/app/Services/IndicadoresService.php, sistema/app/Services/EtlService.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P07_LaneSet">
+      <bpmn:lane id="P07_Lane0" name="Usuario: cualquier perfil">
+        <bpmn:flowNodeRef>P07_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Filtros</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Otra</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P07_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P07_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Origen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Op</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_DW</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Calcular</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P07_I" name="Necesidad de información">
+      <bpmn:outgoing>P07_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P07_Filtros" name="Elegir filtros, fecha y origen">
+      <bpmn:incoming>P07_Flow1</bpmn:incoming>
+      <bpmn:incoming>P07_Flow12</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P07_Validar" name="Validar sesión y parámetros">
+      <bpmn:incoming>P07_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P07_Origen" name="¿Origen seleccionado?" gatewayDirection="Diverging" default="P07_Flow5">
+      <bpmn:incoming>P07_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P07_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P07_Op" name="Leer snapshot operativo">
+      <bpmn:incoming>P07_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P07_DW" name="Leer snapshot DW y revisión">
+      <bpmn:incoming>P07_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P07_Merge" name="Unificar datos del origen" gatewayDirection="Converging">
+      <bpmn:incoming>P07_Flow6</bpmn:incoming>
+      <bpmn:incoming>P07_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P07_Calcular" name="Calcular KPIs y coberturas">
+      <bpmn:documentation>CORTE_COMUN: hitos evaluados a fecha común; finanzas sólo con corte exacto. ULTIMO_REPORTE_POR_PROYECTO: máximo reporte &lt;= fecha límite de cada proyecto. Mostrar Sin datos, No aplica, cobertura y exclusiones; hitos fuera de LB no generan retraso. No promediar porcentajes individuales.</bpmn:documentation>
+      <bpmn:incoming>P07_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P07_Mostrar" name="Mostrar resultados y vigencia">
+      <bpmn:documentation>Si DW está desactualizado se advierte, sin cargarlo automáticamente. Una consulta sin proyectos devuelve conteos cero y porcentajes Sin datos.</bpmn:documentation>
+      <bpmn:incoming>P07_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P07_Revisar" name="Analizar cifras y detalle">
+      <bpmn:incoming>P07_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="P07_Otra" name="¿Cambiar consulta?" gatewayDirection="Diverging" default="P07_Flow13">
+      <bpmn:incoming>P07_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow12</bpmn:outgoing>
+      <bpmn:outgoing>P07_Flow13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P07_Fin" name="Consulta realizada">
+      <bpmn:incoming>P07_Flow13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P07_Flow1" sourceRef="P07_I" targetRef="P07_Filtros"/>
+    <bpmn:sequenceFlow id="P07_Flow2" sourceRef="P07_Filtros" targetRef="P07_Validar"/>
+    <bpmn:sequenceFlow id="P07_Flow3" sourceRef="P07_Validar" targetRef="P07_Origen"/>
+    <bpmn:sequenceFlow id="P07_Flow4" sourceRef="P07_Origen" targetRef="P07_Op" name="Operativo">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">origen == "OPERATIVO"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P07_Flow5" sourceRef="P07_Origen" targetRef="P07_DW" name="DW"/>
+    <bpmn:sequenceFlow id="P07_Flow6" sourceRef="P07_Op" targetRef="P07_Merge"/>
+    <bpmn:sequenceFlow id="P07_Flow7" sourceRef="P07_DW" targetRef="P07_Merge"/>
+    <bpmn:sequenceFlow id="P07_Flow8" sourceRef="P07_Merge" targetRef="P07_Calcular"/>
+    <bpmn:sequenceFlow id="P07_Flow9" sourceRef="P07_Calcular" targetRef="P07_Mostrar"/>
+    <bpmn:sequenceFlow id="P07_Flow10" sourceRef="P07_Mostrar" targetRef="P07_Revisar"/>
+    <bpmn:sequenceFlow id="P07_Flow11" sourceRef="P07_Revisar" targetRef="P07_Otra"/>
+    <bpmn:sequenceFlow id="P07_Flow12" sourceRef="P07_Otra" targetRef="P07_Filtros" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">cambiar_consulta == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P07_Flow13" sourceRef="P07_Otra" targetRef="P07_Fin" name="No"/>
+  </bpmn:process>
+  <bpmn:process id="P08_Process" name="Generar y descargar reporte gerencial" isExecutable="false">
+    <bpmn:documentation>Reportar el mismo contexto seleccionado en el tablero. Formatos implementados: CSV UTF-8 BOM o vista imprimible para guardar PDF desde el navegador. Una variación de revisión se advierte; no se presenta como archivo idéntico silenciosamente.
+Fuentes del sistema: sistema/app/Http/Controllers/ReporteController.php, sistema/resources/views/reportes/imprimir.blade.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P08_LaneSet">
+      <bpmn:lane id="P08_Lane0" name="Usuario: cualquier perfil">
+        <bpmn:flowNodeRef>P08_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Pedir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Recibir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P08_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P08_Contexto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Revision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Avisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Tipo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_CSV</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Imprimir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P08_Merge2</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P08_I" name="Consulta disponible">
+      <bpmn:outgoing>P08_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P08_Pedir" name="Elegir CSV o vista de impresión">
+      <bpmn:incoming>P08_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P08_Contexto" name="Capturar filtros, origen y revisión">
+      <bpmn:incoming>P08_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P08_Leer" name="Consultar datos con ese contexto">
+      <bpmn:incoming>P08_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Revision" name="¿Coincide revisión solicitada?" gatewayDirection="Diverging" default="P08_Flow6">
+      <bpmn:incoming>P08_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P08_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P08_Avisar" name="Incluir aviso de datos cambiados">
+      <bpmn:incoming>P08_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Merge" name="Continuar generación" gatewayDirection="Converging">
+      <bpmn:incoming>P08_Flow5</bpmn:incoming>
+      <bpmn:incoming>P08_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="P08_Tipo" name="¿Formato solicitado?" gatewayDirection="Diverging" default="P08_Flow10">
+      <bpmn:incoming>P08_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow9</bpmn:outgoing>
+      <bpmn:outgoing>P08_Flow10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P08_CSV" name="Generar CSV con BOM y protección">
+      <bpmn:documentation>Neutralizar texto interpretable como fórmula sin alterar importes negativos legítimos. Incluir filtros, modo temporal, revisión y aviso de datos demostrativos; no exportar credenciales.</bpmn:documentation>
+      <bpmn:incoming>P08_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P08_Imprimir" name="Renderizar vista imprimible">
+      <bpmn:incoming>P08_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P08_Merge2" name="Entregar salida" gatewayDirection="Converging">
+      <bpmn:incoming>P08_Flow11</bpmn:incoming>
+      <bpmn:incoming>P08_Flow12</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P08_Recibir" name="Descargar o imprimir documento">
+      <bpmn:incoming>P08_Flow13</bpmn:incoming>
+      <bpmn:outgoing>P08_Flow14</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P08_Fin" name="Reporte obtenido">
+      <bpmn:incoming>P08_Flow14</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P08_Flow1" sourceRef="P08_I" targetRef="P08_Pedir"/>
+    <bpmn:sequenceFlow id="P08_Flow2" sourceRef="P08_Pedir" targetRef="P08_Contexto"/>
+    <bpmn:sequenceFlow id="P08_Flow3" sourceRef="P08_Contexto" targetRef="P08_Leer"/>
+    <bpmn:sequenceFlow id="P08_Flow4" sourceRef="P08_Leer" targetRef="P08_Revision"/>
+    <bpmn:sequenceFlow id="P08_Flow5" sourceRef="P08_Revision" targetRef="P08_Merge" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">revision_esperada == revision_actual</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P08_Flow6" sourceRef="P08_Revision" targetRef="P08_Avisar" name="No"/>
+    <bpmn:sequenceFlow id="P08_Flow7" sourceRef="P08_Avisar" targetRef="P08_Merge"/>
+    <bpmn:sequenceFlow id="P08_Flow8" sourceRef="P08_Merge" targetRef="P08_Tipo"/>
+    <bpmn:sequenceFlow id="P08_Flow9" sourceRef="P08_Tipo" targetRef="P08_CSV" name="CSV">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">formato == "CSV"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P08_Flow10" sourceRef="P08_Tipo" targetRef="P08_Imprimir" name="Impresión"/>
+    <bpmn:sequenceFlow id="P08_Flow11" sourceRef="P08_CSV" targetRef="P08_Merge2"/>
+    <bpmn:sequenceFlow id="P08_Flow12" sourceRef="P08_Imprimir" targetRef="P08_Merge2"/>
+    <bpmn:sequenceFlow id="P08_Flow13" sourceRef="P08_Merge2" targetRef="P08_Recibir"/>
+    <bpmn:sequenceFlow id="P08_Flow14" sourceRef="P08_Recibir" targetRef="P08_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P09_Process" name="Actualizar el almacén de datos — ETL" isExecutable="false">
+    <bpmn:documentation>Carga manual desde la aplicación o comando local etl:cargar. Mantiene mutex y transacción para publicar dimensiones, hechos y revisión. No modela trabajo en Power BI ni una programación periódica no implementada.
+Fuentes del sistema: sistema/app/Http/Controllers/EtlController.php, sistema/app/Services/EtlService.php, sistema/database/migrations/2026_11_03_000004_create_dw_procedimientos_y_vistas.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P09_LaneSet">
+      <bpmn:lane id="P09_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P09_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Pedir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P09_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P09_Perfil</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Lock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Disponible</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Ocupado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Origen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Dims</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Hechos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Ok</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Rollback</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Commit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Liberar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Autorizado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Denegado</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P09_I" name="DW requiere actualización">
+      <bpmn:outgoing>P09_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P09_Pedir" name="Solicitar ejecución ETL">
+      <bpmn:incoming>P09_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P09_Perfil" name="Verificar Administrador">
+      <bpmn:incoming>P09_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Lock" name="Intentar adquirir mutex ETL">
+      <bpmn:incoming>P09_Flow16</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Disponible" name="¿Mutex adquirido?" gatewayDirection="Diverging" default="P09_Flow6">
+      <bpmn:incoming>P09_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P09_Ocupado" name="Carga no iniciada">
+      <bpmn:documentation>Si no se obtiene mutex dentro del tiempo configurado, devolver fallo sin modificar dimensiones/hechos. Una solicitud sin permiso termina denegada antes de ejecutar el procedimiento.</bpmn:documentation>
+      <bpmn:incoming>P09_Flow6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P09_Origen" name="Iniciar transacción y bloquear revisión">
+      <bpmn:incoming>P09_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Dims" name="Sincronizar calendario y dimensiones">
+      <bpmn:incoming>P09_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Hechos" name="Cargar hechos y depurar ausentes">
+      <bpmn:incoming>P09_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Ok" name="¿Carga completa sin error?" gatewayDirection="Diverging" default="P09_Flow11">
+      <bpmn:documentation>Abstracción del EXIT HANDLER SQL: cualquier excepción en la fase transaccional, incluso en calendario/dimensiones, recorre rollback; no se presupone que siempre se alcance la última inserción.</bpmn:documentation>
+      <bpmn:incoming>P09_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow10</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P09_Rollback" name="Revertir y registrar fallo">
+      <bpmn:incoming>P09_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Commit" name="Publicar datos y revisión en COMMIT">
+      <bpmn:incoming>P09_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Merge" name="Finalizar ejecución" gatewayDirection="Converging">
+      <bpmn:incoming>P09_Flow12</bpmn:incoming>
+      <bpmn:incoming>P09_Flow13</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow14</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P09_Liberar" name="Liberar mutex e informar resultado">
+      <bpmn:incoming>P09_Flow14</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow15</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="P09_Fin" name="Estado de carga informado">
+      <bpmn:incoming>P09_Flow15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="P09_Autorizado" name="¿Perfil autorizado?" gatewayDirection="Diverging" default="P09_Flow17">
+      <bpmn:incoming>P09_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow16</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow17</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P09_Denegado" name="Ejecución denegada">
+      <bpmn:incoming>P09_Flow17</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P09_Flow1" sourceRef="P09_I" targetRef="P09_Pedir"/>
+    <bpmn:sequenceFlow id="P09_Flow2" sourceRef="P09_Pedir" targetRef="P09_Perfil"/>
+    <bpmn:sequenceFlow id="P09_Flow3" sourceRef="P09_Perfil" targetRef="P09_Autorizado"/>
+    <bpmn:sequenceFlow id="P09_Flow4" sourceRef="P09_Lock" targetRef="P09_Disponible"/>
+    <bpmn:sequenceFlow id="P09_Flow5" sourceRef="P09_Disponible" targetRef="P09_Origen" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">mutex_adquirido == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow6" sourceRef="P09_Disponible" targetRef="P09_Ocupado" name="No"/>
+    <bpmn:sequenceFlow id="P09_Flow7" sourceRef="P09_Origen" targetRef="P09_Dims"/>
+    <bpmn:sequenceFlow id="P09_Flow8" sourceRef="P09_Dims" targetRef="P09_Hechos"/>
+    <bpmn:sequenceFlow id="P09_Flow9" sourceRef="P09_Hechos" targetRef="P09_Ok"/>
+    <bpmn:sequenceFlow id="P09_Flow10" sourceRef="P09_Ok" targetRef="P09_Commit" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">carga_sin_error == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow11" sourceRef="P09_Ok" targetRef="P09_Rollback" name="No"/>
+    <bpmn:sequenceFlow id="P09_Flow12" sourceRef="P09_Commit" targetRef="P09_Merge"/>
+    <bpmn:sequenceFlow id="P09_Flow13" sourceRef="P09_Rollback" targetRef="P09_Merge"/>
+    <bpmn:sequenceFlow id="P09_Flow14" sourceRef="P09_Merge" targetRef="P09_Liberar"/>
+    <bpmn:sequenceFlow id="P09_Flow15" sourceRef="P09_Liberar" targetRef="P09_Fin"/>
+    <bpmn:sequenceFlow id="P09_Flow16" sourceRef="P09_Autorizado" targetRef="P09_Lock" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">perfil == "Administrador"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow17" sourceRef="P09_Autorizado" targetRef="P09_Denegado" name="No"/>
+  </bpmn:process>
+  <bpmn:process id="P10_Process" name="Administrar usuarios y perfiles" isExecutable="false">
+    <bpmn:documentation>Usuario único; perfiles Administrador/Responsable/Consulta. Clave requerida al crear y opcional al editar. Desactivar exige motivo de 5 a 200 caracteres. Bloquear revisión y administradores activos para impedir desactivar/degradar al último. El hash se guarda pero nunca se serializa ni aparece en auditoría. La desactivación revoca el acceso en la siguiente petición.
+Fuentes del sistema: sistema/app/Http/Controllers/ResponsableController.php, sistema/app/Services/AdministrarUsuarios.php, sistema/app/Policies/ResponsablePolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P10_LaneSet">
+      <bpmn:lane id="P10_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P10_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P10_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P10_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P10_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P10_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P10_Datos" name="Crear usuario o editar perfil/estado">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P10_Flow1</bpmn:incoming>
+      <bpmn:incoming>P10_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P10_Validar" name="Validar datos, motivo y último Admin">
+      <bpmn:documentation>Usuario único; perfiles Administrador/Responsable/Consulta. Clave requerida al crear y opcional al editar. Desactivar exige motivo de 5 a 200 caracteres. Bloquear revisión y administradores activos para impedir desactivar/degradar al último. El hash se guarda pero nunca se serializa ni aparece en auditoría. La desactivación revoca el acceso en la siguiente petición.</bpmn:documentation>
+      <bpmn:incoming>P10_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P10_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P10_Flow5">
+      <bpmn:incoming>P10_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P10_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P10_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P10_Flow5</bpmn:incoming>
+      <bpmn:incoming>P10_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P10_Guardar" name="Guardar usuario y evento auditado">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P10_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P10_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P10_Flow8">
+      <bpmn:incoming>P10_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P10_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P10_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P10_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P10_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P10_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P10_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P10_Fin" name="Registro actualizado">
+      <bpmn:incoming>P10_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P10_Flow1" sourceRef="P10_Inicio" targetRef="P10_Datos"/>
+    <bpmn:sequenceFlow id="P10_Flow2" sourceRef="P10_Datos" targetRef="P10_Validar"/>
+    <bpmn:sequenceFlow id="P10_Flow3" sourceRef="P10_Validar" targetRef="P10_Valido"/>
+    <bpmn:sequenceFlow id="P10_Flow4" sourceRef="P10_Valido" targetRef="P10_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P10_Flow5" sourceRef="P10_Valido" targetRef="P10_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P10_Flow6" sourceRef="P10_Guardar" targetRef="P10_Confirmado"/>
+    <bpmn:sequenceFlow id="P10_Flow7" sourceRef="P10_Confirmado" targetRef="P10_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P10_Flow8" sourceRef="P10_Confirmado" targetRef="P10_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P10_Flow9" sourceRef="P10_Fallo" targetRef="P10_Corregir"/>
+    <bpmn:sequenceFlow id="P10_Flow10" sourceRef="P10_Corregir" targetRef="P10_Datos"/>
+    <bpmn:sequenceFlow id="P10_Flow11" sourceRef="P10_Resultado" targetRef="P10_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P11_Process" name="Administrar objetivos de gobierno digital" isExecutable="false">
+    <bpmn:documentation>El catálogo implementa alta y edición por Administrador. Los otros perfiles sólo consultan. Código único; descripción hasta 200 caracteres. El cambio incrementa la revisión para invalidar consultas y advertir desactualización del DW. No se modela una aprobación institucional ni una eliminación de catálogo no expuesta por rutas.
+Fuentes del sistema: sistema/app/Http/Controllers/ObjetivoGdController.php, sistema/app/Policies/ObjetivoGdPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P11_LaneSet">
+      <bpmn:lane id="P11_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P11_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P11_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P11_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P11_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P11_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P11_Datos" name="Crear o editar código y descripción">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow1</bpmn:incoming>
+      <bpmn:incoming>P11_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P11_Validar" name="Validar permiso, unicidad y longitudes">
+      <bpmn:documentation>El catálogo implementa alta y edición por Administrador. Los otros perfiles sólo consultan. Código único; descripción hasta 200 caracteres. El cambio incrementa la revisión para invalidar consultas y advertir desactualización del DW. No se modela una aprobación institucional ni una eliminación de catálogo no expuesta por rutas.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P11_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P11_Flow5">
+      <bpmn:incoming>P11_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P11_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P11_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow5</bpmn:incoming>
+      <bpmn:incoming>P11_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P11_Guardar" name="Guardar catálogo y revisión auditada">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P11_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P11_Flow8">
+      <bpmn:incoming>P11_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P11_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P11_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P11_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P11_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P11_Fin" name="Registro actualizado">
+      <bpmn:incoming>P11_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P11_Flow1" sourceRef="P11_Inicio" targetRef="P11_Datos"/>
+    <bpmn:sequenceFlow id="P11_Flow2" sourceRef="P11_Datos" targetRef="P11_Validar"/>
+    <bpmn:sequenceFlow id="P11_Flow3" sourceRef="P11_Validar" targetRef="P11_Valido"/>
+    <bpmn:sequenceFlow id="P11_Flow4" sourceRef="P11_Valido" targetRef="P11_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P11_Flow5" sourceRef="P11_Valido" targetRef="P11_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P11_Flow6" sourceRef="P11_Guardar" targetRef="P11_Confirmado"/>
+    <bpmn:sequenceFlow id="P11_Flow7" sourceRef="P11_Confirmado" targetRef="P11_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P11_Flow8" sourceRef="P11_Confirmado" targetRef="P11_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P11_Flow9" sourceRef="P11_Fallo" targetRef="P11_Corregir"/>
+    <bpmn:sequenceFlow id="P11_Flow10" sourceRef="P11_Corregir" targetRef="P11_Datos"/>
+    <bpmn:sequenceFlow id="P11_Flow11" sourceRef="P11_Resultado" targetRef="P11_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P12_Process" name="Consultar trazabilidad de cambios" isExecutable="false">
+    <bpmn:documentation>La auditoría se genera automáticamente al cambiar negocio. Este proceso sólo consulta; no permite editar, borrar o aprobar eventos. No crea una segunda auditoría manual.
+Fuentes del sistema: sistema/app/Http/Controllers/AuditoriaController.php, sistema/app/Policies/BitacoraCambioPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P12_LaneSet">
+      <bpmn:lane id="P12_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P12_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Elegir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P12_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P12_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Permitido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Denegado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P12_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P12_I" name="Necesidad de trazabilidad">
+      <bpmn:outgoing>P12_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P12_Elegir" name="Abrir auditoría y elegir filtros">
+      <bpmn:incoming>P12_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P12_Validar" name="Validar sesión y perfil">
+      <bpmn:incoming>P12_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P12_Permitido" name="¿Es Administrador?" gatewayDirection="Diverging" default="P12_Flow5">
+      <bpmn:incoming>P12_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P12_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P12_Denegado" name="Consulta denegada">
+      <bpmn:incoming>P12_Flow5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P12_Leer" name="Consultar eventos y motivos">
+      <bpmn:incoming>P12_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P12_Mostrar" name="Mostrar cambios sin credenciales">
+      <bpmn:incoming>P12_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P12_Revisar" name="Revisar actor, fecha y valores">
+      <bpmn:incoming>P12_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P12_Flow8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P12_Fin" name="Trazabilidad consultada">
+      <bpmn:incoming>P12_Flow8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P12_Flow1" sourceRef="P12_I" targetRef="P12_Elegir"/>
+    <bpmn:sequenceFlow id="P12_Flow2" sourceRef="P12_Elegir" targetRef="P12_Validar"/>
+    <bpmn:sequenceFlow id="P12_Flow3" sourceRef="P12_Validar" targetRef="P12_Permitido"/>
+    <bpmn:sequenceFlow id="P12_Flow4" sourceRef="P12_Permitido" targetRef="P12_Leer" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">perfil == "Administrador"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P12_Flow5" sourceRef="P12_Permitido" targetRef="P12_Denegado" name="No"/>
+    <bpmn:sequenceFlow id="P12_Flow6" sourceRef="P12_Leer" targetRef="P12_Mostrar"/>
+    <bpmn:sequenceFlow id="P12_Flow7" sourceRef="P12_Mostrar" targetRef="P12_Revisar"/>
+    <bpmn:sequenceFlow id="P12_Flow8" sourceRef="P12_Revisar" targetRef="P12_Fin"/>
+  </bpmn:process>
+  <bpmn:process id="P13_Process" name="Respaldar y verificar recuperación local" isExecutable="false">
+    <bpmn:documentation>Proceso técnico operado desde PowerShell con cuenta migradora autorizada; no existe un botón web de respaldo ni se crea un cuarto perfil de aplicación. El camino normal restaura en esquemas descartables y nunca sobrescribe la operativa.
+Fuentes del sistema: scripts/respaldo_db.ps1, scripts/restaurar_db.ps1, scripts/ajustar_permisos.php, sistema/tests/Feature/GateG4RestauracionTest.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P13_LaneSet">
+      <bpmn:lane id="P13_Lane0" name="Operador técnico local">
+        <bpmn:flowNodeRef>P13_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Preparar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Documentar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P13_Lane1" name="Herramientas locales / MariaDB">
+        <bpmn:flowNodeRef>P13_Dump</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Restaurar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Permisos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Verificar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Ok</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P13_I" name="Necesidad de verificar respaldo">
+      <bpmn:outgoing>P13_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:manualTask id="P13_Preparar" name="Verificar acceso y destinos locales">
+      <bpmn:incoming>P13_Flow1</bpmn:incoming>
+      <bpmn:incoming>P13_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow2</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:serviceTask id="P13_Dump" name="Respaldar operativo y DW">
+      <bpmn:incoming>P13_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:manualTask id="P13_Revisar" name="Seleccionar respaldo y copias destino">
+      <bpmn:incoming>P13_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow4</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:serviceTask id="P13_Restaurar" name="Restaurar y remapear referencias">
+      <bpmn:incoming>P13_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P13_Permisos" name="Reconciliar privilegios técnicos">
+      <bpmn:incoming>P13_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P13_Verificar" name="Conciliar y probar recorrido en copia">
+      <bpmn:documentation>Pruebas sobre copia: conteos, montos, restricciones, login, alta auditada, acción denegada y ETL apuntando a copia. Es una ejecución explícita del operador; restaurar_db.ps1 no ejecuta automáticamente toda la suite.</bpmn:documentation>
+      <bpmn:incoming>P13_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P13_Ok" name="¿Verificaciones satisfactorias?" gatewayDirection="Diverging" default="P13_Flow9">
+      <bpmn:incoming>P13_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow8</bpmn:outgoing>
+      <bpmn:outgoing>P13_Flow9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="P13_Error" name="Registrar fallo y corregir causa">
+      <bpmn:incoming>P13_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow10</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="P13_Documentar" name="Registrar evidencia de recuperación">
+      <bpmn:incoming>P13_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow11</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="P13_Fin" name="Copia recuperable verificada">
+      <bpmn:incoming>P13_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P13_Flow1" sourceRef="P13_I" targetRef="P13_Preparar"/>
+    <bpmn:sequenceFlow id="P13_Flow2" sourceRef="P13_Preparar" targetRef="P13_Dump"/>
+    <bpmn:sequenceFlow id="P13_Flow3" sourceRef="P13_Dump" targetRef="P13_Revisar"/>
+    <bpmn:sequenceFlow id="P13_Flow4" sourceRef="P13_Revisar" targetRef="P13_Restaurar"/>
+    <bpmn:sequenceFlow id="P13_Flow5" sourceRef="P13_Restaurar" targetRef="P13_Permisos"/>
+    <bpmn:sequenceFlow id="P13_Flow6" sourceRef="P13_Permisos" targetRef="P13_Verificar"/>
+    <bpmn:sequenceFlow id="P13_Flow7" sourceRef="P13_Verificar" targetRef="P13_Ok"/>
+    <bpmn:sequenceFlow id="P13_Flow8" sourceRef="P13_Ok" targetRef="P13_Documentar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">verificaciones_aprobadas == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P13_Flow9" sourceRef="P13_Ok" targetRef="P13_Error" name="No"/>
+    <bpmn:sequenceFlow id="P13_Flow10" sourceRef="P13_Error" targetRef="P13_Preparar"/>
+    <bpmn:sequenceFlow id="P13_Flow11" sourceRef="P13_Documentar" targetRef="P13_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="SIG_Electrocentro_Colaboracion" name="SIG Electrocentro — modelo completo de procesos"><bpmn:documentation>Catorce diagramas integrados en un único lienzo editable: una vista de contexto y trece procesos. Los pools son modelos descriptivos independientes, no etapas obligatorias ni actores externos; no se inventan flujos de mensaje entre procesos. Sin imágenes ni trabajo en Power BI. Los procesos no son ejecutables sin configuración adicional del motor.</bpmn:documentation><bpmn:participant id="P00_Pool" name="P00 · Seguimiento gerencial de proyectos" processRef="P00_Process"/>
+  <bpmn:participant id="P01_Pool" name="P01 · Acceso y cierre de sesión" processRef="P01_Process"/>
+  <bpmn:participant id="P02_Pool" name="P02 · Registrar o editar proyectos" processRef="P02_Process"/>
+  <bpmn:participant id="P03_Pool" name="P03 · Gestionar hitos y línea base" processRef="P03_Process"/>
+  <bpmn:participant id="P04_Pool" name="P04 · Registrar o editar cortes presupuestales" processRef="P04_Process"/>
+  <bpmn:participant id="P05_Pool" name="P05 · Cerrar formalmente un proyecto" processRef="P05_Process"/>
+  <bpmn:participant id="P06_Pool" name="P06 · Reabrir un proyecto cerrado" processRef="P06_Process"/>
+  <bpmn:participant id="P07_Pool" name="P07 · Consultar cartera e indicadores" processRef="P07_Process"/>
+  <bpmn:participant id="P08_Pool" name="P08 · Generar y descargar reporte gerencial" processRef="P08_Process"/>
+  <bpmn:participant id="P09_Pool" name="P09 · Actualizar el almacén de datos — ETL" processRef="P09_Process"/>
+  <bpmn:participant id="P10_Pool" name="P10 · Administrar usuarios y perfiles" processRef="P10_Process"/>
+  <bpmn:participant id="P11_Pool" name="P11 · Administrar objetivos de gobierno digital" processRef="P11_Process"/>
+  <bpmn:participant id="P12_Pool" name="P12 · Consultar trazabilidad de cambios" processRef="P12_Process"/>
+  <bpmn:participant id="P13_Pool" name="P13 · Respaldar y verificar recuperación local" processRef="P13_Process"/>
+  </bpmn:collaboration><bpmndi:BPMNDiagram id="SIG_Electrocentro_Diagrama_Completo" name="SIG Electrocentro — 14 procesos"><bpmndi:BPMNPlane id="SIG_Electrocentro_Lienzo" bpmnElement="SIG_Electrocentro_Colaboracion"><bpmndi:BPMNShape id="P00_PoolShape" bpmnElement="P00_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="40.0" width="1940" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_LaneShape0" bpmnElement="P00_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="40.0" width="1910" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_LaneShape1" bpmnElement="P00_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="300.0" width="1910" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_I_di" bpmnElement="P00_I">
+        <dc:Bounds x="162.0" y="152.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="195.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cartera_di" bpmnElement="P00_Cartera">
+        <dc:Bounds x="310.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Estado_di" bpmnElement="P00_Estado">
+        <dc:Bounds x="515.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Accion_di" bpmnElement="P00_Accion" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="145.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="75.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Hitos_di" bpmnElement="P00_Hitos">
+        <dc:Bounds x="925.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cortes_di" bpmnElement="P00_Cortes">
+        <dc:Bounds x="925.0" y="225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Consultar_di" bpmnElement="P00_Consultar">
+        <dc:Bounds x="1130.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cierre_di" bpmnElement="P00_Cierre" isMarkerVisible="true">
+        <dc:Bounds x="1385.0" y="145.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1260.0" y="75.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Cerrar_di" bpmnElement="P00_Cerrar">
+        <dc:Bounds x="1540.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Fin_di" bpmnElement="P00_Fin">
+        <dc:Bounds x="1802.0" y="152.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1745.0" y="195.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P00_Mostrar_di" bpmnElement="P00_Mostrar">
+        <dc:Bounds x="1335.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P00_Edge1" bpmnElement="P00_Flow1">
+        <di:waypoint x="198.0" y="170.0"/>
+        <di:waypoint x="310.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge2" bpmnElement="P00_Flow2">
+        <di:waypoint x="460.0" y="170.0"/>
+        <di:waypoint x="487.5" y="170.0"/>
+        <di:waypoint x="487.5" y="430.0"/>
+        <di:waypoint x="515.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge3" bpmnElement="P00_Flow3">
+        <di:waypoint x="665.0" y="430.0"/>
+        <di:waypoint x="717.5" y="430.0"/>
+        <di:waypoint x="717.5" y="170.0"/>
+        <di:waypoint x="770.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge4" bpmnElement="P00_Flow4">
+        <di:waypoint x="820.0" y="170.0"/>
+        <di:waypoint x="925.0" y="170.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="149.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge5" bpmnElement="P00_Flow5">
+        <di:waypoint x="795.0" y="195.0"/>
+        <di:waypoint x="795.0" y="260.0"/>
+        <di:waypoint x="925.0" y="260.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="206.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge6" bpmnElement="P00_Flow6">
+        <di:waypoint x="795.0" y="145.0"/>
+        <di:waypoint x="795.0" y="75.0"/>
+        <di:waypoint x="1205.0" y="75.0"/>
+        <di:waypoint x="1205.0" y="135.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="89.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge7" bpmnElement="P00_Flow7">
+        <di:waypoint x="1075.0" y="170.0"/>
+        <di:waypoint x="1130.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge8" bpmnElement="P00_Flow8">
+        <di:waypoint x="1075.0" y="260.0"/>
+        <di:waypoint x="1102.5" y="260.0"/>
+        <di:waypoint x="1102.5" y="170.0"/>
+        <di:waypoint x="1130.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge9" bpmnElement="P00_Flow9">
+        <di:waypoint x="1280.0" y="170.0"/>
+        <di:waypoint x="1307.5" y="170.0"/>
+        <di:waypoint x="1307.5" y="430.0"/>
+        <di:waypoint x="1335.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge10" bpmnElement="P00_Flow10">
+        <di:waypoint x="1410.0" y="395.0"/>
+        <di:waypoint x="1410.0" y="195.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge11" bpmnElement="P00_Flow11">
+        <di:waypoint x="1435.0" y="170.0"/>
+        <di:waypoint x="1540.0" y="170.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1452.5" y="149.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge12" bpmnElement="P00_Flow12">
+        <di:waypoint x="1410.0" y="145.0"/>
+        <di:waypoint x="1410.0" y="75.0"/>
+        <di:waypoint x="1820.0" y="75.0"/>
+        <di:waypoint x="1820.0" y="152.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1375.0" y="89.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P00_Edge13" bpmnElement="P00_Flow13">
+        <di:waypoint x="1690.0" y="170.0"/>
+        <di:waypoint x="1802.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P01_PoolShape" bpmnElement="P01_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="40.0" width="2350" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_LaneShape0" bpmnElement="P01_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="40.0" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_LaneShape1" bpmnElement="P01_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="300.0" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_I_di" bpmnElement="P01_I">
+        <dc:Bounds x="3432.0" y="152.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="195.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Cred_di" bpmnElement="P01_Cred">
+        <dc:Bounds x="3580.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Intentos_di" bpmnElement="P01_Intentos">
+        <dc:Bounds x="3785.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Permitido_di" bpmnElement="P01_Permitido" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="405.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="335.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Bloq_di" bpmnElement="P01_Bloq">
+        <dc:Bounds x="4252.0" y="502.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4195.0" y="545.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Auth_di" bpmnElement="P01_Auth">
+        <dc:Bounds x="4195.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Ok_di" bpmnElement="P01_Ok" isMarkerVisible="true">
+        <dc:Bounds x="4450.0" y="405.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4325.0" y="335.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Error_di" bpmnElement="P01_Error">
+        <dc:Bounds x="4605.0" y="485.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Sesion_di" bpmnElement="P01_Sesion">
+        <dc:Bounds x="4605.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Usar_di" bpmnElement="P01_Usar">
+        <dc:Bounds x="4810.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Salir_di" bpmnElement="P01_Salir">
+        <dc:Bounds x="5015.0" y="135.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Invalidar_di" bpmnElement="P01_Invalidar">
+        <dc:Bounds x="5220.0" y="395.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P01_Fin_di" bpmnElement="P01_Fin">
+        <dc:Bounds x="5482.0" y="152.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5425.0" y="195.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P01_Edge1" bpmnElement="P01_Flow1">
+        <di:waypoint x="3468.0" y="170.0"/>
+        <di:waypoint x="3580.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge2" bpmnElement="P01_Flow2">
+        <di:waypoint x="3730.0" y="170.0"/>
+        <di:waypoint x="3757.5" y="170.0"/>
+        <di:waypoint x="3757.5" y="430.0"/>
+        <di:waypoint x="3785.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge3" bpmnElement="P01_Flow3">
+        <di:waypoint x="3935.0" y="430.0"/>
+        <di:waypoint x="4040.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge4" bpmnElement="P01_Flow4">
+        <di:waypoint x="4090.0" y="430.0"/>
+        <di:waypoint x="4195.0" y="430.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4107.5" y="409.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge5" bpmnElement="P01_Flow5">
+        <di:waypoint x="4065.0" y="455.0"/>
+        <di:waypoint x="4065.0" y="520.0"/>
+        <di:waypoint x="4252.0" y="520.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="466.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge6" bpmnElement="P01_Flow6">
+        <di:waypoint x="4345.0" y="430.0"/>
+        <di:waypoint x="4450.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge7" bpmnElement="P01_Flow7">
+        <di:waypoint x="4500.0" y="430.0"/>
+        <di:waypoint x="4605.0" y="430.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4517.5" y="409.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge8" bpmnElement="P01_Flow8">
+        <di:waypoint x="4475.0" y="455.0"/>
+        <di:waypoint x="4475.0" y="520.0"/>
+        <di:waypoint x="4605.0" y="520.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="466.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge9" bpmnElement="P01_Flow9">
+        <di:waypoint x="4605.0" y="520.0"/>
+        <di:waypoint x="4580.0" y="520.0"/>
+        <di:waypoint x="4580.0" y="62.0"/>
+        <di:waypoint x="3655.0" y="62.0"/>
+        <di:waypoint x="3655.0" y="135.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge10" bpmnElement="P01_Flow10">
+        <di:waypoint x="4755.0" y="430.0"/>
+        <di:waypoint x="4782.5" y="430.0"/>
+        <di:waypoint x="4782.5" y="170.0"/>
+        <di:waypoint x="4810.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge11" bpmnElement="P01_Flow11">
+        <di:waypoint x="4960.0" y="170.0"/>
+        <di:waypoint x="5015.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge12" bpmnElement="P01_Flow12">
+        <di:waypoint x="5165.0" y="170.0"/>
+        <di:waypoint x="5192.5" y="170.0"/>
+        <di:waypoint x="5192.5" y="430.0"/>
+        <di:waypoint x="5220.0" y="430.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P01_Edge13" bpmnElement="P01_Flow13">
+        <di:waypoint x="5370.0" y="430.0"/>
+        <di:waypoint x="5426.0" y="430.0"/>
+        <di:waypoint x="5426.0" y="170.0"/>
+        <di:waypoint x="5482.0" y="170.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P02_PoolShape" bpmnElement="P02_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="650.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_LaneShape0" bpmnElement="P02_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="650.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_LaneShape1" bpmnElement="P02_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="910.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Inicio_di" bpmnElement="P02_Inicio">
+        <dc:Bounds x="162.0" y="762.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="805.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Datos_di" bpmnElement="P02_Datos">
+        <dc:Bounds x="310.0" y="745.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Validar_di" bpmnElement="P02_Validar">
+        <dc:Bounds x="515.0" y="1005.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Valido_di" bpmnElement="P02_Valido" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="1015.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="945.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Corregir_di" bpmnElement="P02_Corregir">
+        <dc:Bounds x="925.0" y="835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Guardar_di" bpmnElement="P02_Guardar">
+        <dc:Bounds x="925.0" y="1005.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Confirmado_di" bpmnElement="P02_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="1180.0" y="1015.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1055.0" y="945.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Fallo_di" bpmnElement="P02_Fallo">
+        <dc:Bounds x="1335.0" y="1095.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Resultado_di" bpmnElement="P02_Resultado">
+        <dc:Bounds x="1335.0" y="745.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P02_Fin_di" bpmnElement="P02_Fin">
+        <dc:Bounds x="1597.0" y="762.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1540.0" y="805.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P02_Edge1" bpmnElement="P02_Flow1">
+        <di:waypoint x="198.0" y="780.0"/>
+        <di:waypoint x="310.0" y="780.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge2" bpmnElement="P02_Flow2">
+        <di:waypoint x="460.0" y="780.0"/>
+        <di:waypoint x="487.5" y="780.0"/>
+        <di:waypoint x="487.5" y="1040.0"/>
+        <di:waypoint x="515.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge3" bpmnElement="P02_Flow3">
+        <di:waypoint x="665.0" y="1040.0"/>
+        <di:waypoint x="770.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge4" bpmnElement="P02_Flow4">
+        <di:waypoint x="820.0" y="1040.0"/>
+        <di:waypoint x="925.0" y="1040.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="1019.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge5" bpmnElement="P02_Flow5">
+        <di:waypoint x="795.0" y="1015.0"/>
+        <di:waypoint x="795.0" y="870.0"/>
+        <di:waypoint x="925.0" y="870.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="921.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge6" bpmnElement="P02_Flow6">
+        <di:waypoint x="1075.0" y="1040.0"/>
+        <di:waypoint x="1180.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge7" bpmnElement="P02_Flow7">
+        <di:waypoint x="1205.0" y="1015.0"/>
+        <di:waypoint x="1205.0" y="780.0"/>
+        <di:waypoint x="1335.0" y="780.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="876.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge8" bpmnElement="P02_Flow8">
+        <di:waypoint x="1205.0" y="1065.0"/>
+        <di:waypoint x="1205.0" y="1130.0"/>
+        <di:waypoint x="1335.0" y="1130.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="1076.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge9" bpmnElement="P02_Flow9">
+        <di:waypoint x="1335.0" y="1130.0"/>
+        <di:waypoint x="1310.0" y="1130.0"/>
+        <di:waypoint x="1310.0" y="672.0"/>
+        <di:waypoint x="1000.0" y="672.0"/>
+        <di:waypoint x="1000.0" y="835.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge10" bpmnElement="P02_Flow10">
+        <di:waypoint x="925.0" y="870.0"/>
+        <di:waypoint x="900.0" y="870.0"/>
+        <di:waypoint x="900.0" y="672.0"/>
+        <di:waypoint x="385.0" y="672.0"/>
+        <di:waypoint x="385.0" y="745.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P02_Edge11" bpmnElement="P02_Flow11">
+        <di:waypoint x="1485.0" y="780.0"/>
+        <di:waypoint x="1597.0" y="780.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P03_PoolShape" bpmnElement="P03_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="650.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_LaneShape0" bpmnElement="P03_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="650.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_LaneShape1" bpmnElement="P03_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="910.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Inicio_di" bpmnElement="P03_Inicio">
+        <dc:Bounds x="3432.0" y="762.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="805.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Datos_di" bpmnElement="P03_Datos">
+        <dc:Bounds x="3580.0" y="745.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Validar_di" bpmnElement="P03_Validar">
+        <dc:Bounds x="3785.0" y="1005.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Valido_di" bpmnElement="P03_Valido" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="1015.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="945.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Corregir_di" bpmnElement="P03_Corregir">
+        <dc:Bounds x="4195.0" y="835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Guardar_di" bpmnElement="P03_Guardar">
+        <dc:Bounds x="4195.0" y="1005.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Confirmado_di" bpmnElement="P03_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="4450.0" y="1015.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4325.0" y="945.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Fallo_di" bpmnElement="P03_Fallo">
+        <dc:Bounds x="4605.0" y="1095.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Resultado_di" bpmnElement="P03_Resultado">
+        <dc:Bounds x="4605.0" y="745.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P03_Fin_di" bpmnElement="P03_Fin">
+        <dc:Bounds x="4867.0" y="762.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4810.0" y="805.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P03_Edge1" bpmnElement="P03_Flow1">
+        <di:waypoint x="3468.0" y="780.0"/>
+        <di:waypoint x="3580.0" y="780.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge2" bpmnElement="P03_Flow2">
+        <di:waypoint x="3730.0" y="780.0"/>
+        <di:waypoint x="3757.5" y="780.0"/>
+        <di:waypoint x="3757.5" y="1040.0"/>
+        <di:waypoint x="3785.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge3" bpmnElement="P03_Flow3">
+        <di:waypoint x="3935.0" y="1040.0"/>
+        <di:waypoint x="4040.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge4" bpmnElement="P03_Flow4">
+        <di:waypoint x="4090.0" y="1040.0"/>
+        <di:waypoint x="4195.0" y="1040.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4107.5" y="1019.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge5" bpmnElement="P03_Flow5">
+        <di:waypoint x="4065.0" y="1015.0"/>
+        <di:waypoint x="4065.0" y="870.0"/>
+        <di:waypoint x="4195.0" y="870.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="921.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge6" bpmnElement="P03_Flow6">
+        <di:waypoint x="4345.0" y="1040.0"/>
+        <di:waypoint x="4450.0" y="1040.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge7" bpmnElement="P03_Flow7">
+        <di:waypoint x="4475.0" y="1015.0"/>
+        <di:waypoint x="4475.0" y="780.0"/>
+        <di:waypoint x="4605.0" y="780.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="876.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge8" bpmnElement="P03_Flow8">
+        <di:waypoint x="4475.0" y="1065.0"/>
+        <di:waypoint x="4475.0" y="1130.0"/>
+        <di:waypoint x="4605.0" y="1130.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="1076.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge9" bpmnElement="P03_Flow9">
+        <di:waypoint x="4605.0" y="1130.0"/>
+        <di:waypoint x="4580.0" y="1130.0"/>
+        <di:waypoint x="4580.0" y="672.0"/>
+        <di:waypoint x="4270.0" y="672.0"/>
+        <di:waypoint x="4270.0" y="835.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge10" bpmnElement="P03_Flow10">
+        <di:waypoint x="4195.0" y="870.0"/>
+        <di:waypoint x="4170.0" y="870.0"/>
+        <di:waypoint x="4170.0" y="672.0"/>
+        <di:waypoint x="3655.0" y="672.0"/>
+        <di:waypoint x="3655.0" y="745.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P03_Edge11" bpmnElement="P03_Flow11">
+        <di:waypoint x="4755.0" y="780.0"/>
+        <di:waypoint x="4867.0" y="780.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P04_PoolShape" bpmnElement="P04_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="1260.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_LaneShape0" bpmnElement="P04_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="1260.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_LaneShape1" bpmnElement="P04_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="1520.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Inicio_di" bpmnElement="P04_Inicio">
+        <dc:Bounds x="162.0" y="1372.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="1415.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Datos_di" bpmnElement="P04_Datos">
+        <dc:Bounds x="310.0" y="1355.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Validar_di" bpmnElement="P04_Validar">
+        <dc:Bounds x="515.0" y="1615.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Valido_di" bpmnElement="P04_Valido" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="1625.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="1555.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Corregir_di" bpmnElement="P04_Corregir">
+        <dc:Bounds x="925.0" y="1445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Guardar_di" bpmnElement="P04_Guardar">
+        <dc:Bounds x="925.0" y="1615.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Confirmado_di" bpmnElement="P04_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="1180.0" y="1625.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1055.0" y="1555.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Fallo_di" bpmnElement="P04_Fallo">
+        <dc:Bounds x="1335.0" y="1705.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Resultado_di" bpmnElement="P04_Resultado">
+        <dc:Bounds x="1335.0" y="1355.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P04_Fin_di" bpmnElement="P04_Fin">
+        <dc:Bounds x="1597.0" y="1372.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1540.0" y="1415.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P04_Edge1" bpmnElement="P04_Flow1">
+        <di:waypoint x="198.0" y="1390.0"/>
+        <di:waypoint x="310.0" y="1390.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge2" bpmnElement="P04_Flow2">
+        <di:waypoint x="460.0" y="1390.0"/>
+        <di:waypoint x="487.5" y="1390.0"/>
+        <di:waypoint x="487.5" y="1650.0"/>
+        <di:waypoint x="515.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge3" bpmnElement="P04_Flow3">
+        <di:waypoint x="665.0" y="1650.0"/>
+        <di:waypoint x="770.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge4" bpmnElement="P04_Flow4">
+        <di:waypoint x="820.0" y="1650.0"/>
+        <di:waypoint x="925.0" y="1650.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="1629.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge5" bpmnElement="P04_Flow5">
+        <di:waypoint x="795.0" y="1625.0"/>
+        <di:waypoint x="795.0" y="1480.0"/>
+        <di:waypoint x="925.0" y="1480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="1531.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge6" bpmnElement="P04_Flow6">
+        <di:waypoint x="1075.0" y="1650.0"/>
+        <di:waypoint x="1180.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge7" bpmnElement="P04_Flow7">
+        <di:waypoint x="1205.0" y="1625.0"/>
+        <di:waypoint x="1205.0" y="1390.0"/>
+        <di:waypoint x="1335.0" y="1390.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="1486.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge8" bpmnElement="P04_Flow8">
+        <di:waypoint x="1205.0" y="1675.0"/>
+        <di:waypoint x="1205.0" y="1740.0"/>
+        <di:waypoint x="1335.0" y="1740.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="1686.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge9" bpmnElement="P04_Flow9">
+        <di:waypoint x="1335.0" y="1740.0"/>
+        <di:waypoint x="1310.0" y="1740.0"/>
+        <di:waypoint x="1310.0" y="1282.0"/>
+        <di:waypoint x="1000.0" y="1282.0"/>
+        <di:waypoint x="1000.0" y="1445.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge10" bpmnElement="P04_Flow10">
+        <di:waypoint x="925.0" y="1480.0"/>
+        <di:waypoint x="900.0" y="1480.0"/>
+        <di:waypoint x="900.0" y="1282.0"/>
+        <di:waypoint x="385.0" y="1282.0"/>
+        <di:waypoint x="385.0" y="1355.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P04_Edge11" bpmnElement="P04_Flow11">
+        <di:waypoint x="1485.0" y="1390.0"/>
+        <di:waypoint x="1597.0" y="1390.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P05_PoolShape" bpmnElement="P05_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="1260.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LaneShape0" bpmnElement="P05_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="1260.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LaneShape1" bpmnElement="P05_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="1520.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_I_di" bpmnElement="P05_I">
+        <dc:Bounds x="3432.0" y="1372.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="1415.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Solicitar_di" bpmnElement="P05_Solicitar">
+        <dc:Bounds x="3580.0" y="1355.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Validar_di" bpmnElement="P05_Validar">
+        <dc:Bounds x="3785.0" y="1615.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Permiso_di" bpmnElement="P05_Permiso" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="1625.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="1555.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Denegado_di" bpmnElement="P05_Denegado">
+        <dc:Bounds x="4252.0" y="1722.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4195.0" y="1765.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LB_di" bpmnElement="P05_LB">
+        <dc:Bounds x="4195.0" y="1615.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Completo_di" bpmnElement="P05_Completo" isMarkerVisible="true">
+        <dc:Bounds x="4450.0" y="1625.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4325.0" y="1555.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Observar_di" bpmnElement="P05_Observar">
+        <dc:Bounds x="4605.0" y="1705.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Atender_di" bpmnElement="P05_Atender">
+        <dc:Bounds x="4605.0" y="1445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Guardar_di" bpmnElement="P05_Guardar">
+        <dc:Bounds x="4605.0" y="1615.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Fin_di" bpmnElement="P05_Fin">
+        <dc:Bounds x="4867.0" y="1372.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4810.0" y="1415.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P05_Edge1" bpmnElement="P05_Flow1">
+        <di:waypoint x="3468.0" y="1390.0"/>
+        <di:waypoint x="3580.0" y="1390.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge2" bpmnElement="P05_Flow2">
+        <di:waypoint x="3730.0" y="1390.0"/>
+        <di:waypoint x="3757.5" y="1390.0"/>
+        <di:waypoint x="3757.5" y="1650.0"/>
+        <di:waypoint x="3785.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge3" bpmnElement="P05_Flow3">
+        <di:waypoint x="3935.0" y="1650.0"/>
+        <di:waypoint x="4040.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge4" bpmnElement="P05_Flow4">
+        <di:waypoint x="4090.0" y="1650.0"/>
+        <di:waypoint x="4195.0" y="1650.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4107.5" y="1629.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge5" bpmnElement="P05_Flow5">
+        <di:waypoint x="4065.0" y="1675.0"/>
+        <di:waypoint x="4065.0" y="1740.0"/>
+        <di:waypoint x="4252.0" y="1740.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="1686.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge6" bpmnElement="P05_Flow6">
+        <di:waypoint x="4345.0" y="1650.0"/>
+        <di:waypoint x="4450.0" y="1650.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge7" bpmnElement="P05_Flow7">
+        <di:waypoint x="4500.0" y="1650.0"/>
+        <di:waypoint x="4605.0" y="1650.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4517.5" y="1629.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge8" bpmnElement="P05_Flow8">
+        <di:waypoint x="4475.0" y="1675.0"/>
+        <di:waypoint x="4475.0" y="1740.0"/>
+        <di:waypoint x="4605.0" y="1740.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="1686.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge9" bpmnElement="P05_Flow9">
+        <di:waypoint x="4680.0" y="1705.0"/>
+        <di:waypoint x="4680.0" y="1515.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge10" bpmnElement="P05_Flow10">
+        <di:waypoint x="4605.0" y="1480.0"/>
+        <di:waypoint x="4580.0" y="1480.0"/>
+        <di:waypoint x="4580.0" y="1282.0"/>
+        <di:waypoint x="3655.0" y="1282.0"/>
+        <di:waypoint x="3655.0" y="1355.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge11" bpmnElement="P05_Flow11">
+        <di:waypoint x="4755.0" y="1650.0"/>
+        <di:waypoint x="4811.0" y="1650.0"/>
+        <di:waypoint x="4811.0" y="1390.0"/>
+        <di:waypoint x="4867.0" y="1390.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P06_PoolShape" bpmnElement="P06_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="1870.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_LaneShape0" bpmnElement="P06_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="1870.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_LaneShape1" bpmnElement="P06_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="2130.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Inicio_di" bpmnElement="P06_Inicio">
+        <dc:Bounds x="162.0" y="1982.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="2025.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Datos_di" bpmnElement="P06_Datos">
+        <dc:Bounds x="310.0" y="1965.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Validar_di" bpmnElement="P06_Validar">
+        <dc:Bounds x="515.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Valido_di" bpmnElement="P06_Valido" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="2235.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="2165.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Corregir_di" bpmnElement="P06_Corregir">
+        <dc:Bounds x="925.0" y="2055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Guardar_di" bpmnElement="P06_Guardar">
+        <dc:Bounds x="925.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Confirmado_di" bpmnElement="P06_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="1180.0" y="2235.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1055.0" y="2165.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Fallo_di" bpmnElement="P06_Fallo">
+        <dc:Bounds x="1335.0" y="2315.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Resultado_di" bpmnElement="P06_Resultado">
+        <dc:Bounds x="1335.0" y="1965.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P06_Fin_di" bpmnElement="P06_Fin">
+        <dc:Bounds x="1597.0" y="1982.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1540.0" y="2025.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P06_Edge1" bpmnElement="P06_Flow1">
+        <di:waypoint x="198.0" y="2000.0"/>
+        <di:waypoint x="310.0" y="2000.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge2" bpmnElement="P06_Flow2">
+        <di:waypoint x="460.0" y="2000.0"/>
+        <di:waypoint x="487.5" y="2000.0"/>
+        <di:waypoint x="487.5" y="2260.0"/>
+        <di:waypoint x="515.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge3" bpmnElement="P06_Flow3">
+        <di:waypoint x="665.0" y="2260.0"/>
+        <di:waypoint x="770.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge4" bpmnElement="P06_Flow4">
+        <di:waypoint x="820.0" y="2260.0"/>
+        <di:waypoint x="925.0" y="2260.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="2239.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge5" bpmnElement="P06_Flow5">
+        <di:waypoint x="795.0" y="2235.0"/>
+        <di:waypoint x="795.0" y="2090.0"/>
+        <di:waypoint x="925.0" y="2090.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="2141.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge6" bpmnElement="P06_Flow6">
+        <di:waypoint x="1075.0" y="2260.0"/>
+        <di:waypoint x="1180.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge7" bpmnElement="P06_Flow7">
+        <di:waypoint x="1205.0" y="2235.0"/>
+        <di:waypoint x="1205.0" y="2000.0"/>
+        <di:waypoint x="1335.0" y="2000.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="2096.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge8" bpmnElement="P06_Flow8">
+        <di:waypoint x="1205.0" y="2285.0"/>
+        <di:waypoint x="1205.0" y="2350.0"/>
+        <di:waypoint x="1335.0" y="2350.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="2296.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge9" bpmnElement="P06_Flow9">
+        <di:waypoint x="1335.0" y="2350.0"/>
+        <di:waypoint x="1310.0" y="2350.0"/>
+        <di:waypoint x="1310.0" y="1892.0"/>
+        <di:waypoint x="1000.0" y="1892.0"/>
+        <di:waypoint x="1000.0" y="2055.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge10" bpmnElement="P06_Flow10">
+        <di:waypoint x="925.0" y="2090.0"/>
+        <di:waypoint x="900.0" y="2090.0"/>
+        <di:waypoint x="900.0" y="1892.0"/>
+        <di:waypoint x="385.0" y="1892.0"/>
+        <di:waypoint x="385.0" y="1965.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P06_Edge11" bpmnElement="P06_Flow11">
+        <di:waypoint x="1485.0" y="2000.0"/>
+        <di:waypoint x="1597.0" y="2000.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P07_PoolShape" bpmnElement="P07_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="1870.0" width="2350" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_LaneShape0" bpmnElement="P07_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="1870.0" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_LaneShape1" bpmnElement="P07_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="2130.0" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_I_di" bpmnElement="P07_I">
+        <dc:Bounds x="3432.0" y="1982.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="2025.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Filtros_di" bpmnElement="P07_Filtros">
+        <dc:Bounds x="3580.0" y="1965.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Validar_di" bpmnElement="P07_Validar">
+        <dc:Bounds x="3785.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Origen_di" bpmnElement="P07_Origen" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="2235.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="2165.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Op_di" bpmnElement="P07_Op">
+        <dc:Bounds x="4195.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_DW_di" bpmnElement="P07_DW">
+        <dc:Bounds x="4195.0" y="2315.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Merge_di" bpmnElement="P07_Merge" isMarkerVisible="true">
+        <dc:Bounds x="4450.0" y="2235.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4325.0" y="2165.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Calcular_di" bpmnElement="P07_Calcular">
+        <dc:Bounds x="4605.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Mostrar_di" bpmnElement="P07_Mostrar">
+        <dc:Bounds x="4810.0" y="2225.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Revisar_di" bpmnElement="P07_Revisar">
+        <dc:Bounds x="5015.0" y="1965.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Otra_di" bpmnElement="P07_Otra" isMarkerVisible="true">
+        <dc:Bounds x="5270.0" y="1975.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5145.0" y="1905.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Fin_di" bpmnElement="P07_Fin">
+        <dc:Bounds x="5482.0" y="1982.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5425.0" y="2025.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P07_Edge1" bpmnElement="P07_Flow1">
+        <di:waypoint x="3468.0" y="2000.0"/>
+        <di:waypoint x="3580.0" y="2000.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge2" bpmnElement="P07_Flow2">
+        <di:waypoint x="3730.0" y="2000.0"/>
+        <di:waypoint x="3757.5" y="2000.0"/>
+        <di:waypoint x="3757.5" y="2260.0"/>
+        <di:waypoint x="3785.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge3" bpmnElement="P07_Flow3">
+        <di:waypoint x="3935.0" y="2260.0"/>
+        <di:waypoint x="4040.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge4" bpmnElement="P07_Flow4">
+        <di:waypoint x="4090.0" y="2260.0"/>
+        <di:waypoint x="4195.0" y="2260.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4107.5" y="2239.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge5" bpmnElement="P07_Flow5">
+        <di:waypoint x="4065.0" y="2285.0"/>
+        <di:waypoint x="4065.0" y="2350.0"/>
+        <di:waypoint x="4195.0" y="2350.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="2296.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge6" bpmnElement="P07_Flow6">
+        <di:waypoint x="4345.0" y="2260.0"/>
+        <di:waypoint x="4450.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge7" bpmnElement="P07_Flow7">
+        <di:waypoint x="4345.0" y="2350.0"/>
+        <di:waypoint x="4397.5" y="2350.0"/>
+        <di:waypoint x="4397.5" y="2260.0"/>
+        <di:waypoint x="4450.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge8" bpmnElement="P07_Flow8">
+        <di:waypoint x="4500.0" y="2260.0"/>
+        <di:waypoint x="4605.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge9" bpmnElement="P07_Flow9">
+        <di:waypoint x="4755.0" y="2260.0"/>
+        <di:waypoint x="4810.0" y="2260.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge10" bpmnElement="P07_Flow10">
+        <di:waypoint x="4960.0" y="2260.0"/>
+        <di:waypoint x="4987.5" y="2260.0"/>
+        <di:waypoint x="4987.5" y="2000.0"/>
+        <di:waypoint x="5015.0" y="2000.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge11" bpmnElement="P07_Flow11">
+        <di:waypoint x="5165.0" y="2000.0"/>
+        <di:waypoint x="5270.0" y="2000.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge12" bpmnElement="P07_Flow12">
+        <di:waypoint x="5270.0" y="2000.0"/>
+        <di:waypoint x="5245.0" y="2000.0"/>
+        <di:waypoint x="5245.0" y="1892.0"/>
+        <di:waypoint x="3655.0" y="1892.0"/>
+        <di:waypoint x="3655.0" y="1965.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5222.5" y="1979.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge13" bpmnElement="P07_Flow13">
+        <di:waypoint x="5320.0" y="2000.0"/>
+        <di:waypoint x="5482.0" y="2000.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5366.0" y="1979.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P08_PoolShape" bpmnElement="P08_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="2480.0" width="2555" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_LaneShape0" bpmnElement="P08_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="2480.0" width="2525" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_LaneShape1" bpmnElement="P08_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="2740.0" width="2525" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_I_di" bpmnElement="P08_I">
+        <dc:Bounds x="162.0" y="2592.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="2635.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Pedir_di" bpmnElement="P08_Pedir">
+        <dc:Bounds x="310.0" y="2575.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Contexto_di" bpmnElement="P08_Contexto">
+        <dc:Bounds x="515.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Leer_di" bpmnElement="P08_Leer">
+        <dc:Bounds x="720.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Revision_di" bpmnElement="P08_Revision" isMarkerVisible="true">
+        <dc:Bounds x="975.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="850.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Avisar_di" bpmnElement="P08_Avisar">
+        <dc:Bounds x="1130.0" y="2925.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Merge_di" bpmnElement="P08_Merge" isMarkerVisible="true">
+        <dc:Bounds x="1385.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1260.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Tipo_di" bpmnElement="P08_Tipo" isMarkerVisible="true">
+        <dc:Bounds x="1590.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1465.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_CSV_di" bpmnElement="P08_CSV">
+        <dc:Bounds x="1745.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Imprimir_di" bpmnElement="P08_Imprimir">
+        <dc:Bounds x="1745.0" y="2925.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Merge2_di" bpmnElement="P08_Merge2" isMarkerVisible="true">
+        <dc:Bounds x="2000.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1875.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Recibir_di" bpmnElement="P08_Recibir">
+        <dc:Bounds x="2155.0" y="2575.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P08_Fin_di" bpmnElement="P08_Fin">
+        <dc:Bounds x="2417.0" y="2592.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2360.0" y="2635.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P08_Edge1" bpmnElement="P08_Flow1">
+        <di:waypoint x="198.0" y="2610.0"/>
+        <di:waypoint x="310.0" y="2610.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge2" bpmnElement="P08_Flow2">
+        <di:waypoint x="460.0" y="2610.0"/>
+        <di:waypoint x="487.5" y="2610.0"/>
+        <di:waypoint x="487.5" y="2870.0"/>
+        <di:waypoint x="515.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge3" bpmnElement="P08_Flow3">
+        <di:waypoint x="665.0" y="2870.0"/>
+        <di:waypoint x="720.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge4" bpmnElement="P08_Flow4">
+        <di:waypoint x="870.0" y="2870.0"/>
+        <di:waypoint x="975.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge5" bpmnElement="P08_Flow5">
+        <di:waypoint x="1000.0" y="2845.0"/>
+        <di:waypoint x="1000.0" y="2775.0"/>
+        <di:waypoint x="1410.0" y="2775.0"/>
+        <di:waypoint x="1410.0" y="2845.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="965.0" y="2789.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge6" bpmnElement="P08_Flow6">
+        <di:waypoint x="1000.0" y="2895.0"/>
+        <di:waypoint x="1000.0" y="2960.0"/>
+        <di:waypoint x="1130.0" y="2960.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="965.0" y="2906.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge7" bpmnElement="P08_Flow7">
+        <di:waypoint x="1280.0" y="2960.0"/>
+        <di:waypoint x="1332.5" y="2960.0"/>
+        <di:waypoint x="1332.5" y="2870.0"/>
+        <di:waypoint x="1385.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge8" bpmnElement="P08_Flow8">
+        <di:waypoint x="1435.0" y="2870.0"/>
+        <di:waypoint x="1590.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge9" bpmnElement="P08_Flow9">
+        <di:waypoint x="1640.0" y="2870.0"/>
+        <di:waypoint x="1745.0" y="2870.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1657.5" y="2849.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge10" bpmnElement="P08_Flow10">
+        <di:waypoint x="1615.0" y="2895.0"/>
+        <di:waypoint x="1615.0" y="2960.0"/>
+        <di:waypoint x="1745.0" y="2960.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1580.0" y="2906.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge11" bpmnElement="P08_Flow11">
+        <di:waypoint x="1895.0" y="2870.0"/>
+        <di:waypoint x="2000.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge12" bpmnElement="P08_Flow12">
+        <di:waypoint x="1895.0" y="2960.0"/>
+        <di:waypoint x="1947.5" y="2960.0"/>
+        <di:waypoint x="1947.5" y="2870.0"/>
+        <di:waypoint x="2000.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge13" bpmnElement="P08_Flow13">
+        <di:waypoint x="2025.0" y="2845.0"/>
+        <di:waypoint x="2025.0" y="2610.0"/>
+        <di:waypoint x="2155.0" y="2610.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P08_Edge14" bpmnElement="P08_Flow14">
+        <di:waypoint x="2305.0" y="2610.0"/>
+        <di:waypoint x="2417.0" y="2610.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P09_PoolShape" bpmnElement="P09_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="2480.0" width="3170" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_LaneShape0" bpmnElement="P09_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="2480.0" width="3140" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_LaneShape1" bpmnElement="P09_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="2740.0" width="3140" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_I_di" bpmnElement="P09_I">
+        <dc:Bounds x="3432.0" y="2592.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="2635.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Pedir_di" bpmnElement="P09_Pedir">
+        <dc:Bounds x="3580.0" y="2575.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Perfil_di" bpmnElement="P09_Perfil">
+        <dc:Bounds x="3785.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Lock_di" bpmnElement="P09_Lock">
+        <dc:Bounds x="4400.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Disponible_di" bpmnElement="P09_Disponible" isMarkerVisible="true">
+        <dc:Bounds x="4655.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4530.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Ocupado_di" bpmnElement="P09_Ocupado">
+        <dc:Bounds x="4867.0" y="2942.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4810.0" y="2985.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Origen_di" bpmnElement="P09_Origen">
+        <dc:Bounds x="4810.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Dims_di" bpmnElement="P09_Dims">
+        <dc:Bounds x="5015.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Hechos_di" bpmnElement="P09_Hechos">
+        <dc:Bounds x="5220.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Ok_di" bpmnElement="P09_Ok" isMarkerVisible="true">
+        <dc:Bounds x="5475.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5350.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Rollback_di" bpmnElement="P09_Rollback">
+        <dc:Bounds x="5630.0" y="2925.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Commit_di" bpmnElement="P09_Commit">
+        <dc:Bounds x="5630.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Merge_di" bpmnElement="P09_Merge" isMarkerVisible="true">
+        <dc:Bounds x="5885.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5760.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Liberar_di" bpmnElement="P09_Liberar">
+        <dc:Bounds x="6040.0" y="2835.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Fin_di" bpmnElement="P09_Fin">
+        <dc:Bounds x="6302.0" y="2592.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="6245.0" y="2635.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Autorizado_di" bpmnElement="P09_Autorizado" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="2845.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="2775.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Denegado_di" bpmnElement="P09_Denegado">
+        <dc:Bounds x="4252.0" y="2942.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4195.0" y="2985.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P09_Edge1" bpmnElement="P09_Flow1">
+        <di:waypoint x="3468.0" y="2610.0"/>
+        <di:waypoint x="3580.0" y="2610.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge2" bpmnElement="P09_Flow2">
+        <di:waypoint x="3730.0" y="2610.0"/>
+        <di:waypoint x="3757.5" y="2610.0"/>
+        <di:waypoint x="3757.5" y="2870.0"/>
+        <di:waypoint x="3785.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge3" bpmnElement="P09_Flow3">
+        <di:waypoint x="3935.0" y="2870.0"/>
+        <di:waypoint x="4040.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge4" bpmnElement="P09_Flow4">
+        <di:waypoint x="4550.0" y="2870.0"/>
+        <di:waypoint x="4655.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge5" bpmnElement="P09_Flow5">
+        <di:waypoint x="4705.0" y="2870.0"/>
+        <di:waypoint x="4810.0" y="2870.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4722.5" y="2849.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge6" bpmnElement="P09_Flow6">
+        <di:waypoint x="4680.0" y="2895.0"/>
+        <di:waypoint x="4680.0" y="2960.0"/>
+        <di:waypoint x="4867.0" y="2960.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4645.0" y="2906.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge7" bpmnElement="P09_Flow7">
+        <di:waypoint x="4960.0" y="2870.0"/>
+        <di:waypoint x="5015.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge8" bpmnElement="P09_Flow8">
+        <di:waypoint x="5165.0" y="2870.0"/>
+        <di:waypoint x="5220.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge9" bpmnElement="P09_Flow9">
+        <di:waypoint x="5370.0" y="2870.0"/>
+        <di:waypoint x="5475.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge10" bpmnElement="P09_Flow10">
+        <di:waypoint x="5525.0" y="2870.0"/>
+        <di:waypoint x="5630.0" y="2870.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5542.5" y="2849.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge11" bpmnElement="P09_Flow11">
+        <di:waypoint x="5500.0" y="2895.0"/>
+        <di:waypoint x="5500.0" y="2960.0"/>
+        <di:waypoint x="5630.0" y="2960.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5465.0" y="2906.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge12" bpmnElement="P09_Flow12">
+        <di:waypoint x="5780.0" y="2870.0"/>
+        <di:waypoint x="5885.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge13" bpmnElement="P09_Flow13">
+        <di:waypoint x="5780.0" y="2960.0"/>
+        <di:waypoint x="5832.5" y="2960.0"/>
+        <di:waypoint x="5832.5" y="2870.0"/>
+        <di:waypoint x="5885.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge14" bpmnElement="P09_Flow14">
+        <di:waypoint x="5935.0" y="2870.0"/>
+        <di:waypoint x="6040.0" y="2870.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge15" bpmnElement="P09_Flow15">
+        <di:waypoint x="6190.0" y="2870.0"/>
+        <di:waypoint x="6246.0" y="2870.0"/>
+        <di:waypoint x="6246.0" y="2610.0"/>
+        <di:waypoint x="6302.0" y="2610.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge16" bpmnElement="P09_Flow16">
+        <di:waypoint x="4065.0" y="2845.0"/>
+        <di:waypoint x="4065.0" y="2775.0"/>
+        <di:waypoint x="4475.0" y="2775.0"/>
+        <di:waypoint x="4475.0" y="2835.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="2789.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge17" bpmnElement="P09_Flow17">
+        <di:waypoint x="4065.0" y="2895.0"/>
+        <di:waypoint x="4065.0" y="2960.0"/>
+        <di:waypoint x="4252.0" y="2960.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="2906.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P10_PoolShape" bpmnElement="P10_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="3090.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_LaneShape0" bpmnElement="P10_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="3090.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_LaneShape1" bpmnElement="P10_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="3350.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Inicio_di" bpmnElement="P10_Inicio">
+        <dc:Bounds x="162.0" y="3202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="3245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Datos_di" bpmnElement="P10_Datos">
+        <dc:Bounds x="310.0" y="3185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Validar_di" bpmnElement="P10_Validar">
+        <dc:Bounds x="515.0" y="3445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Valido_di" bpmnElement="P10_Valido" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="3455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="3385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Corregir_di" bpmnElement="P10_Corregir">
+        <dc:Bounds x="925.0" y="3275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Guardar_di" bpmnElement="P10_Guardar">
+        <dc:Bounds x="925.0" y="3445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Confirmado_di" bpmnElement="P10_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="1180.0" y="3455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1055.0" y="3385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Fallo_di" bpmnElement="P10_Fallo">
+        <dc:Bounds x="1335.0" y="3535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Resultado_di" bpmnElement="P10_Resultado">
+        <dc:Bounds x="1335.0" y="3185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_Fin_di" bpmnElement="P10_Fin">
+        <dc:Bounds x="1597.0" y="3202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1540.0" y="3245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P10_Edge1" bpmnElement="P10_Flow1">
+        <di:waypoint x="198.0" y="3220.0"/>
+        <di:waypoint x="310.0" y="3220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge2" bpmnElement="P10_Flow2">
+        <di:waypoint x="460.0" y="3220.0"/>
+        <di:waypoint x="487.5" y="3220.0"/>
+        <di:waypoint x="487.5" y="3480.0"/>
+        <di:waypoint x="515.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge3" bpmnElement="P10_Flow3">
+        <di:waypoint x="665.0" y="3480.0"/>
+        <di:waypoint x="770.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge4" bpmnElement="P10_Flow4">
+        <di:waypoint x="820.0" y="3480.0"/>
+        <di:waypoint x="925.0" y="3480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="3459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge5" bpmnElement="P10_Flow5">
+        <di:waypoint x="795.0" y="3455.0"/>
+        <di:waypoint x="795.0" y="3310.0"/>
+        <di:waypoint x="925.0" y="3310.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="3361.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge6" bpmnElement="P10_Flow6">
+        <di:waypoint x="1075.0" y="3480.0"/>
+        <di:waypoint x="1180.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge7" bpmnElement="P10_Flow7">
+        <di:waypoint x="1205.0" y="3455.0"/>
+        <di:waypoint x="1205.0" y="3220.0"/>
+        <di:waypoint x="1335.0" y="3220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="3316.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge8" bpmnElement="P10_Flow8">
+        <di:waypoint x="1205.0" y="3505.0"/>
+        <di:waypoint x="1205.0" y="3570.0"/>
+        <di:waypoint x="1335.0" y="3570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170.0" y="3516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge9" bpmnElement="P10_Flow9">
+        <di:waypoint x="1335.0" y="3570.0"/>
+        <di:waypoint x="1310.0" y="3570.0"/>
+        <di:waypoint x="1310.0" y="3112.0"/>
+        <di:waypoint x="1000.0" y="3112.0"/>
+        <di:waypoint x="1000.0" y="3275.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge10" bpmnElement="P10_Flow10">
+        <di:waypoint x="925.0" y="3310.0"/>
+        <di:waypoint x="900.0" y="3310.0"/>
+        <di:waypoint x="900.0" y="3112.0"/>
+        <di:waypoint x="385.0" y="3112.0"/>
+        <di:waypoint x="385.0" y="3185.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P10_Edge11" bpmnElement="P10_Flow11">
+        <di:waypoint x="1485.0" y="3220.0"/>
+        <di:waypoint x="1597.0" y="3220.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P11_PoolShape" bpmnElement="P11_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="3090.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_LaneShape0" bpmnElement="P11_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="3090.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_LaneShape1" bpmnElement="P11_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="3350.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Inicio_di" bpmnElement="P11_Inicio">
+        <dc:Bounds x="3432.0" y="3202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="3245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Datos_di" bpmnElement="P11_Datos">
+        <dc:Bounds x="3580.0" y="3185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Validar_di" bpmnElement="P11_Validar">
+        <dc:Bounds x="3785.0" y="3445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Valido_di" bpmnElement="P11_Valido" isMarkerVisible="true">
+        <dc:Bounds x="4040.0" y="3455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3915.0" y="3385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Corregir_di" bpmnElement="P11_Corregir">
+        <dc:Bounds x="4195.0" y="3275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Guardar_di" bpmnElement="P11_Guardar">
+        <dc:Bounds x="4195.0" y="3445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Confirmado_di" bpmnElement="P11_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="4450.0" y="3455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4325.0" y="3385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Fallo_di" bpmnElement="P11_Fallo">
+        <dc:Bounds x="4605.0" y="3535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Resultado_di" bpmnElement="P11_Resultado">
+        <dc:Bounds x="4605.0" y="3185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Fin_di" bpmnElement="P11_Fin">
+        <dc:Bounds x="4867.0" y="3202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4810.0" y="3245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P11_Edge1" bpmnElement="P11_Flow1">
+        <di:waypoint x="3468.0" y="3220.0"/>
+        <di:waypoint x="3580.0" y="3220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge2" bpmnElement="P11_Flow2">
+        <di:waypoint x="3730.0" y="3220.0"/>
+        <di:waypoint x="3757.5" y="3220.0"/>
+        <di:waypoint x="3757.5" y="3480.0"/>
+        <di:waypoint x="3785.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge3" bpmnElement="P11_Flow3">
+        <di:waypoint x="3935.0" y="3480.0"/>
+        <di:waypoint x="4040.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge4" bpmnElement="P11_Flow4">
+        <di:waypoint x="4090.0" y="3480.0"/>
+        <di:waypoint x="4195.0" y="3480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4107.5" y="3459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge5" bpmnElement="P11_Flow5">
+        <di:waypoint x="4065.0" y="3455.0"/>
+        <di:waypoint x="4065.0" y="3310.0"/>
+        <di:waypoint x="4195.0" y="3310.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4030.0" y="3361.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge6" bpmnElement="P11_Flow6">
+        <di:waypoint x="4345.0" y="3480.0"/>
+        <di:waypoint x="4450.0" y="3480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge7" bpmnElement="P11_Flow7">
+        <di:waypoint x="4475.0" y="3455.0"/>
+        <di:waypoint x="4475.0" y="3220.0"/>
+        <di:waypoint x="4605.0" y="3220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="3316.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge8" bpmnElement="P11_Flow8">
+        <di:waypoint x="4475.0" y="3505.0"/>
+        <di:waypoint x="4475.0" y="3570.0"/>
+        <di:waypoint x="4605.0" y="3570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4440.0" y="3516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge9" bpmnElement="P11_Flow9">
+        <di:waypoint x="4605.0" y="3570.0"/>
+        <di:waypoint x="4580.0" y="3570.0"/>
+        <di:waypoint x="4580.0" y="3112.0"/>
+        <di:waypoint x="4270.0" y="3112.0"/>
+        <di:waypoint x="4270.0" y="3275.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge10" bpmnElement="P11_Flow10">
+        <di:waypoint x="4195.0" y="3310.0"/>
+        <di:waypoint x="4170.0" y="3310.0"/>
+        <di:waypoint x="4170.0" y="3112.0"/>
+        <di:waypoint x="3655.0" y="3112.0"/>
+        <di:waypoint x="3655.0" y="3185.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge11" bpmnElement="P11_Flow11">
+        <di:waypoint x="4755.0" y="3220.0"/>
+        <di:waypoint x="4867.0" y="3220.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P12_PoolShape" bpmnElement="P12_Pool" isHorizontal="true">
+        <dc:Bounds x="40.0" y="3700.0" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_LaneShape0" bpmnElement="P12_Lane0" isHorizontal="true">
+        <dc:Bounds x="70.0" y="3700.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_LaneShape1" bpmnElement="P12_Lane1" isHorizontal="true">
+        <dc:Bounds x="70.0" y="3960.0" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_I_di" bpmnElement="P12_I">
+        <dc:Bounds x="162.0" y="3812.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105.0" y="3855.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Elegir_di" bpmnElement="P12_Elegir">
+        <dc:Bounds x="310.0" y="3795.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Validar_di" bpmnElement="P12_Validar">
+        <dc:Bounds x="515.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Permitido_di" bpmnElement="P12_Permitido" isMarkerVisible="true">
+        <dc:Bounds x="770.0" y="4065.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645.0" y="3995.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Denegado_di" bpmnElement="P12_Denegado">
+        <dc:Bounds x="982.0" y="4162.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="925.0" y="4205.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Leer_di" bpmnElement="P12_Leer">
+        <dc:Bounds x="925.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Mostrar_di" bpmnElement="P12_Mostrar">
+        <dc:Bounds x="1130.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Revisar_di" bpmnElement="P12_Revisar">
+        <dc:Bounds x="1335.0" y="3795.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P12_Fin_di" bpmnElement="P12_Fin">
+        <dc:Bounds x="1597.0" y="3812.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1540.0" y="3855.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P12_Edge1" bpmnElement="P12_Flow1">
+        <di:waypoint x="198.0" y="3830.0"/>
+        <di:waypoint x="310.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge2" bpmnElement="P12_Flow2">
+        <di:waypoint x="460.0" y="3830.0"/>
+        <di:waypoint x="487.5" y="3830.0"/>
+        <di:waypoint x="487.5" y="4090.0"/>
+        <di:waypoint x="515.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge3" bpmnElement="P12_Flow3">
+        <di:waypoint x="665.0" y="4090.0"/>
+        <di:waypoint x="770.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge4" bpmnElement="P12_Flow4">
+        <di:waypoint x="820.0" y="4090.0"/>
+        <di:waypoint x="925.0" y="4090.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837.5" y="4069.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge5" bpmnElement="P12_Flow5">
+        <di:waypoint x="795.0" y="4115.0"/>
+        <di:waypoint x="795.0" y="4180.0"/>
+        <di:waypoint x="982.0" y="4180.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="760.0" y="4126.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge6" bpmnElement="P12_Flow6">
+        <di:waypoint x="1075.0" y="4090.0"/>
+        <di:waypoint x="1130.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge7" bpmnElement="P12_Flow7">
+        <di:waypoint x="1280.0" y="4090.0"/>
+        <di:waypoint x="1307.5" y="4090.0"/>
+        <di:waypoint x="1307.5" y="3830.0"/>
+        <di:waypoint x="1335.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P12_Edge8" bpmnElement="P12_Flow8">
+        <di:waypoint x="1485.0" y="3830.0"/>
+        <di:waypoint x="1597.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+    <bpmndi:BPMNShape id="P13_PoolShape" bpmnElement="P13_Pool" isHorizontal="true">
+        <dc:Bounds x="3310.0" y="3700.0" width="2145" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_LaneShape0" bpmnElement="P13_Lane0" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="3700.0" width="2115" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_LaneShape1" bpmnElement="P13_Lane1" isHorizontal="true">
+        <dc:Bounds x="3340.0" y="3960.0" width="2115" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_I_di" bpmnElement="P13_I">
+        <dc:Bounds x="3432.0" y="3812.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3375.0" y="3855.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Preparar_di" bpmnElement="P13_Preparar">
+        <dc:Bounds x="3580.0" y="3795.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Dump_di" bpmnElement="P13_Dump">
+        <dc:Bounds x="3785.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Revisar_di" bpmnElement="P13_Revisar">
+        <dc:Bounds x="3990.0" y="3795.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Restaurar_di" bpmnElement="P13_Restaurar">
+        <dc:Bounds x="4195.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Permisos_di" bpmnElement="P13_Permisos">
+        <dc:Bounds x="4400.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Verificar_di" bpmnElement="P13_Verificar">
+        <dc:Bounds x="4605.0" y="4055.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Ok_di" bpmnElement="P13_Ok" isMarkerVisible="true">
+        <dc:Bounds x="4860.0" y="4065.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4735.0" y="3995.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Error_di" bpmnElement="P13_Error">
+        <dc:Bounds x="5015.0" y="3885.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Documentar_di" bpmnElement="P13_Documentar">
+        <dc:Bounds x="5015.0" y="3795.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Fin_di" bpmnElement="P13_Fin">
+        <dc:Bounds x="5277.0" y="3812.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5220.0" y="3855.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P13_Edge1" bpmnElement="P13_Flow1">
+        <di:waypoint x="3468.0" y="3830.0"/>
+        <di:waypoint x="3580.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge2" bpmnElement="P13_Flow2">
+        <di:waypoint x="3730.0" y="3830.0"/>
+        <di:waypoint x="3757.5" y="3830.0"/>
+        <di:waypoint x="3757.5" y="4090.0"/>
+        <di:waypoint x="3785.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge3" bpmnElement="P13_Flow3">
+        <di:waypoint x="3935.0" y="4090.0"/>
+        <di:waypoint x="3962.5" y="4090.0"/>
+        <di:waypoint x="3962.5" y="3830.0"/>
+        <di:waypoint x="3990.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge4" bpmnElement="P13_Flow4">
+        <di:waypoint x="4140.0" y="3830.0"/>
+        <di:waypoint x="4167.5" y="3830.0"/>
+        <di:waypoint x="4167.5" y="4090.0"/>
+        <di:waypoint x="4195.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge5" bpmnElement="P13_Flow5">
+        <di:waypoint x="4345.0" y="4090.0"/>
+        <di:waypoint x="4400.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge6" bpmnElement="P13_Flow6">
+        <di:waypoint x="4550.0" y="4090.0"/>
+        <di:waypoint x="4605.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge7" bpmnElement="P13_Flow7">
+        <di:waypoint x="4755.0" y="4090.0"/>
+        <di:waypoint x="4860.0" y="4090.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge8" bpmnElement="P13_Flow8">
+        <di:waypoint x="4885.0" y="4065.0"/>
+        <di:waypoint x="4885.0" y="3830.0"/>
+        <di:waypoint x="5015.0" y="3830.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4850.0" y="3926.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge9" bpmnElement="P13_Flow9">
+        <di:waypoint x="4885.0" y="4065.0"/>
+        <di:waypoint x="4885.0" y="3920.0"/>
+        <di:waypoint x="5015.0" y="3920.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4850.0" y="3971.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge10" bpmnElement="P13_Flow10">
+        <di:waypoint x="5015.0" y="3920.0"/>
+        <di:waypoint x="4990.0" y="3920.0"/>
+        <di:waypoint x="4990.0" y="3722.0"/>
+        <di:waypoint x="3655.0" y="3722.0"/>
+        <di:waypoint x="3655.0" y="3795.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge11" bpmnElement="P13_Flow11">
+        <di:waypoint x="5165.0" y="3830.0"/>
+        <di:waypoint x="5277.0" y="3830.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>

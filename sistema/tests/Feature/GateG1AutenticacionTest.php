@@ -50,38 +50,40 @@ class GateG1AutenticacionTest extends TestCase
      */
     public function test_login_exitoso_para_cada_perfil(): void
     {
-        // Administrador (Marta Salas)
-        $respAdmin = $this->post('/login', [
-            'usuario' => 'msalas',
-            'clave' => 'Admin2026!',
-        ]);
-        $respAdmin->assertRedirect('/tablero');
-        $this->assertAuthenticated();
-        $this->assertEquals('Administrador', Auth::user()->perfil);
+        $this->conClavesDePrueba(['msalas' => 'PrivadaAdminPrueba2026!', 'aquispe' => 'PrivadaResponsablePrueba2026!', 'cgarcia' => 'PrivadaConsultaPrueba2026!'], function () {
+            // Administrador (Marta Salas)
+            $respAdmin = $this->post('/login', [
+                'usuario' => 'msalas',
+                'clave' => 'PrivadaAdminPrueba2026!',
+            ]);
+            $respAdmin->assertRedirect('/tablero');
+            $this->assertAuthenticated();
+            $this->assertEquals('Administrador', Auth::user()->perfil);
 
-        $this->post('/logout');
-        $this->assertGuest();
+            $this->post('/logout');
+            $this->assertGuest();
 
-        // Responsable (Ana Quispe)
-        $respResp = $this->post('/login', [
-            'usuario' => 'aquispe',
-            'clave' => 'Resp2026!',
-        ]);
-        $respResp->assertRedirect('/tablero');
-        $this->assertAuthenticated();
-        $this->assertEquals('Responsable', Auth::user()->perfil);
+            // Responsable (Ana Quispe)
+            $respResp = $this->post('/login', [
+                'usuario' => 'aquispe',
+                'clave' => 'PrivadaResponsablePrueba2026!',
+            ]);
+            $respResp->assertRedirect('/tablero');
+            $this->assertAuthenticated();
+            $this->assertEquals('Responsable', Auth::user()->perfil);
 
-        $this->post('/logout');
-        $this->assertGuest();
+            $this->post('/logout');
+            $this->assertGuest();
 
-        // Consulta (Carlos García)
-        $respCons = $this->post('/login', [
-            'usuario' => 'cgarcia',
-            'clave' => 'Consulta2026!',
-        ]);
-        $respCons->assertRedirect('/tablero');
-        $this->assertAuthenticated();
-        $this->assertEquals('Consulta', Auth::user()->perfil);
+            // Consulta (Carlos García)
+            $respCons = $this->post('/login', [
+                'usuario' => 'cgarcia',
+                'clave' => 'PrivadaConsultaPrueba2026!',
+            ]);
+            $respCons->assertRedirect('/tablero');
+            $this->assertAuthenticated();
+            $this->assertEquals('Consulta', Auth::user()->perfil);
+        });
     }
 
     /**

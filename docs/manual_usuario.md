@@ -33,12 +33,12 @@ El sistema garantiza:
 
 El acceso al sistema está controlado por roles y políticas estrictas a nivel de servidor:
 
-| Perfil | Usuario | Contraseña Demo | Rol y Responsabilidad Principal |
+| Perfil | Usuario | Acceso | Rol y Responsabilidad Principal |
 | :--- | :--- | :--- | :--- |
-| **Administrador** | `msalas` | `Admin2026!` | Gestión global de cartera, reapertura de proyectos, auditoría y ejecución ETL. |
-| **Responsable Titular** | `aquispe` | `Resp2026!` | Registro de avances presupuestales y cierre de hitos en sus proyectos asignados. |
-| **Responsable Delegado** | `lrojas` | `Resp2026!` | Actualización técnica de proyectos alternos bajo su jefatura. |
-| **Perfil Consulta** | `cgarcia` | `Consulta2026!` | Visualización ejecutiva, tablero gerencial, exportación CSV e impresión. |
+| **Administrador** | `msalas` | `Clave privada asignada localmente` | Gestión global de cartera, reapertura de proyectos, auditoría y ejecución ETL. |
+| **Responsable Titular** | `aquispe` | `Clave privada asignada localmente` | Registro de avances presupuestales y cierre de hitos en sus proyectos asignados. |
+| **Responsable Delegado** | `lrojas` | `Clave privada asignada localmente` | Actualización técnica de proyectos alternos bajo su jefatura. |
+| **Perfil Consulta** | `cgarcia` | `Clave privada asignada localmente` | Visualización ejecutiva, tablero gerencial, exportación CSV e impresión. |
 
 > [!NOTE]
 > Las contraseñas se almacenan mediante algoritmos `bcrypt` seguros en MariaDB 10.11. El sistema aplica bloqueo temporal por fuerza bruta tras 5 intentos fallidos consecutivos.
@@ -161,3 +161,11 @@ $$\text{Desviación (\%)} = \frac{\text{Gasto Acumulado} - \text{Presupuesto Pla
 - **«Error de Concurrencia Optimista»:** Ocurre cuando dos usuarios intentan modificar el mismo proyecto simultáneamente. El sistema protege la integridad de los datos solicitando recargar la página para revisar los cambios más recientes.
 - **«Regla R1 / R2 Violada»:** Indica que el importe ingresado no respeta el presupuesto total adjudicado o que se intentó registrar un gasto menor al del período anterior.
 - **«Motivo Obligatorio»:** Recuerda que la modificación de líneas base y reapertura de proyectos exige una justificación escrita para fines de auditoría.
+
+
+### Acceso privado desde la corrección de seguridad (06/11/2026)
+En una instalación nueva, `scripts/instalar.ps1` ejecuta `php artisan sig:inicializar` después de migrar. El comando solicita dos veces una contraseña privada para `msalas`, sin mostrarla ni guardarla en archivos o argumentos. Debe tener entre 12 y 72 bytes. No hay contraseñas predeterminadas públicas. El administrador asigna contraseñas privadas a las demás cuentas desde **Usuarios** antes de entregarlas.
+
+Repetir la inicialización o la siembra conserva las cuentas existentes, incluidas claves, perfil, estado y datos editados. Las claves demostrativas anteriores quedan rechazadas en el login y no pueden volver a asignarse desde Usuarios. En una instalación anterior, el operador debe ejecutar desde `sistema/`: `php artisan sig:cambiar-clave msalas` (y repetir con los demás usuarios que necesiten renovación). El comando pide la contraseña sin mostrarla; conserva perfil/estado y audita el cambio. No escriba contraseñas en argumentos o en el repositorio. Ejecutar `db:seed` directamente en una base nueva genera claves aleatorias no entregadas; utilice el flujo de inicialización interactiva para disponer del acceso administrador.
+
+La sonda pública `/salud` devuelve únicamente `estado` y HTTP 200/503. Los detalles de errores quedan en el registro del servidor.

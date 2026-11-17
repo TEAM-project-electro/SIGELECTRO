@@ -1,0 +1,15 @@
+{
+  "archivo": "SIG_Electrocentro_Completo.bpmn",
+  "procesos": 14,
+  "pools": 14,
+  "lienzos": 1,
+  "formato": "BPMN 2.0 XML con BPMNDI",
+  "xsd_omg": "VALIDO",
+  "ids_y_referencias": "VALIDOS",
+  "imagenes_incrustadas": false,
+  "ancho_lienzo": 6480.0,
+  "alto_lienzo": 4245.0,
+  "superficie": 27507600.0,
+  "sha256": "38d65cc59bdccd406ae105650dcac902bd45f7cfad913aa88ff605bc3fedc738",
+  "importacion_nativa_bizagi": "No ejecutada en este entorno"
+}

@@ -150,15 +150,17 @@ class CorreccionesAuditoriaTest extends TestCase
 
     public function test_csrf_efectivo_rechaza_token_ausente_y_acepta_token_valido(): void
     {
-        $this->app->bind(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class, function ($app) {
-            return new class($app, $app['encrypter']) extends \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken {
-                protected function runningUnitTests() { return false; }
-            };
+        $this->conClavesDePrueba(['msalas' => 'PrivadaAdminPrueba2026!'], function () {
+            $this->app->bind(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class, function ($app) {
+                return new class($app, $app['encrypter']) extends \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken {
+                    protected function runningUnitTests() { return false; }
+                };
         });
-        $datos = ['usuario'=>'msalas','clave'=>'Admin2026!','remember'=>1];
+        $datos = ['usuario'=>'msalas','clave'=>'PrivadaAdminPrueba2026!','remember'=>1];
         $this->post('/login',$datos)->assertStatus(419);
         $this->withSession(['_token'=>'token-controlado'])->post('/login',$datos+['_token'=>'token-controlado'])->assertRedirect('/tablero');
         $this->assertAuthenticated();
+        });
     }
 
     public function test_desactivar_sin_motivo_no_guarda_y_no_expone_credenciales(): void

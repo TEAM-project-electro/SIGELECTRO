@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P13_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P13_Process" name="Respaldar y verificar recuperación local" isExecutable="false">
+    <bpmn:documentation>Proceso técnico operado desde PowerShell con cuenta migradora autorizada; no existe un botón web de respaldo ni se crea un cuarto perfil de aplicación. El camino normal restaura en esquemas descartables y nunca sobrescribe la operativa.
+Fuentes del sistema: scripts/respaldo_db.ps1, scripts/restaurar_db.ps1, scripts/ajustar_permisos.php, sistema/tests/Feature/GateG4RestauracionTest.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P13_LaneSet">
+      <bpmn:lane id="P13_Lane0" name="Operador técnico local">
+        <bpmn:flowNodeRef>P13_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Preparar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Documentar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P13_Lane1" name="Herramientas locales / MariaDB">
+        <bpmn:flowNodeRef>P13_Dump</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Restaurar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Permisos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Verificar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P13_Ok</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P13_I" name="Necesidad de verificar respaldo">
+      <bpmn:outgoing>P13_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:manualTask id="P13_Preparar" name="Verificar acceso y destinos locales">
+      <bpmn:incoming>P13_Flow1</bpmn:incoming>
+      <bpmn:incoming>P13_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow2</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:serviceTask id="P13_Dump" name="Respaldar operativo y DW">
+      <bpmn:incoming>P13_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:manualTask id="P13_Revisar" name="Seleccionar respaldo y copias destino">
+      <bpmn:incoming>P13_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow4</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:serviceTask id="P13_Restaurar" name="Restaurar y remapear referencias">
+      <bpmn:incoming>P13_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P13_Permisos" name="Reconciliar privilegios técnicos">
+      <bpmn:incoming>P13_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P13_Verificar" name="Conciliar y probar recorrido en copia">
+      <bpmn:documentation>Pruebas sobre copia: conteos, montos, restricciones, login, alta auditada, acción denegada y ETL apuntando a copia. Es una ejecución explícita del operador; restaurar_db.ps1 no ejecuta automáticamente toda la suite.</bpmn:documentation>
+      <bpmn:incoming>P13_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P13_Ok" name="¿Verificaciones satisfactorias?" gatewayDirection="Diverging" default="P13_Flow9">
+      <bpmn:incoming>P13_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow8</bpmn:outgoing>
+      <bpmn:outgoing>P13_Flow9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="P13_Error" name="Registrar fallo y corregir causa">
+      <bpmn:incoming>P13_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow10</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="P13_Documentar" name="Registrar evidencia de recuperación">
+      <bpmn:incoming>P13_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P13_Flow11</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="P13_Fin" name="Copia recuperable verificada">
+      <bpmn:incoming>P13_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P13_Flow1" sourceRef="P13_I" targetRef="P13_Preparar"/>
+    <bpmn:sequenceFlow id="P13_Flow2" sourceRef="P13_Preparar" targetRef="P13_Dump"/>
+    <bpmn:sequenceFlow id="P13_Flow3" sourceRef="P13_Dump" targetRef="P13_Revisar"/>
+    <bpmn:sequenceFlow id="P13_Flow4" sourceRef="P13_Revisar" targetRef="P13_Restaurar"/>
+    <bpmn:sequenceFlow id="P13_Flow5" sourceRef="P13_Restaurar" targetRef="P13_Permisos"/>
+    <bpmn:sequenceFlow id="P13_Flow6" sourceRef="P13_Permisos" targetRef="P13_Verificar"/>
+    <bpmn:sequenceFlow id="P13_Flow7" sourceRef="P13_Verificar" targetRef="P13_Ok"/>
+    <bpmn:sequenceFlow id="P13_Flow8" sourceRef="P13_Ok" targetRef="P13_Documentar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">verificaciones_aprobadas == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P13_Flow9" sourceRef="P13_Ok" targetRef="P13_Error" name="No"/>
+    <bpmn:sequenceFlow id="P13_Flow10" sourceRef="P13_Error" targetRef="P13_Preparar"/>
+    <bpmn:sequenceFlow id="P13_Flow11" sourceRef="P13_Documentar" targetRef="P13_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P13_Collaboration">
+    <bpmn:participant id="P13_Pool" name="SIG Electrocentro — P13" processRef="P13_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P13_Diagram" name="Respaldar y verificar recuperación local">
+    <bpmndi:BPMNPlane id="P13_Plane" bpmnElement="P13_Collaboration">
+      <bpmndi:BPMNShape id="P13_PoolShape" bpmnElement="P13_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="2145" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_LaneShape0" bpmnElement="P13_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="2115" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_LaneShape1" bpmnElement="P13_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="2115" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_I_di" bpmnElement="P13_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Preparar_di" bpmnElement="P13_Preparar">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Dump_di" bpmnElement="P13_Dump">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Revisar_di" bpmnElement="P13_Revisar">
+        <dc:Bounds x="715.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Restaurar_di" bpmnElement="P13_Restaurar">
+        <dc:Bounds x="920.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Permisos_di" bpmnElement="P13_Permisos">
+        <dc:Bounds x="1125.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Verificar_di" bpmnElement="P13_Verificar">
+        <dc:Bounds x="1330.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Ok_di" bpmnElement="P13_Ok" isMarkerVisible="true">
+        <dc:Bounds x="1585.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1460.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Error_di" bpmnElement="P13_Error">
+        <dc:Bounds x="1740.0" y="275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Documentar_di" bpmnElement="P13_Documentar">
+        <dc:Bounds x="1740.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P13_Fin_di" bpmnElement="P13_Fin">
+        <dc:Bounds x="2002.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1945.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P13_Edge1" bpmnElement="P13_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge2" bpmnElement="P13_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge3" bpmnElement="P13_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="687.5" y="480.0"/>
+        <di:waypoint x="687.5" y="220.0"/>
+        <di:waypoint x="715.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge4" bpmnElement="P13_Flow4">
+        <di:waypoint x="865.0" y="220.0"/>
+        <di:waypoint x="892.5" y="220.0"/>
+        <di:waypoint x="892.5" y="480.0"/>
+        <di:waypoint x="920.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge5" bpmnElement="P13_Flow5">
+        <di:waypoint x="1070.0" y="480.0"/>
+        <di:waypoint x="1125.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge6" bpmnElement="P13_Flow6">
+        <di:waypoint x="1275.0" y="480.0"/>
+        <di:waypoint x="1330.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge7" bpmnElement="P13_Flow7">
+        <di:waypoint x="1480.0" y="480.0"/>
+        <di:waypoint x="1585.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge8" bpmnElement="P13_Flow8">
+        <di:waypoint x="1610.0" y="455.0"/>
+        <di:waypoint x="1610.0" y="220.0"/>
+        <di:waypoint x="1740.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1575.0" y="316.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge9" bpmnElement="P13_Flow9">
+        <di:waypoint x="1610.0" y="455.0"/>
+        <di:waypoint x="1610.0" y="310.0"/>
+        <di:waypoint x="1740.0" y="310.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1575.0" y="361.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge10" bpmnElement="P13_Flow10">
+        <di:waypoint x="1740.0" y="310.0"/>
+        <di:waypoint x="1715.0" y="310.0"/>
+        <di:waypoint x="1715.0" y="112"/>
+        <di:waypoint x="380.0" y="112"/>
+        <di:waypoint x="380.0" y="185.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P13_Edge11" bpmnElement="P13_Flow11">
+        <di:waypoint x="1890.0" y="220.0"/>
+        <di:waypoint x="2002.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,236 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P07_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P07_Process" name="Consultar cartera e indicadores" isExecutable="false">
+    <bpmn:documentation>Consultar la cartera con filtros de estado, responsable, objetivo, búsqueda y fecha. Elegir operativo o DW y modo temporal. No se guarda información de negocio ni se ejecuta ETL automáticamente.
+Fuentes del sistema: sistema/app/Http/Controllers/TableroController.php, sistema/app/Services/IndicadoresService.php, sistema/app/Services/EtlService.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P07_LaneSet">
+      <bpmn:lane id="P07_Lane0" name="Usuario: cualquier perfil">
+        <bpmn:flowNodeRef>P07_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Filtros</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Revisar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Otra</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P07_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P07_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Origen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Op</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_DW</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Calcular</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P07_Mostrar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P07_I" name="Necesidad de información">
+      <bpmn:outgoing>P07_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P07_Filtros" name="Elegir filtros, fecha y origen">
+      <bpmn:incoming>P07_Flow1</bpmn:incoming>
+      <bpmn:incoming>P07_Flow12</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P07_Validar" name="Validar sesión y parámetros">
+      <bpmn:incoming>P07_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P07_Origen" name="¿Origen seleccionado?" gatewayDirection="Diverging" default="P07_Flow5">
+      <bpmn:incoming>P07_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P07_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P07_Op" name="Leer snapshot operativo">
+      <bpmn:incoming>P07_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P07_DW" name="Leer snapshot DW y revisión">
+      <bpmn:incoming>P07_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P07_Merge" name="Unificar datos del origen" gatewayDirection="Converging">
+      <bpmn:incoming>P07_Flow6</bpmn:incoming>
+      <bpmn:incoming>P07_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P07_Calcular" name="Calcular KPIs y coberturas">
+      <bpmn:documentation>CORTE_COMUN: hitos evaluados a fecha común; finanzas sólo con corte exacto. ULTIMO_REPORTE_POR_PROYECTO: máximo reporte &lt;= fecha límite de cada proyecto. Mostrar Sin datos, No aplica, cobertura y exclusiones; hitos fuera de LB no generan retraso. No promediar porcentajes individuales.</bpmn:documentation>
+      <bpmn:incoming>P07_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P07_Mostrar" name="Mostrar resultados y vigencia">
+      <bpmn:documentation>Si DW está desactualizado se advierte, sin cargarlo automáticamente. Una consulta sin proyectos devuelve conteos cero y porcentajes Sin datos.</bpmn:documentation>
+      <bpmn:incoming>P07_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P07_Revisar" name="Analizar cifras y detalle">
+      <bpmn:incoming>P07_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="P07_Otra" name="¿Cambiar consulta?" gatewayDirection="Diverging" default="P07_Flow13">
+      <bpmn:incoming>P07_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P07_Flow12</bpmn:outgoing>
+      <bpmn:outgoing>P07_Flow13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P07_Fin" name="Consulta realizada">
+      <bpmn:incoming>P07_Flow13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P07_Flow1" sourceRef="P07_I" targetRef="P07_Filtros"/>
+    <bpmn:sequenceFlow id="P07_Flow2" sourceRef="P07_Filtros" targetRef="P07_Validar"/>
+    <bpmn:sequenceFlow id="P07_Flow3" sourceRef="P07_Validar" targetRef="P07_Origen"/>
+    <bpmn:sequenceFlow id="P07_Flow4" sourceRef="P07_Origen" targetRef="P07_Op" name="Operativo">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">origen == "OPERATIVO"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P07_Flow5" sourceRef="P07_Origen" targetRef="P07_DW" name="DW"/>
+    <bpmn:sequenceFlow id="P07_Flow6" sourceRef="P07_Op" targetRef="P07_Merge"/>
+    <bpmn:sequenceFlow id="P07_Flow7" sourceRef="P07_DW" targetRef="P07_Merge"/>
+    <bpmn:sequenceFlow id="P07_Flow8" sourceRef="P07_Merge" targetRef="P07_Calcular"/>
+    <bpmn:sequenceFlow id="P07_Flow9" sourceRef="P07_Calcular" targetRef="P07_Mostrar"/>
+    <bpmn:sequenceFlow id="P07_Flow10" sourceRef="P07_Mostrar" targetRef="P07_Revisar"/>
+    <bpmn:sequenceFlow id="P07_Flow11" sourceRef="P07_Revisar" targetRef="P07_Otra"/>
+    <bpmn:sequenceFlow id="P07_Flow12" sourceRef="P07_Otra" targetRef="P07_Filtros" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">cambiar_consulta == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P07_Flow13" sourceRef="P07_Otra" targetRef="P07_Fin" name="No"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P07_Collaboration">
+    <bpmn:participant id="P07_Pool" name="SIG Electrocentro — P07" processRef="P07_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P07_Diagram" name="Consultar cartera e indicadores">
+    <bpmndi:BPMNPlane id="P07_Plane" bpmnElement="P07_Collaboration">
+      <bpmndi:BPMNShape id="P07_PoolShape" bpmnElement="P07_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="2350" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_LaneShape0" bpmnElement="P07_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_LaneShape1" bpmnElement="P07_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="2320" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_I_di" bpmnElement="P07_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Filtros_di" bpmnElement="P07_Filtros">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Validar_di" bpmnElement="P07_Validar">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Origen_di" bpmnElement="P07_Origen" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Op_di" bpmnElement="P07_Op">
+        <dc:Bounds x="920.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_DW_di" bpmnElement="P07_DW">
+        <dc:Bounds x="920.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Merge_di" bpmnElement="P07_Merge" isMarkerVisible="true">
+        <dc:Bounds x="1175.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1050.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Calcular_di" bpmnElement="P07_Calcular">
+        <dc:Bounds x="1330.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Mostrar_di" bpmnElement="P07_Mostrar">
+        <dc:Bounds x="1535.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Revisar_di" bpmnElement="P07_Revisar">
+        <dc:Bounds x="1740.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Otra_di" bpmnElement="P07_Otra" isMarkerVisible="true">
+        <dc:Bounds x="1995.0" y="195.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1870.0" y="125.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P07_Fin_di" bpmnElement="P07_Fin">
+        <dc:Bounds x="2207.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2150.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P07_Edge1" bpmnElement="P07_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge2" bpmnElement="P07_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge3" bpmnElement="P07_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge4" bpmnElement="P07_Flow4">
+        <di:waypoint x="815.0" y="480.0"/>
+        <di:waypoint x="920.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge5" bpmnElement="P07_Flow5">
+        <di:waypoint x="790.0" y="505.0"/>
+        <di:waypoint x="790.0" y="570.0"/>
+        <di:waypoint x="920.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge6" bpmnElement="P07_Flow6">
+        <di:waypoint x="1070.0" y="480.0"/>
+        <di:waypoint x="1175.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge7" bpmnElement="P07_Flow7">
+        <di:waypoint x="1070.0" y="570.0"/>
+        <di:waypoint x="1122.5" y="570.0"/>
+        <di:waypoint x="1122.5" y="480.0"/>
+        <di:waypoint x="1175.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge8" bpmnElement="P07_Flow8">
+        <di:waypoint x="1225.0" y="480.0"/>
+        <di:waypoint x="1330.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge9" bpmnElement="P07_Flow9">
+        <di:waypoint x="1480.0" y="480.0"/>
+        <di:waypoint x="1535.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge10" bpmnElement="P07_Flow10">
+        <di:waypoint x="1685.0" y="480.0"/>
+        <di:waypoint x="1712.5" y="480.0"/>
+        <di:waypoint x="1712.5" y="220.0"/>
+        <di:waypoint x="1740.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge11" bpmnElement="P07_Flow11">
+        <di:waypoint x="1890.0" y="220.0"/>
+        <di:waypoint x="1995.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge12" bpmnElement="P07_Flow12">
+        <di:waypoint x="1995.0" y="220.0"/>
+        <di:waypoint x="1970.0" y="220.0"/>
+        <di:waypoint x="1970.0" y="112"/>
+        <di:waypoint x="380.0" y="112"/>
+        <di:waypoint x="380.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1947.5" y="199.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P07_Edge13" bpmnElement="P07_Flow13">
+        <di:waypoint x="2045.0" y="220.0"/>
+        <di:waypoint x="2207.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2091.0" y="199.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

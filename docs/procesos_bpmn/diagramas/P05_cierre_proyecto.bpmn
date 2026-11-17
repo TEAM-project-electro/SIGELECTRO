@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P05_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P05_Process" name="Cerrar formalmente un proyecto" isExecutable="false">
+    <bpmn:documentation>El cierre es una solicitud ejecutada por el titular o Administrador. No interviene un aprobador adicional. La regla implementada exige al menos un hito de línea base y ningún hito de línea base sin fecha de cierre.
+Fuentes del sistema: sistema/app/Http/Controllers/ProyectoController.php, sistema/app/Http/Requests/Proyecto/CerrarProyectoRequest.php, sistema/database/migrations/2026_11_03_000002_create_triggers_y_procedimientos.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P05_LaneSet">
+      <bpmn:lane id="P05_Lane0" name="Administrador / Responsable titular">
+        <bpmn:flowNodeRef>P05_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Solicitar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Atender</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P05_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P05_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Permiso</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Denegado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_LB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Completo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Observar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P05_Guardar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P05_I" name="Proyecto candidato a cierre">
+      <bpmn:outgoing>P05_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P05_Solicitar" name="Solicitar cierre formal">
+      <bpmn:incoming>P05_Flow1</bpmn:incoming>
+      <bpmn:incoming>P05_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P05_Validar" name="Bloquear y revalidar permiso">
+      <bpmn:incoming>P05_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P05_Permiso" name="¿Puede cerrar este proyecto?" gatewayDirection="Diverging" default="P05_Flow5">
+      <bpmn:incoming>P05_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P05_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P05_Denegado" name="Cierre denegado">
+      <bpmn:incoming>P05_Flow5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P05_LB" name="Comprobar hitos de línea base">
+      <bpmn:incoming>P05_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P05_Completo" name="¿Hay línea base y todos cerrados?" gatewayDirection="Diverging" default="P05_Flow8">
+      <bpmn:incoming>P05_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P05_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P05_Observar" name="Revertir e informar pendientes">
+      <bpmn:incoming>P05_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P05_Atender" name="Actualizar hitos y revisar">
+      <bpmn:incoming>P05_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P05_Guardar" name="Cerrar y auditar en transacción">
+      <bpmn:documentation>Una transacción guarda estado Cerrado, actividad y auditoría; ante error se revierte y se informa, sin cierre parcial. El control de estado/permisos ocurre después del bloqueo.</bpmn:documentation>
+      <bpmn:incoming>P05_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P05_Flow11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="P05_Fin" name="Proyecto cerrado">
+      <bpmn:incoming>P05_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P05_Flow1" sourceRef="P05_I" targetRef="P05_Solicitar"/>
+    <bpmn:sequenceFlow id="P05_Flow2" sourceRef="P05_Solicitar" targetRef="P05_Validar"/>
+    <bpmn:sequenceFlow id="P05_Flow3" sourceRef="P05_Validar" targetRef="P05_Permiso"/>
+    <bpmn:sequenceFlow id="P05_Flow4" sourceRef="P05_Permiso" targetRef="P05_LB" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">permiso_cierre == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P05_Flow5" sourceRef="P05_Permiso" targetRef="P05_Denegado" name="No"/>
+    <bpmn:sequenceFlow id="P05_Flow6" sourceRef="P05_LB" targetRef="P05_Completo"/>
+    <bpmn:sequenceFlow id="P05_Flow7" sourceRef="P05_Completo" targetRef="P05_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">hitos_lb &gt; 0 &amp;&amp; hitos_lb_sin_cierre == 0</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P05_Flow8" sourceRef="P05_Completo" targetRef="P05_Observar" name="No"/>
+    <bpmn:sequenceFlow id="P05_Flow9" sourceRef="P05_Observar" targetRef="P05_Atender"/>
+    <bpmn:sequenceFlow id="P05_Flow10" sourceRef="P05_Atender" targetRef="P05_Solicitar"/>
+    <bpmn:sequenceFlow id="P05_Flow11" sourceRef="P05_Guardar" targetRef="P05_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P05_Collaboration">
+    <bpmn:participant id="P05_Pool" name="SIG Electrocentro — P05" processRef="P05_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P05_Diagram" name="Cerrar formalmente un proyecto">
+    <bpmndi:BPMNPlane id="P05_Plane" bpmnElement="P05_Collaboration">
+      <bpmndi:BPMNShape id="P05_PoolShape" bpmnElement="P05_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LaneShape0" bpmnElement="P05_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LaneShape1" bpmnElement="P05_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_I_di" bpmnElement="P05_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Solicitar_di" bpmnElement="P05_Solicitar">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Validar_di" bpmnElement="P05_Validar">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Permiso_di" bpmnElement="P05_Permiso" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Denegado_di" bpmnElement="P05_Denegado">
+        <dc:Bounds x="977.0" y="552.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="920.0" y="595.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_LB_di" bpmnElement="P05_LB">
+        <dc:Bounds x="920.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Completo_di" bpmnElement="P05_Completo" isMarkerVisible="true">
+        <dc:Bounds x="1175.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1050.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Observar_di" bpmnElement="P05_Observar">
+        <dc:Bounds x="1330.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Atender_di" bpmnElement="P05_Atender">
+        <dc:Bounds x="1330.0" y="275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Guardar_di" bpmnElement="P05_Guardar">
+        <dc:Bounds x="1330.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P05_Fin_di" bpmnElement="P05_Fin">
+        <dc:Bounds x="1592.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1535.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P05_Edge1" bpmnElement="P05_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge2" bpmnElement="P05_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge3" bpmnElement="P05_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge4" bpmnElement="P05_Flow4">
+        <di:waypoint x="815.0" y="480.0"/>
+        <di:waypoint x="920.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge5" bpmnElement="P05_Flow5">
+        <di:waypoint x="790.0" y="505.0"/>
+        <di:waypoint x="790.0" y="570.0"/>
+        <di:waypoint x="977.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge6" bpmnElement="P05_Flow6">
+        <di:waypoint x="1070.0" y="480.0"/>
+        <di:waypoint x="1175.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge7" bpmnElement="P05_Flow7">
+        <di:waypoint x="1225.0" y="480.0"/>
+        <di:waypoint x="1330.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1242.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge8" bpmnElement="P05_Flow8">
+        <di:waypoint x="1200.0" y="505.0"/>
+        <di:waypoint x="1200.0" y="570.0"/>
+        <di:waypoint x="1330.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1165.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge9" bpmnElement="P05_Flow9">
+        <di:waypoint x="1405.0" y="535.0"/>
+        <di:waypoint x="1405.0" y="345.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge10" bpmnElement="P05_Flow10">
+        <di:waypoint x="1330.0" y="310.0"/>
+        <di:waypoint x="1305.0" y="310.0"/>
+        <di:waypoint x="1305.0" y="112"/>
+        <di:waypoint x="380.0" y="112"/>
+        <di:waypoint x="380.0" y="185.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P05_Edge11" bpmnElement="P05_Flow11">
+        <di:waypoint x="1480.0" y="480.0"/>
+        <di:waypoint x="1536.0" y="480.0"/>
+        <di:waypoint x="1536.0" y="220.0"/>
+        <di:waypoint x="1592.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

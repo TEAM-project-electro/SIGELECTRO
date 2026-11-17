@@ -37,12 +37,12 @@
 > [!NOTE]
 > Las contraseñas se almacenan mediante hashing seguro **bcrypt** (`Hash::make()` en Laravel). Prohibido el uso de SHA2 o contraseñas en texto plano.
 
-| ID | Nombre Completo | Área | Perfil | Usuario | Contraseña Demostrativa | Activo |
+| ID | Nombre Completo | Área | Perfil | Usuario | Acceso | Activo |
 | :---: | :--- | :--- | :--- | :--- | :--- | :---: |
-| 1 | Marta Salas | Planeamiento | `Administrador` | `msalas` | `Admin2026!` | 1 |
-| 2 | Ana Quispe | TIC | `Responsable` | `aquispe` | `Resp2026!` | 1 |
-| 3 | Luis Rojas | TIC | `Responsable` | `lrojas` | `Resp2026!` | 1 |
-| 4 | Carlos García | Comité de GD | `Consulta` | `cgarcia` | `Consulta2026!` | 1 |
+| 1 | Marta Salas | Planeamiento | `Administrador` | `msalas` | `Clave privada asignada localmente` | 1 |
+| 2 | Ana Quispe | TIC | `Responsable` | `aquispe` | `Clave privada asignada localmente` | 1 |
+| 3 | Luis Rojas | TIC | `Responsable` | `lrojas` | `Clave privada asignada localmente` | 1 |
+| 4 | Carlos García | Comité de GD | `Consulta` | `cgarcia` | `Clave privada asignada localmente` | 1 |
 
 ---
 
@@ -104,3 +104,11 @@ PGD  | Estado     | Últ. Reporte | Hitos LB | Vencidos | Presup. Plan   | Gasto
 023  | Cerrado    | 2023-12-31   | 2/2      | 0        | S/ 212,000.00  | S/ 205,000.00  |  -3.3%  | 0 (No)
 024  | En curso   | 2024-06-30   | 1/2      | 1        | S/ 80,000.00   | S/ 76,000.00   |  -5.0%  | 1 (Sí)
 ```
+
+
+### Acceso privado desde la corrección de seguridad (06/11/2026)
+En una instalación nueva, `scripts/instalar.ps1` ejecuta `php artisan sig:inicializar` después de migrar. El comando solicita dos veces una contraseña privada para `msalas`, sin mostrarla ni guardarla en archivos o argumentos. Debe tener entre 12 y 72 bytes. No hay contraseñas predeterminadas públicas. El administrador asigna contraseñas privadas a las demás cuentas desde **Usuarios** antes de entregarlas.
+
+Repetir la inicialización o la siembra conserva las cuentas existentes, incluidas claves, perfil, estado y datos editados. Las claves demostrativas anteriores quedan rechazadas en el login y no pueden volver a asignarse desde Usuarios. En una instalación anterior, el operador debe ejecutar desde `sistema/`: `php artisan sig:cambiar-clave msalas` (y repetir con los demás usuarios que necesiten renovación). El comando pide la contraseña sin mostrarla; conserva perfil/estado y audita el cambio. No escriba contraseñas en argumentos o en el repositorio. Ejecutar `db:seed` directamente en una base nueva genera claves aleatorias no entregadas; utilice el flujo de inicialización interactiva para disponer del acceso administrador.
+
+La sonda pública `/salud` devuelve únicamente `estado` y HTTP 200/503. Los detalles de errores quedan en el registro del servidor.

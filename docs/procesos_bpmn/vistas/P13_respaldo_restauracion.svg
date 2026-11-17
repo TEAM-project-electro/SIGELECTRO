@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2225" height="670" viewBox="0 0 2225 670">
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#334155"/></marker></defs>
+<rect width="2225" height="670" fill="white"/>
+<text x="35" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#0f172a">P13 · Respaldar y verificar recuperación local</text>
+<text x="35" y="53" font-family="Arial" font-size="12" fill="#475569">Modelo AS-IS académico · BPMN 2.0 · Las rutas representan el sistema implementado</text>
+<rect x="35" y="90" width="2145" height="520" fill="none" stroke="#334155"/>
+<rect x="65" y="90" width="2115" height="260" fill="#f8fafc" stroke="#94a3b8"/>
+<text transform="translate(87,220) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Operador técnico local</text>
+<rect x="65" y="350" width="2115" height="260" fill="#ffffff" stroke="#94a3b8"/>
+<text transform="translate(87,480) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Herramientas locales / MariaDB</text>
+<polyline points="193.0,220.0 305.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="455.0,220.0 482.5,220.0 482.5,480.0 510.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="660.0,480.0 687.5,480.0 687.5,220.0 715.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="865.0,220.0 892.5,220.0 892.5,480.0 920.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1070.0,480.0 1125.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1275.0,480.0 1330.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1480.0,480.0 1585.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1610.0,455.0 1610.0,220.0 1740.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1610.0" y="328.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Sí</text>
+<polyline points="1610.0,455.0 1610.0,310.0 1740.0,310.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1610.0" y="373.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">No</text>
+<polyline points="1740.0,310.0 1715.0,310.0 1715.0,112 380.0,112 380.0,185.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1890.0,220.0 2002.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<circle cx="175.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="1.5"/>
+<text x="175.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Necesidad de verificar</text>
+<text x="175.0" y="272.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">respaldo</text>
+<rect x="305.0" y="185.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="380.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Verificar acceso y</text>
+<text x="380.0" y="237.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">destinos locales</text>
+<rect x="510.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="515.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="585.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Respaldar operativo y</text>
+<text x="585.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">DW</text>
+<rect x="715.0" y="185.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="790.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Seleccionar respaldo y</text>
+<text x="790.0" y="237.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">copias destino</text>
+<rect x="920.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="925.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="995.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Restaurar y remapear</text>
+<text x="995.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">referencias</text>
+<rect x="1125.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1130.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1200.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Reconciliar privilegios</text>
+<text x="1200.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">técnicos</text>
+<rect x="1330.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1335.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1405.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Conciliar y probar</text>
+<text x="1405.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">recorrido en copia</text>
+<path d="M1610.0,455.0 L1635.0,480.0 L1610.0,505.0 L1585.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M1603.0,473.0 L1617.0,487.0 M1617.0,473.0 L1603.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="1535.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Verificaciones</text>
+<text x="1535.0" y="411.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">satisfactorias?</text>
+<rect x="1740.0" y="275.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1815.0" y="313.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Registrar fallo y</text>
+<text x="1815.0" y="327.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">corregir causa</text>
+<rect x="1740.0" y="185.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1815.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Registrar evidencia de</text>
+<text x="1815.0" y="237.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">recuperación</text>
+<circle cx="2020.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="3.5"/>
+<text x="2020.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Copia recuperable</text>
+<text x="2020.0" y="272.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">verificada</text>
+</svg>

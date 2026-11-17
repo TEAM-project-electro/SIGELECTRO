@@ -1,0 +1,132 @@
+{
+  "estandar": "BPMN 2.0.2 XML + BPMNDI",
+  "importacion_nativa": "NO EJECUTADA en Bizagi/Bonita",
+  "archivos": [
+    {
+      "archivo": "P00_seguimiento_integral.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 11,
+      "flujos": 13,
+      "sha256": "074b59299baa6ff30a9da4a9ea550079a628c199763519da093e3bd013224ad7"
+    },
+    {
+      "archivo": "P01_acceso.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 13,
+      "flujos": 13,
+      "sha256": "709dad3c1c7e46375b9a5d1ca069dda882e0828996ab76ea28a4f7fdf9a89bf0"
+    },
+    {
+      "archivo": "P02_cartera.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "0ae18f33da1e98aaa637184a4c9467682e8d80f1f0e360db6556c2b5250aba26"
+    },
+    {
+      "archivo": "P03_hitos_linea_base.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "7385aab16cf83b01dd911e0a2ed9fb11e045194b284c22840192b72ff54d9aba"
+    },
+    {
+      "archivo": "P04_avance_presupuestal.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "2069ef837354fec5500eff0d1a50ff0835079f3df2512e1b7eb3f0913ecc121d"
+    },
+    {
+      "archivo": "P05_cierre_proyecto.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 11,
+      "flujos": 11,
+      "sha256": "cbd17474100ba13271a70d887d4cc84f5e36cc94c76c97dc8da99deda0921b78"
+    },
+    {
+      "archivo": "P06_reapertura.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "342bfbf1cafdb217d28087fe330e9161ce93fe3c32995db64758ff2f933d64b8"
+    },
+    {
+      "archivo": "P07_consulta_indicadores.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 12,
+      "flujos": 13,
+      "sha256": "1cbc1bbdde46546dad13fe86d1fd91b5ea38254e0b25a3b1cd6ae1529feda037"
+    },
+    {
+      "archivo": "P08_reportes.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 13,
+      "flujos": 14,
+      "sha256": "1f9783b0f66034da85ddbf576d4190c8419093a637aa368ccde748cff0a3c641"
+    },
+    {
+      "archivo": "P09_actualizacion_dw.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 17,
+      "flujos": 17,
+      "sha256": "7dd97580dfb568c8cfe5070a0125876c2e121a660abe50fada36ab671b659cff"
+    },
+    {
+      "archivo": "P10_administracion_usuarios.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "97fffe40f4bad2b0c4d567081249eeb09af2dd4f336e532a7228ef4b2d47dd50"
+    },
+    {
+      "archivo": "P11_catalogo_objetivos.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 10,
+      "flujos": 11,
+      "sha256": "7430cd2656df9a4f0762ddeacf647cd8e7fe557f40f11c3474c3f3b67cf24947"
+    },
+    {
+      "archivo": "P12_consulta_auditoria.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 9,
+      "flujos": 8,
+      "sha256": "9f5d23e3a850952310e2b8b7a80d1145476e62c633b576ced1cda49ed5e96db2"
+    },
+    {
+      "archivo": "P13_respaldo_restauracion.bpmn",
+      "xsd_omg": "VALIDO",
+      "referencias": "VALIDAS",
+      "alcanzabilidad": "VALIDA",
+      "nodos": 11,
+      "flujos": 11,
+      "sha256": "59c3c0f8a2ae592f8a3585ff04d7306c0f5277394d8425bedb05fb2dae1ef451"
+    }
+  ]
+}

@@ -29,18 +29,20 @@ class GateG4RestauracionTest extends TestCase
                 DB::purge($nombre);
             }
             \Illuminate\Support\Facades\Auth::forgetGuards();
-            $this->post('/login',['usuario'=>'msalas','clave'=>'Admin2026!'])->assertRedirect('/tablero');
-            $this->get('/tablero')->assertOk();
-            $respuesta=$this->postJson('/proyectos/1/hitos',['descripcion'=>'Recorrido HTTP restaurado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0]);
-            $respuesta->assertCreated();
-            $idHito=$respuesta->json('id_hito');
-            $this->get('/proyectos/1')->assertOk()->assertSee('Recorrido HTTP restaurado');
-            $this->assertTrue(DB::table('bitacora_cambio')->where('tabla_afectada','hito')->where('id_registro',$idHito)->exists());
-            $this->assertTrue(app(\App\Services\EtlService::class)->ejecutar()['exito']);
-            $this->assertTrue(DB::connection('dw_lector')->table('fact_hito')->where('id_hito',$idHito)->exists());
-            $this->post('/logout')->assertRedirect('/login');
-            $this->post('/login',['usuario'=>'cgarcia','clave'=>'Consulta2026!'])->assertRedirect('/tablero');
-            $this->postJson('/proyectos/1/hitos',['descripcion'=>'Denegado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0])->assertForbidden();
+            $this->conClavesDePrueba(['msalas'=>'PrivadaAdminRestaurada2026!', 'cgarcia'=>'PrivadaConsultaRestaurada2026!'], function () use (&$idHito) {
+                $this->post('/login',['usuario'=>'msalas','clave'=>'PrivadaAdminRestaurada2026!'])->assertRedirect('/tablero');
+                $this->get('/tablero')->assertOk();
+                $respuesta=$this->postJson('/proyectos/1/hitos',['descripcion'=>'Recorrido HTTP restaurado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0]);
+                $respuesta->assertCreated();
+                $idHito=$respuesta->json('id_hito');
+                $this->get('/proyectos/1')->assertOk()->assertSee('Recorrido HTTP restaurado');
+                $this->assertTrue(DB::table('bitacora_cambio')->where('tabla_afectada','hito')->where('id_registro',$idHito)->exists());
+                $this->assertTrue(app(\App\Services\EtlService::class)->ejecutar()['exito']);
+                $this->assertTrue(DB::connection('dw_lector')->table('fact_hito')->where('id_hito',$idHito)->exists());
+                $this->post('/logout')->assertRedirect('/login');
+                $this->post('/login',['usuario'=>'cgarcia','clave'=>'PrivadaConsultaRestaurada2026!'])->assertRedirect('/tablero');
+                $this->postJson('/proyectos/1/hitos',['descripcion'=>'Denegado','fecha_prevista'=>'2025-01-01','en_linea_base'=>0])->assertForbidden();
+            });
         } finally {
             if ($idHito) {
                 DB::connection('escritor')->statement('SET @id_responsable=1');

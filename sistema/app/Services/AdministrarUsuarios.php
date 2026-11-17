@@ -13,6 +13,9 @@ class AdministrarUsuarios
     public static function guardar(?int $id, array $datos, ?string $motivo = null): Responsable
     {
         abort_unless(Auth::check() && Auth::user()->esAdmin(), 403);
+        if (isset($datos['clave']) && ClavesPublicasLegadas::contiene((string) $datos['clave'])) {
+            throw ValidationException::withMessages(['clave'=>'La contraseña demostrativa anterior es pública. Elija una contraseña privada.']);
+        }
         if (isset($datos['activo']) && !in_array($datos['activo'], [0,1], true)) {
             throw ValidationException::withMessages(['activo'=>'Estado inválido.']);
         }

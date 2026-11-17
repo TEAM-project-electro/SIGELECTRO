@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P11_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P11_Process" name="Administrar objetivos de gobierno digital" isExecutable="false">
+    <bpmn:documentation>El catálogo implementa alta y edición por Administrador. Los otros perfiles sólo consultan. Código único; descripción hasta 200 caracteres. El cambio incrementa la revisión para invalidar consultas y advertir desactualización del DW. No se modela una aprobación institucional ni una eliminación de catálogo no expuesta por rutas.
+Fuentes del sistema: sistema/app/Http/Controllers/ObjetivoGdController.php, sistema/app/Policies/ObjetivoGdPolicy.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P11_LaneSet">
+      <bpmn:lane id="P11_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P11_Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Datos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Resultado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P11_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P11_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Valido</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Confirmado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P11_Fallo</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P11_Inicio" name="Necesidad de actualización">
+      <bpmn:outgoing>P11_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P11_Datos" name="Crear o editar código y descripción">
+      <bpmn:documentation>Incluye revisión esperada al editar. El actor proviene de la sesión; nunca del formulario.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow1</bpmn:incoming>
+      <bpmn:incoming>P11_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P11_Validar" name="Validar permiso, unicidad y longitudes">
+      <bpmn:documentation>El catálogo implementa alta y edición por Administrador. Los otros perfiles sólo consultan. Código único; descripción hasta 200 caracteres. El cambio incrementa la revisión para invalidar consultas y advertir desactualización del DW. No se modela una aprobación institucional ni una eliminación de catálogo no expuesta por rutas.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P11_Valido" name="¿Solicitud válida y autorizada?" gatewayDirection="Diverging" default="P11_Flow5">
+      <bpmn:incoming>P11_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow4</bpmn:outgoing>
+      <bpmn:outgoing>P11_Flow5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="P11_Corregir" name="Revisar rechazo y corregir">
+      <bpmn:documentation>Sin autorización no se permite guardar. Un conflicto exige recargar la revisión vigente.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow5</bpmn:incoming>
+      <bpmn:incoming>P11_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P11_Guardar" name="Guardar catálogo y revisión auditada">
+      <bpmn:documentation>Una sola transacción: bloquear revisión central y padre si corresponde; revalidar actor, perfil, propiedad y revisión; guardar negocio, auditoría, motivo y actividad; COMMIT o ROLLBACK. Limpiar actor y motivo en finally.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P11_Confirmado" name="¿Transacción confirmada?" gatewayDirection="Diverging" default="P11_Flow8">
+      <bpmn:incoming>P11_Flow6</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow7</bpmn:outgoing>
+      <bpmn:outgoing>P11_Flow8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P11_Fallo" name="Revertir y comunicar conflicto">
+      <bpmn:documentation>El cambio y su auditoría se revierten juntos. Mostrar mensaje de negocio y limpiar contexto de conexión.</bpmn:documentation>
+      <bpmn:incoming>P11_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P11_Resultado" name="Consultar cambio confirmado">
+      <bpmn:incoming>P11_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P11_Flow11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="P11_Fin" name="Registro actualizado">
+      <bpmn:incoming>P11_Flow11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P11_Flow1" sourceRef="P11_Inicio" targetRef="P11_Datos"/>
+    <bpmn:sequenceFlow id="P11_Flow2" sourceRef="P11_Datos" targetRef="P11_Validar"/>
+    <bpmn:sequenceFlow id="P11_Flow3" sourceRef="P11_Validar" targetRef="P11_Valido"/>
+    <bpmn:sequenceFlow id="P11_Flow4" sourceRef="P11_Valido" targetRef="P11_Guardar" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">solicitud_valida == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P11_Flow5" sourceRef="P11_Valido" targetRef="P11_Corregir" name="No"/>
+    <bpmn:sequenceFlow id="P11_Flow6" sourceRef="P11_Guardar" targetRef="P11_Confirmado"/>
+    <bpmn:sequenceFlow id="P11_Flow7" sourceRef="P11_Confirmado" targetRef="P11_Resultado" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">transaccion_confirmada == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P11_Flow8" sourceRef="P11_Confirmado" targetRef="P11_Fallo" name="No"/>
+    <bpmn:sequenceFlow id="P11_Flow9" sourceRef="P11_Fallo" targetRef="P11_Corregir"/>
+    <bpmn:sequenceFlow id="P11_Flow10" sourceRef="P11_Corregir" targetRef="P11_Datos"/>
+    <bpmn:sequenceFlow id="P11_Flow11" sourceRef="P11_Resultado" targetRef="P11_Fin"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P11_Collaboration">
+    <bpmn:participant id="P11_Pool" name="SIG Electrocentro — P11" processRef="P11_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P11_Diagram" name="Administrar objetivos de gobierno digital">
+    <bpmndi:BPMNPlane id="P11_Plane" bpmnElement="P11_Collaboration">
+      <bpmndi:BPMNShape id="P11_PoolShape" bpmnElement="P11_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="1735" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_LaneShape0" bpmnElement="P11_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_LaneShape1" bpmnElement="P11_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="1705" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Inicio_di" bpmnElement="P11_Inicio">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Datos_di" bpmnElement="P11_Datos">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Validar_di" bpmnElement="P11_Validar">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Valido_di" bpmnElement="P11_Valido" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Corregir_di" bpmnElement="P11_Corregir">
+        <dc:Bounds x="920.0" y="275.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Guardar_di" bpmnElement="P11_Guardar">
+        <dc:Bounds x="920.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Confirmado_di" bpmnElement="P11_Confirmado" isMarkerVisible="true">
+        <dc:Bounds x="1175.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1050.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Fallo_di" bpmnElement="P11_Fallo">
+        <dc:Bounds x="1330.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Resultado_di" bpmnElement="P11_Resultado">
+        <dc:Bounds x="1330.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P11_Fin_di" bpmnElement="P11_Fin">
+        <dc:Bounds x="1592.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1535.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P11_Edge1" bpmnElement="P11_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge2" bpmnElement="P11_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge3" bpmnElement="P11_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge4" bpmnElement="P11_Flow4">
+        <di:waypoint x="815.0" y="480.0"/>
+        <di:waypoint x="920.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge5" bpmnElement="P11_Flow5">
+        <di:waypoint x="790.0" y="455.0"/>
+        <di:waypoint x="790.0" y="310.0"/>
+        <di:waypoint x="920.0" y="310.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="361.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge6" bpmnElement="P11_Flow6">
+        <di:waypoint x="1070.0" y="480.0"/>
+        <di:waypoint x="1175.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge7" bpmnElement="P11_Flow7">
+        <di:waypoint x="1200.0" y="455.0"/>
+        <di:waypoint x="1200.0" y="220.0"/>
+        <di:waypoint x="1330.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1165.0" y="316.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge8" bpmnElement="P11_Flow8">
+        <di:waypoint x="1200.0" y="505.0"/>
+        <di:waypoint x="1200.0" y="570.0"/>
+        <di:waypoint x="1330.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1165.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge9" bpmnElement="P11_Flow9">
+        <di:waypoint x="1330.0" y="570.0"/>
+        <di:waypoint x="1305.0" y="570.0"/>
+        <di:waypoint x="1305.0" y="112"/>
+        <di:waypoint x="995.0" y="112"/>
+        <di:waypoint x="995.0" y="275.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge10" bpmnElement="P11_Flow10">
+        <di:waypoint x="920.0" y="310.0"/>
+        <di:waypoint x="895.0" y="310.0"/>
+        <di:waypoint x="895.0" y="112"/>
+        <di:waypoint x="380.0" y="112"/>
+        <di:waypoint x="380.0" y="185.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P11_Edge11" bpmnElement="P11_Flow11">
+        <di:waypoint x="1480.0" y="220.0"/>
+        <di:waypoint x="1592.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

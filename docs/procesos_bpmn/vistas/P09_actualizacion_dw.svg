@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3250" height="670" viewBox="0 0 3250 670">
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#334155"/></marker></defs>
+<rect width="3250" height="670" fill="white"/>
+<text x="35" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#0f172a">P09 · Actualizar el almacén de datos — ETL</text>
+<text x="35" y="53" font-family="Arial" font-size="12" fill="#475569">Modelo AS-IS académico · BPMN 2.0 · Las rutas representan el sistema implementado</text>
+<rect x="35" y="90" width="3170" height="520" fill="none" stroke="#334155"/>
+<rect x="65" y="90" width="3140" height="260" fill="#f8fafc" stroke="#94a3b8"/>
+<text transform="translate(87,220) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Administrador</text>
+<rect x="65" y="350" width="3140" height="260" fill="#ffffff" stroke="#94a3b8"/>
+<text transform="translate(87,480) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Sistema SIG</text>
+<polyline points="193.0,220.0 305.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="455.0,220.0 482.5,220.0 482.5,480.0 510.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="660.0,480.0 765.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1275.0,480.0 1380.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1430.0,480.0 1535.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1482.5" y="471.0" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Sí</text>
+<polyline points="1405.0,505.0 1405.0,570.0 1592.0,570.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1405.0" y="528.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">No</text>
+<polyline points="1685.0,480.0 1740.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1890.0,480.0 1945.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2095.0,480.0 2200.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2250.0,480.0 2355.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="2302.5" y="471.0" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Sí</text>
+<polyline points="2225.0,505.0 2225.0,570.0 2355.0,570.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="2225.0" y="528.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">No</text>
+<polyline points="2505.0,480.0 2610.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2505.0,570.0 2557.5,570.0 2557.5,480.0 2610.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2660.0,480.0 2765.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2915.0,480.0 2971.0,480.0 2971.0,220.0 3027.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="790.0,455.0 790.0,385 1200.0,385 1200.0,445.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="790.0" y="411.0" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Sí</text>
+<polyline points="790.0,505.0 790.0,570.0 977.0,570.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="790.0" y="528.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">No</text>
+<circle cx="175.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="1.5"/>
+<text x="175.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">DW requiere</text>
+<text x="175.0" y="272.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">actualización</text>
+<rect x="305.0" y="185.0" width="150" height="70" rx="10" fill="#eff6ff" stroke="#334155" stroke-width="1.4"/>
+<circle cx="318.0" cy="195.0" r="4" fill="none" stroke="#334155"/><path d="M311.0,208.0 v-4 q7,-8 14,0 v4 Z" fill="none" stroke="#334155"/>
+<text x="380.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Solicitar ejecución ETL</text>
+<rect x="510.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="515.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="585.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Verificar Administrador</text>
+<rect x="1125.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1130.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1200.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Intentar adquirir mutex</text>
+<text x="1200.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">ETL</text>
+<path d="M1405.0,455.0 L1430.0,480.0 L1405.0,505.0 L1380.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M1398.0,473.0 L1412.0,487.0 M1412.0,473.0 L1398.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="1330.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Mutex adquirido?</text>
+<circle cx="1610.0" cy="570.0" r="18" fill="white" stroke="#0f172a" stroke-width="3.5"/>
+<text x="1610.0" y="608.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Carga no iniciada</text>
+<rect x="1535.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1540.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1610.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Iniciar transacción y</text>
+<text x="1610.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">bloquear revisión</text>
+<rect x="1740.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1745.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1815.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Sincronizar calendario</text>
+<text x="1815.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">y dimensiones</text>
+<rect x="1945.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1950.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="2020.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Cargar hechos y depurar</text>
+<text x="2020.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">ausentes</text>
+<path d="M2225.0,455.0 L2250.0,480.0 L2225.0,505.0 L2200.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M2218.0,473.0 L2232.0,487.0 M2232.0,473.0 L2218.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="2150.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Carga completa sin</text>
+<text x="2150.0" y="411.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">error?</text>
+<rect x="2355.0" y="535.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="2360.0" y="553.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="2430.0" y="573.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Revertir y registrar</text>
+<text x="2430.0" y="587.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">fallo</text>
+<rect x="2355.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="2360.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="2430.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Publicar datos y</text>
+<text x="2430.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">revisión en COMMIT</text>
+<path d="M2635.0,455.0 L2660.0,480.0 L2635.0,505.0 L2610.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M2628.0,473.0 L2642.0,487.0 M2642.0,473.0 L2628.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="2560.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Finalizar ejecución</text>
+<rect x="2765.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="2770.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="2840.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Liberar mutex e</text>
+<text x="2840.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">informar resultado</text>
+<circle cx="3045.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="3.5"/>
+<text x="3045.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Estado de carga</text>
+<text x="3045.0" y="272.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">informado</text>
+<path d="M790.0,455.0 L815.0,480.0 L790.0,505.0 L765.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M783.0,473.0 L797.0,487.0 M797.0,473.0 L783.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="715.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Perfil autorizado?</text>
+<circle cx="995.0" cy="570.0" r="18" fill="white" stroke="#0f172a" stroke-width="3.5"/>
+<text x="995.0" y="608.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Ejecución denegada</text>
+</svg>

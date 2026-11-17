@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2635" height="670" viewBox="0 0 2635 670">
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#334155"/></marker></defs>
+<rect width="2635" height="670" fill="white"/>
+<text x="35" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#0f172a">P08 · Generar y descargar reporte gerencial</text>
+<text x="35" y="53" font-family="Arial" font-size="12" fill="#475569">Modelo AS-IS académico · BPMN 2.0 · Las rutas representan el sistema implementado</text>
+<rect x="35" y="90" width="2555" height="520" fill="none" stroke="#334155"/>
+<rect x="65" y="90" width="2525" height="260" fill="#f8fafc" stroke="#94a3b8"/>
+<text transform="translate(87,220) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Usuario: cualquier perfil</text>
+<rect x="65" y="350" width="2525" height="260" fill="#ffffff" stroke="#94a3b8"/>
+<text transform="translate(87,480) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Sistema SIG</text>
+<polyline points="193.0,220.0 305.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="455.0,220.0 482.5,220.0 482.5,480.0 510.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="660.0,480.0 715.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="865.0,480.0 970.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="995.0,455.0 995.0,385 1405.0,385 1405.0,455.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="995.0" y="411.0" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Sí</text>
+<polyline points="995.0,505.0 995.0,570.0 1125.0,570.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="995.0" y="528.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">No</text>
+<polyline points="1275.0,570.0 1327.5,570.0 1327.5,480.0 1380.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1430.0,480.0 1585.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1635.0,480.0 1740.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1687.5" y="471.0" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">CSV</text>
+<polyline points="1610.0,505.0 1610.0,570.0 1740.0,570.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="1610.0" y="528.5" text-anchor="middle" font-family="Arial" font-size="11" fill="#0f172a" style="paint-order:stroke;stroke:white;stroke-width:4">Impresión</text>
+<polyline points="1890.0,480.0 1995.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="1890.0,570.0 1942.5,570.0 1942.5,480.0 1995.0,480.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2020.0,455.0 2020.0,220.0 2150.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<polyline points="2300.0,220.0 2412.0,220.0" fill="none" stroke="#334155" stroke-width="1.4" marker-end="url(#arrow)"/>
+<circle cx="175.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="1.5"/>
+<text x="175.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Consulta disponible</text>
+<rect x="305.0" y="185.0" width="150" height="70" rx="10" fill="#eff6ff" stroke="#334155" stroke-width="1.4"/>
+<circle cx="318.0" cy="195.0" r="4" fill="none" stroke="#334155"/><path d="M311.0,208.0 v-4 q7,-8 14,0 v4 Z" fill="none" stroke="#334155"/>
+<text x="380.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Elegir CSV o vista de</text>
+<text x="380.0" y="237.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">impresión</text>
+<rect x="510.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="515.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="585.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Capturar filtros,</text>
+<text x="585.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">origen y revisión</text>
+<rect x="715.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="720.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="790.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Consultar datos con ese</text>
+<text x="790.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">contexto</text>
+<path d="M995.0,455.0 L1020.0,480.0 L995.0,505.0 L970.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M988.0,473.0 L1002.0,487.0 M1002.0,473.0 L988.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="920.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Coincide revisión</text>
+<text x="920.0" y="411.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">solicitada?</text>
+<rect x="1125.0" y="535.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1130.0" y="553.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1200.0" y="573.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Incluir aviso de datos</text>
+<text x="1200.0" y="587.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">cambiados</text>
+<path d="M1405.0,455.0 L1430.0,480.0 L1405.0,505.0 L1380.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M1398.0,473.0 L1412.0,487.0 M1412.0,473.0 L1398.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="1330.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Continuar generación</text>
+<path d="M1610.0,455.0 L1635.0,480.0 L1610.0,505.0 L1585.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M1603.0,473.0 L1617.0,487.0 M1617.0,473.0 L1603.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="1535.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">¿Formato solicitado?</text>
+<rect x="1740.0" y="445.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1745.0" y="463.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1815.0" y="483.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Generar CSV con BOM y</text>
+<text x="1815.0" y="497.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">protección</text>
+<rect x="1740.0" y="535.0" width="150" height="70" rx="10" fill="white" stroke="#334155" stroke-width="1.4"/>
+<text x="1745.0" y="553.0" font-family="Segoe UI Symbol,Arial" font-size="19">⚙</text>
+<text x="1815.0" y="573.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Renderizar vista</text>
+<text x="1815.0" y="587.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">imprimible</text>
+<path d="M2020.0,455.0 L2045.0,480.0 L2020.0,505.0 L1995.0,480.0 Z" fill="#fffbeb" stroke="#334155"/><path d="M2013.0,473.0 L2027.0,487.0 M2027.0,473.0 L2013.0,487.0" stroke="#334155" stroke-width="2"/>
+<text x="1945.0" y="397.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Entregar salida</text>
+<rect x="2150.0" y="185.0" width="150" height="70" rx="10" fill="#eff6ff" stroke="#334155" stroke-width="1.4"/>
+<circle cx="2163.0" cy="195.0" r="4" fill="none" stroke="#334155"/><path d="M2156.0,208.0 v-4 q7,-8 14,0 v4 Z" fill="none" stroke="#334155"/>
+<text x="2225.0" y="223.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Descargar o imprimir</text>
+<text x="2225.0" y="237.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">documento</text>
+<circle cx="2430.0" cy="220.0" r="18" fill="white" stroke="#0f172a" stroke-width="3.5"/>
+<text x="2430.0" y="258.0" font-family="Arial" font-size="11.5" text-anchor="middle" fill="#0f172a">Reporte obtenido</text>
+</svg>

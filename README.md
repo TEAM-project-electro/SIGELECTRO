@@ -51,12 +51,12 @@ El servidor web quedará accesible de inmediato en:
 
 El acceso al sistema está controlado por roles y políticas estrictas a nivel de servidor (Laravel Policies):
 
-| Perfil | Usuario | Contraseña Demo | Área | Alcance de Permisos |
+| Perfil | Usuario | Acceso | Área | Alcance de Permisos |
 | :--- | :--- | :--- | :--- | :--- |
-| **Administrador** | `msalas` | `Admin2026!` | Planeamiento | Gestión total de cartera, reapertura de proyectos, auditoría y control ETL. |
-| **Responsable Titular** | `aquispe` | `Resp2026!` | TIC | Registro de avances presupuestales y cierre de hitos en sus proyectos. |
-| **Responsable Delegado** | `lrojas` | `Resp2026!` | TIC | Gestión de proyectos asignados bajo su responsabilidad. |
-| **Consulta** | `cgarcia` | `Consulta2026!` | Comité GD | Acceso de solo lectura a cartera, tablero analítico y exportación de reportes. |
+| **Administrador** | `msalas` | `Clave privada asignada localmente` | Planeamiento | Gestión total de cartera, reapertura de proyectos, auditoría y control ETL. |
+| **Responsable Titular** | `aquispe` | `Clave privada asignada localmente` | TIC | Registro de avances presupuestales y cierre de hitos en sus proyectos. |
+| **Responsable Delegado** | `lrojas` | `Clave privada asignada localmente` | TIC | Gestión de proyectos asignados bajo su responsabilidad. |
+| **Consulta** | `cgarcia` | `Clave privada asignada localmente` | Comité GD | Acceso de solo lectura a cartera, tablero analítico y exportación de reportes. |
 
 ---
 
@@ -139,3 +139,11 @@ proyecto team/
     bi/                                   # Artefactos para Microsoft Power BI
   sistema/                                # Aplicación Laravel 12 (monolito modular)
 ```
+
+
+### Acceso privado desde la corrección de seguridad (06/11/2026)
+En una instalación nueva, `scripts/instalar.ps1` ejecuta `php artisan sig:inicializar` después de migrar. El comando solicita dos veces una contraseña privada para `msalas`, sin mostrarla ni guardarla en archivos o argumentos. Debe tener entre 12 y 72 bytes. No hay contraseñas predeterminadas públicas. El administrador asigna contraseñas privadas a las demás cuentas desde **Usuarios** antes de entregarlas.
+
+Repetir la inicialización o la siembra conserva las cuentas existentes, incluidas claves, perfil, estado y datos editados. Las claves demostrativas anteriores quedan rechazadas en el login y no pueden volver a asignarse desde Usuarios. En una instalación anterior, el operador debe ejecutar desde `sistema/`: `php artisan sig:cambiar-clave msalas` (y repetir con los demás usuarios que necesiten renovación). El comando pide la contraseña sin mostrarla; conserva perfil/estado y audita el cambio. No escriba contraseñas en argumentos o en el repositorio. Ejecutar `db:seed` directamente en una base nueva genera claves aleatorias no entregadas; utilice el flujo de inicialización interactiva para disponer del acceso administrador.
+
+La sonda pública `/salud` devuelve únicamente `estado` y HTTP 200/503. Los detalles de errores quedan en el registro del servidor.

@@ -1,0 +1,312 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="P09_Definitions" targetNamespace="urn:academico:sig-electrocentro:procesos" exporter="SIG Electrocentro — documentación académica" exporterVersion="1.0">
+  <bpmn:process id="P09_Process" name="Actualizar el almacén de datos — ETL" isExecutable="false">
+    <bpmn:documentation>Carga manual desde la aplicación o comando local etl:cargar. Mantiene mutex y transacción para publicar dimensiones, hechos y revisión. No modela trabajo en Power BI ni una programación periódica no implementada.
+Fuentes del sistema: sistema/app/Http/Controllers/EtlController.php, sistema/app/Services/EtlService.php, sistema/database/migrations/2026_11_03_000004_create_dw_procedimientos_y_vistas.php
+Modelo descriptivo AS-IS: no incluye aprobaciones institucionales ni automatización de Bonita. Sesión activa requerida salvo P01 y operación técnica local P13.</bpmn:documentation>
+    <bpmn:laneSet id="P09_LaneSet">
+      <bpmn:lane id="P09_Lane0" name="Administrador">
+        <bpmn:flowNodeRef>P09_I</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Pedir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Fin</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="P09_Lane1" name="Sistema SIG">
+        <bpmn:flowNodeRef>P09_Perfil</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Lock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Disponible</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Ocupado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Origen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Dims</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Hechos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Ok</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Rollback</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Commit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Merge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Liberar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Autorizado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P09_Denegado</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="P09_I" name="DW requiere actualización">
+      <bpmn:outgoing>P09_Flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="P09_Pedir" name="Solicitar ejecución ETL">
+      <bpmn:incoming>P09_Flow1</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P09_Perfil" name="Verificar Administrador">
+      <bpmn:incoming>P09_Flow2</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Lock" name="Intentar adquirir mutex ETL">
+      <bpmn:incoming>P09_Flow16</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Disponible" name="¿Mutex adquirido?" gatewayDirection="Diverging" default="P09_Flow6">
+      <bpmn:incoming>P09_Flow4</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow5</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P09_Ocupado" name="Carga no iniciada">
+      <bpmn:documentation>Si no se obtiene mutex dentro del tiempo configurado, devolver fallo sin modificar dimensiones/hechos. Una solicitud sin permiso termina denegada antes de ejecutar el procedimiento.</bpmn:documentation>
+      <bpmn:incoming>P09_Flow6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P09_Origen" name="Iniciar transacción y bloquear revisión">
+      <bpmn:incoming>P09_Flow5</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Dims" name="Sincronizar calendario y dimensiones">
+      <bpmn:incoming>P09_Flow7</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Hechos" name="Cargar hechos y depurar ausentes">
+      <bpmn:incoming>P09_Flow8</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Ok" name="¿Carga completa sin error?" gatewayDirection="Diverging" default="P09_Flow11">
+      <bpmn:documentation>Abstracción del EXIT HANDLER SQL: cualquier excepción en la fase transaccional, incluso en calendario/dimensiones, recorre rollback; no se presupone que siempre se alcance la última inserción.</bpmn:documentation>
+      <bpmn:incoming>P09_Flow9</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow10</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P09_Rollback" name="Revertir y registrar fallo">
+      <bpmn:incoming>P09_Flow11</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P09_Commit" name="Publicar datos y revisión en COMMIT">
+      <bpmn:incoming>P09_Flow10</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="P09_Merge" name="Finalizar ejecución" gatewayDirection="Converging">
+      <bpmn:incoming>P09_Flow12</bpmn:incoming>
+      <bpmn:incoming>P09_Flow13</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow14</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P09_Liberar" name="Liberar mutex e informar resultado">
+      <bpmn:incoming>P09_Flow14</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow15</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="P09_Fin" name="Estado de carga informado">
+      <bpmn:incoming>P09_Flow15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="P09_Autorizado" name="¿Perfil autorizado?" gatewayDirection="Diverging" default="P09_Flow17">
+      <bpmn:incoming>P09_Flow3</bpmn:incoming>
+      <bpmn:outgoing>P09_Flow16</bpmn:outgoing>
+      <bpmn:outgoing>P09_Flow17</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="P09_Denegado" name="Ejecución denegada">
+      <bpmn:incoming>P09_Flow17</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P09_Flow1" sourceRef="P09_I" targetRef="P09_Pedir"/>
+    <bpmn:sequenceFlow id="P09_Flow2" sourceRef="P09_Pedir" targetRef="P09_Perfil"/>
+    <bpmn:sequenceFlow id="P09_Flow3" sourceRef="P09_Perfil" targetRef="P09_Autorizado"/>
+    <bpmn:sequenceFlow id="P09_Flow4" sourceRef="P09_Lock" targetRef="P09_Disponible"/>
+    <bpmn:sequenceFlow id="P09_Flow5" sourceRef="P09_Disponible" targetRef="P09_Origen" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">mutex_adquirido == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow6" sourceRef="P09_Disponible" targetRef="P09_Ocupado" name="No"/>
+    <bpmn:sequenceFlow id="P09_Flow7" sourceRef="P09_Origen" targetRef="P09_Dims"/>
+    <bpmn:sequenceFlow id="P09_Flow8" sourceRef="P09_Dims" targetRef="P09_Hechos"/>
+    <bpmn:sequenceFlow id="P09_Flow9" sourceRef="P09_Hechos" targetRef="P09_Ok"/>
+    <bpmn:sequenceFlow id="P09_Flow10" sourceRef="P09_Ok" targetRef="P09_Commit" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">carga_sin_error == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow11" sourceRef="P09_Ok" targetRef="P09_Rollback" name="No"/>
+    <bpmn:sequenceFlow id="P09_Flow12" sourceRef="P09_Commit" targetRef="P09_Merge"/>
+    <bpmn:sequenceFlow id="P09_Flow13" sourceRef="P09_Rollback" targetRef="P09_Merge"/>
+    <bpmn:sequenceFlow id="P09_Flow14" sourceRef="P09_Merge" targetRef="P09_Liberar"/>
+    <bpmn:sequenceFlow id="P09_Flow15" sourceRef="P09_Liberar" targetRef="P09_Fin"/>
+    <bpmn:sequenceFlow id="P09_Flow16" sourceRef="P09_Autorizado" targetRef="P09_Lock" name="Sí">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">perfil == "Administrador"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="P09_Flow17" sourceRef="P09_Autorizado" targetRef="P09_Denegado" name="No"/>
+  </bpmn:process>
+  <bpmn:collaboration id="P09_Collaboration">
+    <bpmn:participant id="P09_Pool" name="SIG Electrocentro — P09" processRef="P09_Process"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="P09_Diagram" name="Actualizar el almacén de datos — ETL">
+    <bpmndi:BPMNPlane id="P09_Plane" bpmnElement="P09_Collaboration">
+      <bpmndi:BPMNShape id="P09_PoolShape" bpmnElement="P09_Pool" isHorizontal="true">
+        <dc:Bounds x="35" y="90" width="3170" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_LaneShape0" bpmnElement="P09_Lane0" isHorizontal="true">
+        <dc:Bounds x="65" y="90" width="3140" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_LaneShape1" bpmnElement="P09_Lane1" isHorizontal="true">
+        <dc:Bounds x="65" y="350" width="3140" height="260"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_I_di" bpmnElement="P09_I">
+        <dc:Bounds x="157.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Pedir_di" bpmnElement="P09_Pedir">
+        <dc:Bounds x="305.0" y="185.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Perfil_di" bpmnElement="P09_Perfil">
+        <dc:Bounds x="510.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Lock_di" bpmnElement="P09_Lock">
+        <dc:Bounds x="1125.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Disponible_di" bpmnElement="P09_Disponible" isMarkerVisible="true">
+        <dc:Bounds x="1380.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1255.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Ocupado_di" bpmnElement="P09_Ocupado">
+        <dc:Bounds x="1592.0" y="552.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1535.0" y="595.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Origen_di" bpmnElement="P09_Origen">
+        <dc:Bounds x="1535.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Dims_di" bpmnElement="P09_Dims">
+        <dc:Bounds x="1740.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Hechos_di" bpmnElement="P09_Hechos">
+        <dc:Bounds x="1945.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Ok_di" bpmnElement="P09_Ok" isMarkerVisible="true">
+        <dc:Bounds x="2200.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2075.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Rollback_di" bpmnElement="P09_Rollback">
+        <dc:Bounds x="2355.0" y="535.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Commit_di" bpmnElement="P09_Commit">
+        <dc:Bounds x="2355.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Merge_di" bpmnElement="P09_Merge" isMarkerVisible="true">
+        <dc:Bounds x="2610.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2485.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Liberar_di" bpmnElement="P09_Liberar">
+        <dc:Bounds x="2765.0" y="445.0" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Fin_di" bpmnElement="P09_Fin">
+        <dc:Bounds x="3027.0" y="202.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2970.0" y="245.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Autorizado_di" bpmnElement="P09_Autorizado" isMarkerVisible="true">
+        <dc:Bounds x="765.0" y="455.0" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640.0" y="385.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P09_Denegado_di" bpmnElement="P09_Denegado">
+        <dc:Bounds x="977.0" y="552.0" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="920.0" y="595.0" width="150" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P09_Edge1" bpmnElement="P09_Flow1">
+        <di:waypoint x="193.0" y="220.0"/>
+        <di:waypoint x="305.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge2" bpmnElement="P09_Flow2">
+        <di:waypoint x="455.0" y="220.0"/>
+        <di:waypoint x="482.5" y="220.0"/>
+        <di:waypoint x="482.5" y="480.0"/>
+        <di:waypoint x="510.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge3" bpmnElement="P09_Flow3">
+        <di:waypoint x="660.0" y="480.0"/>
+        <di:waypoint x="765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge4" bpmnElement="P09_Flow4">
+        <di:waypoint x="1275.0" y="480.0"/>
+        <di:waypoint x="1380.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge5" bpmnElement="P09_Flow5">
+        <di:waypoint x="1430.0" y="480.0"/>
+        <di:waypoint x="1535.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1447.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge6" bpmnElement="P09_Flow6">
+        <di:waypoint x="1405.0" y="505.0"/>
+        <di:waypoint x="1405.0" y="570.0"/>
+        <di:waypoint x="1592.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1370.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge7" bpmnElement="P09_Flow7">
+        <di:waypoint x="1685.0" y="480.0"/>
+        <di:waypoint x="1740.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge8" bpmnElement="P09_Flow8">
+        <di:waypoint x="1890.0" y="480.0"/>
+        <di:waypoint x="1945.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge9" bpmnElement="P09_Flow9">
+        <di:waypoint x="2095.0" y="480.0"/>
+        <di:waypoint x="2200.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge10" bpmnElement="P09_Flow10">
+        <di:waypoint x="2250.0" y="480.0"/>
+        <di:waypoint x="2355.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2267.5" y="459.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge11" bpmnElement="P09_Flow11">
+        <di:waypoint x="2225.0" y="505.0"/>
+        <di:waypoint x="2225.0" y="570.0"/>
+        <di:waypoint x="2355.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2190.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge12" bpmnElement="P09_Flow12">
+        <di:waypoint x="2505.0" y="480.0"/>
+        <di:waypoint x="2610.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge13" bpmnElement="P09_Flow13">
+        <di:waypoint x="2505.0" y="570.0"/>
+        <di:waypoint x="2557.5" y="570.0"/>
+        <di:waypoint x="2557.5" y="480.0"/>
+        <di:waypoint x="2610.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge14" bpmnElement="P09_Flow14">
+        <di:waypoint x="2660.0" y="480.0"/>
+        <di:waypoint x="2765.0" y="480.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge15" bpmnElement="P09_Flow15">
+        <di:waypoint x="2915.0" y="480.0"/>
+        <di:waypoint x="2971.0" y="480.0"/>
+        <di:waypoint x="2971.0" y="220.0"/>
+        <di:waypoint x="3027.0" y="220.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge16" bpmnElement="P09_Flow16">
+        <di:waypoint x="790.0" y="455.0"/>
+        <di:waypoint x="790.0" y="385"/>
+        <di:waypoint x="1200.0" y="385"/>
+        <di:waypoint x="1200.0" y="445.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="399.0" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P09_Edge17" bpmnElement="P09_Flow17">
+        <di:waypoint x="790.0" y="505.0"/>
+        <di:waypoint x="790.0" y="570.0"/>
+        <di:waypoint x="977.0" y="570.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755.0" y="516.5" width="95" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
