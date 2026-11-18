@@ -1,9 +1,7 @@
 # SIG Electrocentro S. A. - Sistema de Información Gerencial
 
 **Prototipo Académico Local para la Supervisión y Seguimiento Gerencial de la Cartera del Plan de Gobierno Digital (PGD 2023–2026)**  
-**Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00)  
-**Institución:** Universidad Nacional de Huancavelica — Escuela Profesional de Ingeniería de Sistemas  
-**Asignatura:** Sistema de Información Gerencial (8vo Ciclo)  
+**Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00) 
 **Estado actual:** Correcciones del núcleo aplicadas y verificadas con 133 pruebas / 1,441 aserciones. Power BI preparado parcialmente; ejecución y conciliación DAX pendientes. Ver [informe vigente](docs/correcciones_auditoria_2026-11-04.md).
 
 ---
