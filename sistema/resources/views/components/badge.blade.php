@@ -4,17 +4,17 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center font-semibold rounded-full border transition-colors';
-    
+    $baseClasses = 'inline-flex items-center font-semibold rounded-full border';
+
     $sizeClasses = [
-        'sm' => 'px-2 py-0.5 text-[10px]',
+        'sm' => 'px-2 py-0.5 text-[11px]',
         'md' => 'px-2.5 py-0.5 text-xs',
         'lg' => 'px-3 py-1 text-sm',
     ][$size] ?? 'px-2.5 py-0.5 text-xs';
 
     $variantClasses = [
-        'primary' => 'bg-brand-50 text-brand-700 border-brand-200',
-        'success' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        'primary' => 'bg-brand-50 text-brand-800 border-brand-200',
+        'success' => 'bg-energy-50 text-energy-700 border-energy-100',
         'warning' => 'bg-amber-50 text-amber-800 border-amber-200',
         'danger' => 'bg-rose-50 text-rose-800 border-rose-200',
         'neutral' => 'bg-slate-100 text-slate-700 border-slate-200',

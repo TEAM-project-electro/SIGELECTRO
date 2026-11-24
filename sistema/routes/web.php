@@ -92,4 +92,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/avances/{avance}/editar', [\App\Http\Controllers\AvancePresupuestalController::class, 'edit'])->name('avances.edit');
     Route::put('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'update'])->name('avances.update');
     Route::delete('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'destroy'])->name('avances.destroy');
+
+    // Integración de Compras y Recepciones Odoo (CSV controlado)
+    Route::get('/abastecimiento/importar', [\App\Http\Controllers\AbastecimientoController::class, 'importar'])->name('abastecimiento.importar');
+    Route::post('/abastecimiento/previsualizar', [\App\Http\Controllers\AbastecimientoController::class, 'previsualizar'])->name('abastecimiento.previsualizar');
+    Route::post('/abastecimiento/confirmar', [\App\Http\Controllers\AbastecimientoController::class, 'confirmar'])->name('abastecimiento.confirmar');
 });

@@ -130,6 +130,14 @@ class ProyectoController extends Controller
             $q->orderBy('fecha_reporte');
         }]);
 
+        try {
+            $proyecto->load(['compras' => function ($q) {
+                $q->with('responsableCarga')->orderByDesc('fecha_orden')->orderBy('orden_compra');
+            }]);
+        } catch (\Throwable $e) {
+            $proyecto->setRelation('compras', collect());
+        }
+
         // Indicadores específicos del proyecto desde la vista analítica
         $indicador = DB::table('v_indicadores_proyecto')
             ->where('id_proyecto', $proyecto->id_proyecto)

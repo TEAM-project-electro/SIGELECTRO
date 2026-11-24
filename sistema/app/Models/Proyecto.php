@@ -51,4 +51,9 @@ class Proyecto extends Model
     {
         return $this->hasMany(AvancePresupuestal::class, 'id_proyecto', 'id_proyecto');
     }
+
+    public function compras(): HasMany
+    {
+        return $this->hasMany(AbastecimientoCompra::class, 'id_proyecto', 'id_proyecto');
+    }
 }
