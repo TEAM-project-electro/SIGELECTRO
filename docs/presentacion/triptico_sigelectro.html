@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tríptico SIGELECTRO — INNOVATECH FEST LIMA SUR 2026</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0B2A4A;
+      --navy-dark: #071D34;
+      --blue: #1D63B8;
+      --blue-soft: #EBF3FC;
+      --green: #43B02A;
+      --green-soft: #ECF8E9;
+      --slate-900: #0F172A;
+      --slate-700: #334155;
+      --slate-500: #64748B;
+      --slate-200: #E2E8F0;
+      --slate-50: #F8FAFC;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      background: #CBD5E1;
+      color: var(--slate-900);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .toolbar {
+      max-width: 297mm;
+      margin: 14px auto;
+      padding: 10px 16px;
+      background: #0F172A;
+      color: #F8FAFC;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .toolbar button {
+      background: var(--green);
+      color: #FFFFFF;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .toolbar button:hover {
+      filter: brightness(1.06);
+    }
+
+    .sheet {
+      width: 297mm;
+      height: 210mm;
+      margin: 12px auto 24px;
+      background: #FFFFFF;
+      display: grid;
+      grid-template-columns: repeat(3, 99mm);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+      page-break-after: always;
+      position: relative;
+    }
+
+    .panel {
+      width: 99mm;
+      height: 210mm;
+      padding: 10mm 8.5mm 9mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border-right: 0.4px dashed #CBD5E1;
+    }
+
+    .panel:last-child {
+      border-right: none;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--blue) 65%, var(--green) 100%);
+    }
+
+    /* Portada */
+    .cover {
+      background: linear-gradient(165deg, var(--navy) 0%, var(--navy-dark) 100%);
+      color: #FFFFFF;
+      border-right: none;
+    }
+
+    .cover-logo-box {
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 7px 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .cover-logo-box img {
+      height: 30px;
+      width: auto;
+      display: block;
+    }
+
+    .event-pill {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(67, 176, 42, 0.18);
+      border: 1px solid rgba(67, 176, 42, 0.65);
+      color: #B7F4A8;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .cover h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      margin-top: 12px;
+      line-height: 1.05;
+    }
+
+    .cover .subtitle {
+      font-size: 12px;
+      color: #CBD5E1;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .cover-divider {
+      height: 3px;
+      width: 48px;
+      background: var(--green);
+      border-radius: 2px;
+      margin: 14px 0;
+    }
+
+    .cover-kpis {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .cover-kpi {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 8px 9px;
+    }
+
+    .cover-kpi strong {
+      display: block;
+      font-size: 15px;
+      color: #FFFFFF;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cover-kpi span {
+      font-size: 9px;
+      color: #CBD5E1;
+      line-height: 1.25;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .cover-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 9px;
+      font-size: 9.5px;
+      color: #CBD5E1;
+      line-height: 1.45;
+    }
+
+    .cover-footer strong {
+      color: #FFFFFF;
+    }
+
+    /* Cabeceras de paneles internos */
+    .eyebrow {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--blue);
+      margin-bottom: 3px;
+    }
+
+    h2 {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 8px 0 4px;
+    }
+
+    p {
+      font-size: 9.8px;
+      line-height: 1.45;
+      color: var(--slate-700);
+    }
+
+    ul {
+      padding-left: 14px;
+      margin-top: 4px;
+    }
+
+    li {
+      font-size: 9.5px;
+      line-height: 1.42;
+      color: var(--slate-700);
+      margin-bottom: 4px;
+    }
+
+    li strong {
+      color: var(--slate-900);
+    }
+
+    .card {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 8px 9px;
+      margin-top: 7px;
+    }
+
+    .card-blue {
+      background: var(--blue-soft);
+      border-color: #BFDBFE;
+    }
+
+    .card-green {
+      background: var(--green-soft);
+      border-color: #BBF7D0;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .mini-stat {
+      background: #FFFFFF;
+      border: 1px solid var(--slate-200);
+      border-radius: 7px;
+      padding: 6px 7px;
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-size: 12px;
+      color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mini-stat span {
+      font-size: 8.5px;
+      color: var(--slate-500);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 2.5px 7px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--navy);
+      border: 1px solid #BFDBFE;
+    }
+
+    .badge-green {
+      background: var(--green-soft);
+      color: #166534;
+      border-color: #BBF7D0;
+    }
+
+    .layer-list {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 5px;
+    }
+
+    .layer-list li {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      margin-bottom: 4px;
+      font-size: 9.2px;
+    }
+
+    .layer-num {
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #FFFFFF;
+      font-size: 8.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .panel-footer {
+      border-top: 1px solid var(--slate-200);
+      padding-top: 6px;
+      font-size: 8.5px;
+      color: var(--slate-500);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .team-box {
+      border: 1px dashed #94A3B8;
+      border-radius: 7px;
+      padding: 7px 9px;
+      background: #FFFFFF;
+      margin-top: 6px;
+    }
+
+    .team-box p {
+      font-size: 9px;
+      margin-bottom: 3px;
+    }
+
+    .mono {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.8px;
+      color: var(--blue);
+      word-break: break-all;
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF;
+      }
+      .toolbar {
+        display: none;
+      }
+      .sheet {
+        margin: 0;
+        box-shadow: none;
+      }
+      .panel {
+        border-right: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div>
+      <strong>Tríptico SIGELECTRO (A4 Apaisado · Doble cara · Borde corto)</strong>
+      — Abra en Chrome/Edge, pulse <em>Imprimir / Guardar PDF</em> y desactive encabezados/pies de página.
+    </div>
+    <button onclick="window.print()">Imprimir / Exportar PDF</button>
+  </div>
+
+  <!-- =========================================================
+       CARA 1 (EXTERIOR): Solapa interior | Contraportada | Portada
+       ========================================================= -->
+  <section class="sheet" aria-label="Cara exterior del tríptico">
+
+    <!-- PANEL 1 (Izquierdo - Solapa interior) -->
+    <article class="panel">
+      <div class="top-bar"></div>
+      <div>
+        <div class="eyebrow">Sostenibilidad, Ética y Seguridad</div>
+        <h2>Diseño Responsable y Continuidad Operativa</h2>
+        <p>
+          SIGELECTRO incorpora controles de seguridad, ética de datos y sostenibilidad tecnológica exigidos para entidades públicas bajo supervisión de <strong>FONAFE y SEGDI</strong>.
+        </p>
+
+        <div class="card card-green">
+          <h3>Ética y Privacidad de la Información</h3>
+          <ul>
+            <li><strong>Datos demarcados:</strong> distinción explícita entre cartera pública PGD y datos demostrativos académicos.</li>
+            <li><strong>Cero exposición de secretos:</strong> <code>clave_hash</code> oculto en consultas de lectura, Data Warehouse y RAG; sin contraseñas públicas legadas.</li>
+            <li><strong>Trazabilidad nominal:</strong> cada cambio exige usuario actor y motivo justificado.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Seguridad en Capas (Laudon Cap. 8)</h3>
+          <ul>
+            <li><strong>RBAC en servidor:</strong> 3 perfiles (<em>Administrador</em>, <em>Responsable</em>, <em>Consulta</em>) con Laravel Policies y autoservicio <code>/perfil/clave</code>.</li>
+            <li><strong>7 cuentas técnicas sin <code>root</code>:</strong> la cuenta web tiene revocados <code>UPDATE/DELETE</code> en auditoría (error 1142).</li>
+            <li><strong>Respaldo y recuperación (Gate G4):</strong> restauración probada en esquemas aislados con conciliación al 100 %.</li>
+          </ul>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Sostenibilidad (TCO S/ 0.00 en Licencias)</h3>
+          <p>
+            Construido íntegramente con software libre reproducible (PHP 8.3, Laravel 12, MariaDB 10.11, Vite local sin CDNs externos), desplegable en intranet sin dependencia de nube.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span>SIGELECTRO · Electrocentro S. A.</span>
+        <span>Ética y Seguridad</span>
+      </div>
+    </article>
+
+    <!-- PANEL 2 (Central - Contraportada) -->
+    <article class="panel">
+      <div class="top-bar"></div>
+      <div>
+        <div class="eyebrow">Información Institucional</div>
+        <h2>Ficha del Proyecto y Equipo</h2>
+
+        <div class="card">
+          <p><strong>Evento:</strong> INNOVATECH FEST LIMA SUR 2026 — UNTELS</p>
+          <p style="margin-top:3px;"><strong>Categoría:</strong> Innovación Tecnológica Aplicada / Emprendimiento Digital</p>
+          <p style="margin-top:3px;"><strong>Fase declarada:</strong> Prototipo Funcional Verificado</p>
+          <p style="margin-top:3px;"><strong>Institución de origen:</strong> Universidad Nacional de Huancavelica (UNH) — E. P. Ingeniería de Sistemas (VIII Ciclo)</p>
+          <p style="margin-top:3px;"><strong>Marco teórico:</strong> Laudon, Laudon y Traver (18.ª ed., Cap. 1–11) y OWASP LLM Top 10</p>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-stat">
+            <strong>170 pruebas</strong>
+            <span>1,698 aserciones aprobadas</span>
+          </div>
+          <div class="mini-stat">
+            <strong>0.00 pp</strong>
+            <span>Brecha OLTP vs. DW</span>
+          </div>
+          <div class="mini-stat">
+            <strong>14 procesos</strong>
+            <span>Modelados en BPMN 2.0</span>
+          </div>
+          <div class="mini-stat">
+            <strong>100 % local</strong>
+            <span>Opera sin internet</span>
+          </div>
+        </div>
+
+        <div class="team-box">
+          <h3 style="margin-top:0;">Integrantes del Equipo</h3>
+          <p>• Líder: ___________________________________</p>
+          <p>• Integrante 2: _____________________________</p>
+          <p>• Integrante 3: _____________________________</p>
+          <p>• Integrante 4: _____________________________</p>
+          <p style="margin-top:4px;"><strong>Asesor / Docente:</strong> Ing. Roly A. Cristóbal Lara</p>
+        </div>
+
+        <div class="card card-blue">
+          <h3 style="margin-top:0;">Repositorio y Evidencias</h3>
+          <p class="mono">https://github.com/TEAM-project-electro/SIGELECTRO</p>
+          <p style="margin-top:3px;font-size:8.6px;">
+            Incluye código fuente, scripts de respaldo/restauración, tablero Power BI (<code>.pbix</code>), modelos BPMN 2.0 y pruebas automatizadas.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span>INNOVATECH FEST 2026 · UNTELS</span>
+        <span>UNH · Ing. de Sistemas</span>
+      </div>
+    </article>
+
+    <!-- PANEL 3 (Derecho - PORTADA) -->
+    <article class="panel cover">
+      <div>
+        <div class="cover-logo-box">
+          <img src="../../sistema/public/images/logo-electrocentro.jpg" alt="Electrocentro S. A.">
+        </div>
+        <div>
+          <span class="event-pill">INNOVATECH FEST LIMA SUR 2026</span>
+        </div>
+        <h1>SIGELECTRO</h1>
+        <p class="subtitle">
+          Sistema de Información Gerencial con <strong>Asistente RAG Seguro</strong> para la Supervisión de la Cartera del Plan de Gobierno Digital (PGD) de Electrocentro S. A.
+        </p>
+        <div class="cover-divider"></div>
+        <p style="color:#E2E8F0;font-size:9.8px;line-height:1.5;">
+          Del seguimiento disperso en hojas de cálculo a una plataforma auditable con <strong>Data Warehouse</strong>, <strong>Power BI</strong> e <strong>Inteligencia Artificial</strong> protegida contra <em>prompt injection</em>.
+        </p>
+      </div>
+
+      <div>
+        <div class="cover-kpis">
+          <div class="cover-kpi">
+            <strong>S/ 8.62 M</strong>
+            <span>10 proyectos estratégicos PGD 2023–2026</span>
+          </div>
+          <div class="cover-kpi">
+            <strong>4 KPIs</strong>
+            <span>Paridad exacta OLTP vs. Data Warehouse</span>
+          </div>
+          <div class="cover-kpi">
+            <strong>8 Capas</strong>
+            <span>Defensa OWASP LLM01 en Asistente RAG</span>
+          </div>
+          <div class="cover-kpi">
+            <strong>170 Tests</strong>
+            <span>Integridad, concurrencia y seguridad</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cover-footer">
+        <strong>Prototipo Funcional · Fase Verificada</strong><br>
+        Universidad Nacional de Huancavelica — E. P. Ingeniería de Sistemas<br>
+        Concurso de Proyectos de Innovación · UNTELS
+      </div>
+    </article>
+
+  </section>
+
+  <!-- =========================================================
+       CARA 2 (INTERIOR): Problemática | Solución Técnica | Innovación RAG
+       ========================================================= -->
+  <section class="sheet" aria-label="Cara interior del tríptico">
+
+    <!-- PANEL 4 (Interior Izquierdo) -->
+    <article class="panel">
+      <div class="top-bar"></div>
+      <div>
+        <div class="eyebrow">1. Problemática e Impacto</div>
+        <h2>¿Qué Problema Resolvemos?</h2>
+        <p>
+          Electrocentro S. A. ejecuta una cartera de <strong>10 proyectos de Gobierno Digital por S/ 8,623,550.00</strong> (6 Objetivos OGD). El seguimiento manual en hojas de cálculo genera:
+        </p>
+        <ul>
+          <li><strong>Falta de trazabilidad:</strong> cambios en hitos de línea base y presupuestos sin responsable ni sustento auditado.</li>
+          <li><strong>Inconsistencia analítica:</strong> discrepancias al consolidar cortes trimestrales para el Comité de Gobierno Digital y FONAFE.</li>
+          <li><strong>Riesgo de alertas tardías:</strong> demoras en devengado e hitos vencidos detectados fuera de plazo.</li>
+          <li><strong>Conocimiento disperso:</strong> normas, contratos de KPIs y estados de cartera repartidos en múltiples documentos.</li>
+        </ul>
+
+        <div class="card card-blue">
+          <h3>Impacto y Aplicabilidad Directa</h3>
+          <ul>
+            <li><strong>Gobernanza real:</strong> vincula cada proyecto con su objetivo estratégico (PEI 2022–2026 y PGD 2023–2026).</li>
+            <li><strong>Reportes en segundos:</strong> tablero gerencial (&lt; 0.1 s), vista A4 imprimible y CSV protegido contra <em>CSV Injection</em>.</li>
+            <li><strong>Replicable:</strong> adaptable a cualquier empresa eléctrica del Grupo Distriluz o entidad pública con cartera TI.</li>
+          </ul>
+        </div>
+
+        <div class="badge-row">
+          <span class="badge">10 Proyectos PGD</span>
+          <span class="badge">26 Hitos</span>
+          <span class="badge">24 Cortes</span>
+          <span class="badge badge-green">6 Objetivos OGD</span>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span>1 / 3 · Problema e Impacto</span>
+        <span>25 pts evaluación</span>
+      </div>
+    </article>
+
+    <!-- PANEL 5 (Interior Central) -->
+    <article class="panel">
+      <div class="top-bar"></div>
+      <div>
+        <div class="eyebrow">2. Solución y Viabilidad Técnica</div>
+        <h2>Arquitectura OLTP, DW y BI</h2>
+        <p>
+          Prototipo web modular (<strong>Laravel 12 + MariaDB 10.11</strong>) que separa operación transaccional, analítica gerencial e intercambio empresarial:
+        </p>
+
+        <div class="card">
+          <h3>Reglas de Integridad en Motor BD (R1–R4)</h3>
+          <ul>
+            <li><strong>R1 y R2 (Financieras):</strong> impide superar el monto del proyecto y exige gasto acumulado no decreciente.</li>
+            <li><strong>R3 (Cierre formal):</strong> exige 100 % de hitos de línea base concluidos; reabrir obliga a justificar motivo.</li>
+            <li><strong>R4 (Auditoría inmutable):</strong> triggers registran todo cambio con usuario actor y bloquean borrados.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Data Warehouse, ETL y Power BI</h3>
+          <ul>
+            <li><strong>4 KPIs canónicos:</strong> avance de hitos LB, % proyectos con retraso, desviación presupuestal y estados.</li>
+            <li><strong>Dualidad temporal:</strong> <em>Corte Común</em> (foto de comité) y <em>Último Reporte</em> (control operativo).</li>
+            <li><strong>Esquema estrella:</strong> 4 dimensiones, 2 hechos, ETL atómico con <em>mutex</em> semanal y tablero <strong>Power BI (.pbix)</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="card card-green">
+          <h3>Extensión Controlada Odoo 16 (Cap. 9)</h3>
+          <p>
+            Importador CSV idempotente de compras y recepciones parciales hacia <code>PROYGD-005</code> en tabla técnica aislada, sin alterar las 6 tablas canónicas ni operar como ERP.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span>2 / 3 · Arquitectura y Viabilidad</span>
+        <span>25 pts evaluación</span>
+      </div>
+    </article>
+
+    <!-- PANEL 6 (Interior Derecho) -->
+    <article class="panel">
+      <div class="top-bar"></div>
+      <div>
+        <div class="eyebrow">3. Componente Innovador (Laudon Cap. 11)</div>
+        <h2>Asistente RAG Blindado con IA</h2>
+        <p>
+          Integramos <strong>Generación Aumentada por Recuperación (RAG)</strong> para consultar normas, indicadores y estado vivo de la cartera en lenguaje natural con <strong>citas verificables <code>[F#]</code></strong>.
+        </p>
+
+        <div class="card card-blue">
+          <h3>Recuperación Híbrida y Modo Offline</h3>
+          <p>
+            Combina búsqueda léxica <strong>BM25 local</strong> + <strong>vectores Gemini</strong> fusionados con <strong>RRF</strong> y datos vivos filtrados por perfil. <strong>Sin internet o sin clave API</strong>, degrada automáticamente a modo extractivo con fuentes citadas.
+          </p>
+        </div>
+
+        <h3>Defensa en 8 Capas (OWASP LLM01 / 02 / 06)</h3>
+        <ul class="layer-list">
+          <li><span class="layer-num">1</span><span><strong>Corpus cerrado:</strong> lista blanca fija; sin carga de archivos por usuarios.</span></li>
+          <li><span class="layer-num">2</span><span><strong>Escaneo al indexar:</strong> bloquea fragmentos con instrucciones ocultas.</span></li>
+          <li><span class="layer-num">3</span><span><strong>Guardia de entrada:</strong> rechaza intentos de <em>jailbreak</em>, SQL y pedido de claves.</span></li>
+          <li><span class="layer-num">4</span><span><strong>Separación regla/dato:</strong> delimitadores neutralizados entre sistema y consulta.</span></li>
+          <li><span class="layer-num">5</span><span><strong>Mínimo privilegio:</strong> sin herramientas, sin escritura ni SQL generado por IA.</span></li>
+          <li><span class="layer-num">6</span><span><strong>Salida saneada:</strong> exige citas reales, elimina URLs/HTML y escapa XSS.</span></li>
+          <li><span class="layer-num">7</span><span><strong>Límite y auditoría:</strong> máx. 10 consultas/min registradas en <code>rag_consulta</code>.</span></li>
+          <li><span class="layer-num">8</span><span><strong>Pruebas <em>red team</em>:</strong> 10 tests automatizados de ataques directos e indirectos.</span></li>
+        </ul>
+      </div>
+
+      <div class="panel-footer">
+        <span>3 / 3 · Innovación IA Segura</span>
+        <span>30 pts evaluación</span>
+      </div>
+    </article>
+
+  </section>
+
+</body>
+</html>

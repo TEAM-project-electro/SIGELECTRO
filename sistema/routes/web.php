@@ -45,11 +45,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tablero', [\App\Http\Controllers\TableroController::class, 'index'])->name('tablero');
 
-    // Asistente RAG de consulta (Laudon Cap. 11) — solo lectura, con límite de consultas por usuario
+    // Asistente RAG de consulta y Agente de Decisión Gerencial (Laudon Cap. 11 y 12) — solo lectura
     Route::get('/asistente', [\App\Http\Controllers\AsistenteController::class, 'index'])->name('asistente.index');
     Route::post('/asistente/preguntar', [\App\Http\Controllers\AsistenteController::class, 'preguntar'])
         ->middleware('throttle:'.config('rag.consultas_por_minuto', 10).',1')
         ->name('asistente.preguntar');
+    Route::post('/asistente/decidir', [\App\Http\Controllers\AsistenteController::class, 'decidir'])
+        ->middleware('throttle:'.config('rag.consultas_por_minuto', 10).',1')
+        ->name('asistente.decidir');
 
     // Motor de Indicadores y Consulta (RF04 - Etapa 10)
     Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');

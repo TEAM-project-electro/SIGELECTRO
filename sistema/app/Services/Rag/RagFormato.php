@@ -82,6 +82,7 @@ class RagFormato
 
     private static function inline(string $texto): string
     {
+        $texto = self::limpiarLatex($texto);
         $seguro = e($texto);
         $seguro = preg_replace('/\*\*(.+?)\*\*/s', '<strong class="font-semibold text-slate-900">$1</strong>', $seguro) ?? $seguro;
         $seguro = preg_replace('/`([^`]+)`/', '<code class="px-1.5 py-0.5 rounded bg-slate-100 text-brand-800 font-mono text-[12px]">$1</code>', $seguro) ?? $seguro;
@@ -90,5 +91,16 @@ class RagFormato
             '<span class="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded bg-brand-50 text-brand-800 border border-brand-200 font-mono text-[11px] font-semibold">[$1]</span>',
             $seguro
         ) ?? $seguro;
+    }
+
+    private static function limpiarLatex(string $texto): string
+    {
+        if (!str_contains($texto, '$') && !str_contains($texto, '\\')) {
+            return $texto;
+        }
+        $texto = str_replace(['$$', '\\times', '\\cdot', '\\sum', '\\%', '\\_'], ['', ' × ', ' · ', 'Σ', '%', '_'], $texto);
+        $texto = preg_replace('/\\\\text\{([^}]*)\}/u', '$1', $texto) ?? $texto;
+        $texto = preg_replace('/\\\\frac\{([^}]*)\}\{([^}]*)\}/u', '($1) / ($2)', $texto) ?? $texto;
+        return preg_replace('/\$([^$]+)\$/u', '$1', $texto) ?? $texto;
     }
 }
