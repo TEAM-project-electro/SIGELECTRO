@@ -143,7 +143,26 @@ class ProyectoController extends Controller
             ->where('id_proyecto', $proyecto->id_proyecto)
             ->first();
 
-        return view('proyectos.show', compact('proyecto', 'indicador'));
+        // Versiones de la línea base (alta, reprogramaciones, retiros), visibles para todos los perfiles.
+        try {
+            $versionesLb = DB::connection('lector')->table('hito_linea_base_version as v')
+                ->join('responsable as r', 'r.id_responsable', '=', 'v.id_responsable')
+                ->leftJoin('hito as h', 'h.id_hito', '=', 'v.id_hito')
+                ->where('v.id_proyecto', $proyecto->id_proyecto)
+                ->select('v.id_version', 'v.id_hito', 'v.version', 'v.accion', 'v.fecha_prevista_anterior', 'v.fecha_prevista',
+                    'v.motivo', 'v.fecha_hora', 'r.nombre as responsable', 'h.descripcion as hito')
+                ->orderBy('v.id_hito')
+                ->orderBy('v.version')
+                ->get();
+        } catch (\Throwable $e) {
+            $versionesLb = collect(); // Esquema anterior al versionado de la línea base.
+        }
+        $resumenLb = $versionesLb->groupBy('id_hito')->map(fn ($vs) => [
+            'fecha_original' => optional($vs->first(fn ($v) => $v->fecha_prevista !== null))->fecha_prevista,
+            'reprogramaciones' => $vs->where('accion', 'REPROGRAMACION')->count(),
+        ]);
+
+        return view('proyectos.show', compact('proyecto', 'indicador', 'versionesLb', 'resumenLb'));
     }
 
     /**

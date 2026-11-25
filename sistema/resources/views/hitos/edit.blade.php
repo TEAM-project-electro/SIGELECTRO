@@ -63,18 +63,29 @@
         </div>
 
         <div>
-            <input type="hidden" name="en_linea_base" value="0">
-            <label for="en_linea_base" class="inline-flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer select-none">
-                <input id="en_linea_base" type="checkbox" name="en_linea_base" value="1" @checked(old('en_linea_base', $hito->en_linea_base))
-                       class="rounded border-slate-300 text-brand-700 focus:ring-brand-600">
-                <span>Forma parte de la línea base del proyecto</span>
-            </label>
+            @if(Auth::user()->esAdmin())
+                <input type="hidden" name="en_linea_base" value="0">
+                <label for="en_linea_base" class="inline-flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer select-none">
+                    <input id="en_linea_base" type="checkbox" name="en_linea_base" value="1" @checked(old('en_linea_base', $hito->en_linea_base))
+                           class="rounded border-slate-300 text-brand-700 focus:ring-brand-600">
+                    <span>Forma parte de la línea base del proyecto</span>
+                </label>
+            @else
+                {{-- Un control deshabilitado no se envía: se conserva el valor vigente. --}}
+                <input type="hidden" name="en_linea_base" value="{{ $hito->en_linea_base ? 1 : 0 }}">
+                <label for="en_linea_base" class="inline-flex items-center gap-2.5 text-xs font-medium text-slate-500 select-none">
+                    <input id="en_linea_base" type="checkbox" disabled @checked($hito->en_linea_base)
+                           class="rounded border-slate-300 text-slate-400 bg-slate-100 cursor-not-allowed">
+                    <span>Forma parte de la línea base del proyecto</span>
+                </label>
+                <p class="text-[11px] text-slate-500 mt-1">Solo un Administrador puede incorporar o retirar hitos de la línea base.</p>
+            @endif
         </div>
 
         <div>
             <label for="motivo_cambio" class="block text-xs font-semibold text-slate-700 mb-1.5">Motivo del cambio</label>
             <input type="text" name="motivo_cambio" id="motivo_cambio" value="{{ old('motivo_cambio') }}" maxlength="200" autocomplete="off"
-                   placeholder="Obligatorio si modifica la pertenencia a la línea base (5 a 200 caracteres)…"
+                   placeholder="Obligatorio si cambia la línea base o su fecha prevista (5 a 200 caracteres)…"
                    class="sig-input">
         </div>
 

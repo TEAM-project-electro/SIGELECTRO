@@ -40,6 +40,13 @@ class UpdateHitoRequest extends FormRequest
                     && $this->filled('fecha_prevista')
                     && $fechaNueva !== $fechaOriginal;
 
+                // Sacar o reincorporar un hito a la línea base también la modifica: sin este control,
+                // un Responsable podía retirarlo, cambiar la fecha y reincorporarlo (evasión de P0-1).
+                if ($cambioLb && !$this->user()->esAdmin()) {
+                    $validator->errors()->add('en_linea_base', 'Solo un Administrador puede incorporar o retirar un hito de la línea base.');
+                    return;
+                }
+
                 if ($cambioFechaLb && !$this->user()->esAdmin()) {
                     $validator->errors()->add('fecha_prevista', 'Solo un Administrador puede reprogramar la fecha prevista de un hito en línea base.');
                     return;

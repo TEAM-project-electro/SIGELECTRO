@@ -31,7 +31,12 @@ class BaseOperativaReglasTest extends TestCase
         $db->statement('DELETE FROM bitacora_motivo;');
         $db->statement('DELETE FROM bitacora_cambio;');
         $db->statement('DELETE FROM avance_presupuestal;');
-        $db->statement('DELETE FROM hito;');
+        // TRUNCATE (cuenta migradora, solo esquemas _test) no dispara triggers: el borrado de hitos de línea base
+        // exige un Administrador como actor, y aquí el actor 1 de la siembra de prueba es un Responsable.
+        $db->statement('TRUNCATE TABLE hito;');
+        if ($db->getSchemaBuilder()->hasTable('hito_linea_base_version')) {
+            $db->statement('TRUNCATE TABLE hito_linea_base_version;');
+        }
         $db->statement('DELETE FROM proyecto;');
         $db->statement('DELETE FROM responsable;');
         $db->statement('DELETE FROM objetivo_gd;');

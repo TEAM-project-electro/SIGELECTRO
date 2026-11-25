@@ -146,7 +146,21 @@
                                     {{ $hito->en_linea_base ? 'Sí' : 'No' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-xs text-slate-700">{{ $hito->fecha_prevista }}</td>
+                            @php
+                                $lb = $resumenLb->get($hito->id_hito);
+                                $fechaPrevista = $hito->fecha_prevista?->format('Y-m-d');
+                            @endphp
+                            <td class="px-4 py-3 text-center font-mono text-xs text-slate-700">
+                                {{ $fechaPrevista }}
+                                @if($lb && $lb['reprogramaciones'] > 0)
+                                    <span class="block mt-1 font-sans">
+                                        <x-badge size="sm" variant="warning">Reprogramado {{ $lb['reprogramaciones'] }} {{ $lb['reprogramaciones'] === 1 ? 'vez' : 'veces' }}</x-badge>
+                                    </span>
+                                    @if($lb['fecha_original'] && $lb['fecha_original'] !== $fechaPrevista)
+                                        <span class="block mt-0.5 font-sans text-[11px] text-slate-500">Original: <span class="font-mono">{{ $lb['fecha_original'] }}</span></span>
+                                    @endif
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-center font-mono text-xs text-slate-700">{{ $hito->fecha_cierre ?? '—' }}</td>
                             <td class="px-4 py-3 text-xs text-slate-600 max-w-xs break-words">{{ $hito->evidencia ?: '—' }}</td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -179,6 +193,63 @@
                 </tbody>
             </table>
         </div>
+
+        @if($versionesLb->isNotEmpty())
+            @php
+                $cambiosLb = $versionesLb->where('accion', '!=', 'ALTA');
+                $etiquetasLb = [
+                    'ALTA' => ['Alta', 'neutral'],
+                    'INCORPORACION' => ['Incorporación', 'info'],
+                    'REPROGRAMACION' => ['Reprogramación', 'warning'],
+                    'RETIRO' => ['Retiro', 'danger'],
+                    'ELIMINACION' => ['Eliminación', 'danger'],
+                ];
+            @endphp
+            <details class="group border-t border-slate-200/80" @if($cambiosLb->isNotEmpty()) open @endif>
+                <summary class="cursor-pointer list-none px-5 py-3 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/80">
+                    <span class="font-semibold text-slate-800">
+                        Historial de la línea base
+                        <span class="font-normal text-slate-500">· {{ $cambiosLb->count() === 0 ? 'sin cambios desde su alta' : $cambiosLb->count().' '.($cambiosLb->count() === 1 ? 'cambio' : 'cambios').' desde su alta' }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="overflow-x-auto border-t border-slate-100">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-50/90 text-slate-600 text-left">
+                            <tr>
+                                <th class="px-5 py-2.5 font-semibold">Fecha y hora</th>
+                                <th class="px-4 py-2.5 font-semibold">Hito</th>
+                                <th class="px-4 py-2.5 font-semibold">Acción</th>
+                                <th class="px-4 py-2.5 font-semibold text-center">Fecha prevista</th>
+                                <th class="px-4 py-2.5 font-semibold">Motivo</th>
+                                <th class="px-5 py-2.5 font-semibold">Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($versionesLb->sortByDesc('id_version') as $v)
+                                @php [$textoLb, $varianteLb] = $etiquetasLb[$v->accion] ?? [$v->accion, 'neutral']; @endphp
+                                <tr>
+                                    <td class="px-5 py-2.5 font-mono text-slate-600 whitespace-nowrap">{{ $v->fecha_hora }}</td>
+                                    <td class="px-4 py-2.5 text-slate-800">{{ $v->hito ?? 'Hito #'.$v->id_hito.' (eliminado)' }}</td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap"><x-badge size="sm" :variant="$varianteLb">{{ $textoLb }}</x-badge></td>
+                                    <td class="px-4 py-2.5 text-center font-mono text-slate-700 whitespace-nowrap">
+                                        @if($v->fecha_prevista_anterior && $v->fecha_prevista && $v->fecha_prevista_anterior !== $v->fecha_prevista)
+                                            {{ $v->fecha_prevista_anterior }} → {{ $v->fecha_prevista }}
+                                        @else
+                                            {{ $v->fecha_prevista ?? $v->fecha_prevista_anterior }}
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2.5 text-slate-600 max-w-xs break-words">{{ $v->motivo ?: '—' }}</td>
+                                    <td class="px-5 py-2.5 text-slate-600 whitespace-nowrap">{{ $v->responsable }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        @endif
     </section>
 
     {{-- Cortes presupuestales --}}

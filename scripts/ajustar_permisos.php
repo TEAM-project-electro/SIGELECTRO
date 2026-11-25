@@ -23,6 +23,10 @@ $stmtRag = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE t
 $stmtRag->execute([$op]);
 $tieneRag = ((int) $stmtRag->fetchColumn()) > 0;
 if ($tieneRag) $tablasConExtensiones = array_merge($tablasConExtensiones, ['rag_documento','rag_fragmento','rag_consulta']);
+$stmtLb = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'hito_linea_base_version'");
+$stmtLb->execute([$op]);
+$tieneVersionesLb = ((int) $stmtLb->fetchColumn()) > 0;
+if ($tieneVersionesLb) $tablasConExtensiones = array_merge($tablasConExtensiones, ['hito_linea_base_version']);
 foreach (['localhost','127.0.0.1'] as $host) {
     foreach (['sig_auth','sig_lector','sig_escritor','sig_etl','bi_lector','sig_definer'] as $cuenta) {
         $user = "'{$cuenta}'@'{$host}'";
@@ -53,6 +57,8 @@ foreach (['localhost','127.0.0.1'] as $host) {
     // Sólo los triggers/rutinas del definer escriben auditoría y gestionan el DW.
     foreach ($tablasConExtensiones as $tabla) $grant($tabla==='responsable' ? 'SELECT (id_responsable,usuario,activo,perfil,nombre,area,clave_hash)' : 'SELECT', "`$op`.`$tabla`", 'sig_definer');
     foreach (['bitacora_cambio','bitacora_motivo'] as $tabla) $grant('INSERT', "`$op`.`$tabla`", 'sig_definer');
+    // Versiones de línea base: inmutables, solo las escriben los triggers del definer.
+    if ($tieneVersionesLb) $grant('INSERT', "`$op`.hito_linea_base_version", 'sig_definer');
     $grant('UPDATE', "`$op`.control_revision", 'sig_definer');
     $grant('EXECUTE', "`$op`.*", 'sig_definer');
     $grant('TRIGGER', "`$op`.*", 'sig_definer');
