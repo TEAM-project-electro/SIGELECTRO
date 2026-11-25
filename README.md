@@ -1,154 +1,129 @@
-# SIG Electrocentro S. A. - Sistema de Información Gerencial
+# SIGELECTRO — Sistema de Información Gerencial (Caso Electrocentro S. A., Huancayo)
 
-**Prototipo Académico Local para la Supervisión y Seguimiento Gerencial de la Cartera del Plan de Gobierno Digital (PGD 2023–2026)**  
-**Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00)  
-**Estado actual:** Proyecto cerrado y verificado con **174 pruebas automatizadas aprobadas (1,729 aserciones)** (Capítulos 1 al 11 de Laudon, Laudon y Traver, 18.ª ed.). Incluye núcleo OLTP/DW/ETL, cambio de contraseña en autoservicio (`/perfil/clave`), programación semanal del ETL, procesos BPMN 2.0 (`docs/procesos_bpmn/`), tablero Power BI (`docs/bi/Tablero_Seguimiento_GD_FINAL.pbix`), extensión controlada por lotes CSV con Odoo 16 (`docs/odoo/`), **Asistente RAG con carga documental Solo Admin** y **Agente de Decisión Gerencial (DSS)** en `/asistente`. Ver [alineamiento Laudon Cap. 1–11](docs/alineamiento_laudon_cap01_10.md) y [estado de desarrollo](docs/estado_desarrollo.md).
+> **La inteligencia artificial en la era digital: innovación en la gestión y seguimiento de proyectos mediante un sistema de información gerencial. Caso Electrocentro S. A., Huancayo.**
 
----
+![Laravel 12](https://img.shields.io/badge/Laravel-12.71-FF2D20?style=flat-square&logo=laravel&logoColor=white)
+![PHP 8.3](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php&logoColor=white)
+![MariaDB 10.11](https://img.shields.io/badge/MariaDB-10.11-003545?style=flat-square&logo=mariadb&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-Desktop-F2C811?style=flat-square&logo=powerbi&logoColor=black)
+![Tests](https://img.shields.io/badge/Pruebas-177%20aprobadas-2E7D32?style=flat-square)
 
-## 1. Requisitos del Entorno de Ejecución
-
-El sistema ha sido probado y certificado en entorno Windows 10/11 con las siguientes versiones de software:
-
-- **PHP:** 8.2 o superior (PHP 8.3.28 comprobado) con extensiones `pdo_mysql`, `mbstring`, `openssl`, `intl`, `bcmath`, `fileinfo`.
-- **Framework Web:** Laravel 12.71.0, actualizado y probado con PHP 8.3.28; PHPUnit 11.5.57 y lockfile actualizado.
-- **Composer:** 2.8+ (Composer 2.9.2 comprobado).
-- **Node.js:** v18+ (v24.19.0 comprobado) con `npm`.
-- **Motor de Base de Datos:** MariaDB 10.11 portable ejecutándose en `127.0.0.1:3307` (esquemas `seguimiento_gd` y `dw_seguimiento_gd`).
-- **PowerShell:** PowerShell 7.4+ nativo (`pwsh`).
+Prototipo funcional de **Sistema de Información Gerencial (SIG)** desarrollado en la **Universidad Nacional de Huancavelica (UNH) — E. P. Ingeniería de Sistemas** para el seguimiento de la cartera de proyectos del área de **Gestión de Proyectos del Gobierno Digital** de **Electrocentro S. A.** (10 proyectos estratégicos del PGD 2023–2026 por **S/ 8,623,550.00**, alineados a 6 Objetivos de Gobierno Digital `OGD 01`–`OGD 06`).
 
 ---
 
-## 2. Puesta en Marcha Rápida (Instalación y Despliegue)
+## 1. Capacidades Principales
 
-Para preparar el sistema en una instalación limpia, ejecute los scripts automatizados desde la raíz del proyecto:
+| Módulo | Qué resuelve | Destacado técnico |
+| :--- | :--- | :--- |
+| **Cartera, Hitos y Presupuesto (OLTP)** | Registro centralizado de proyectos PGD, hitos de línea base y cortes trimestrales de avance financiero. | Reglas **R1–R4** en triggers y procedimientos MariaDB; protección de fecha prevista en línea base (solo Administrador con motivo obligatorio). |
+| **Tablero Gerencial y 4 KPIs** | Supervisión en tiempo real en dos modalidades (*Corte Común* y *Último Reporte*) y alertas filtrables. | Paridad matemática **0.00 pp** entre base operativa y Data Warehouse; gráfico con cobertura de proyectos por corte y explicación de desviación presupuestal. |
+| **Data Warehouse, ETL y Power BI** | Analítica histórica para el Comité de Gobierno Digital. | Esquema estrella (`dw_seguimiento_gd`: 4 dimensiones, 2 hechos, 6 vistas), ETL atómico con *mutex* y programación semanal, y tablero nativo `Tablero_Seguimiento_GD_FINAL.pbix`. |
+| **Asistente RAG y Agente de Decisión (DSS)** | Consulta documental con citas `[F#]` y priorización gerencial paso a paso (0–100) con opciones comparadas. | Recuperación híbrida **BM25 + embeddings Gemini (RRF)**, umbral anti-temas irrelevantes, carga documental controlada (Solo Admin), degradación offline automática y **8 capas OWASP LLM01/02/06** (*Human-in-the-Loop*). |
+| **Reportes y Extensión Odoo 16** | Emisión de reportes A4 imprimibles, CSV seguro e intercambio por lotes de órdenes/recepciones (`PROYGD-005`). | Mitigación contra *CSV Injection* y tabla técnica aislada `abastecimiento_compra` (sin alterar el núcleo de 6 tablas). |
+| **Seguridad y Continuidad (Gate G1–G4)** | Control de acceso por roles, auditoría inmutable y recuperación comprobada. | 3 perfiles con Policies en servidor, **7 cuentas técnicas en BD sin `root`**, auditoría inmutable (error 1142), autoservicio `/perfil/clave`, cabeceras HTTP de seguridad y restauración validada en esquemas aislados. |
 
-### Opción A: Instalación Automatizada Completa
+---
 
-Ejecuta la verificación de prerrequisitos, configuración privada de `.env`, dependencias de Composer y NPM, migraciones, siembra canónica, compilación de activos de frontend, carga inicial de Data Warehouse y ejecución de pruebas:
+## 2. Requisitos del Entorno
+
+- **PHP:** 8.2+ (probado en `8.3.28`) con `pdo_mysql`, `mbstring`, `openssl`, `intl`, `bcmath`, `fileinfo`.
+- **Composer:** 2.8+ y **Node.js:** 18+ (`npm`).
+- **Base de datos:** MariaDB 10.11 portable en `127.0.0.1:3307` (esquemas `seguimiento_gd` y `dw_seguimiento_gd`).
+- **PowerShell:** 7.4+ (`pwsh`) en Windows 10/11.
+
+---
+
+## 3. Instalación y Arranque Rápido
+
+### Instalación completa desde cero
+Configura dependencias, migraciones, contraseña privada inicial de `msalas`, activos Vite (100 % locales, sin CDNs), carga inicial del Data Warehouse, indexación RAG y suite de pruebas:
 
 ```powershell
 pwsh -File .\scripts\instalar.ps1
 ```
 
-### Opción B: Arranque Rápido (Entorno Ya Configurado)
-
-Si el entorno ya fue instalado previamente y solo desea iniciar el servidor sin re-sembrar datos ni alterar claves:
+### Arranque en entorno ya instalado
 
 ```powershell
-# 1. Iniciar MariaDB 10.11 en puerto 3307 (si no está activo):
-pwsh -File .\scripts\iniciar_mariadb.ps1
-
-# 2. Iniciar el servidor web de desarrollo Laravel:
 pwsh -File .\scripts\arrancar.ps1
 ```
 
-El servidor web quedará accesible de inmediato en:
+Accesos locales:
+- **Aplicación y Login:** `http://localhost:8000`
+- **Tablero Gerencial:** `http://localhost:8000/tablero`
+- **Asistente RAG y Agente de Decisión:** `http://localhost:8000/asistente`
+- **Sonda de Salud:** `http://localhost:8000/salud` (devuelve únicamente `{"estado":"OPERATIVO"}`)
 
-- **Página de Bienvenida y Login:** [http://localhost:8000](http://localhost:8000)
-- **Diagnóstico y Salud del Sistema:** [http://localhost:8000/salud](http://localhost:8000/salud)
-- **Tablero Gerencial de Control:** [http://localhost:8000/tablero](http://localhost:8000/tablero)
+### Activación opcional de Gemini API para el Asistente RAG
+Sin clave API ni conexión a internet, el asistente funciona en **modo extractivo** y el agente DSS con su **motor determinista local**. Para habilitar redacción con IA y vectores semánticos, añade en `sistema/.env` (archivo excluido de Git):
 
----
+```env
+GEMINI_API_KEY=tu_clave_de_google_ai_studio
+```
 
-## 3. Cuentas de Acceso de Demostración por Perfil
+Luego limpia caché y reindexa:
 
-El acceso al sistema está controlado por roles y políticas estrictas a nivel de servidor (Laravel Policies):
-
-| Perfil                   | Usuario   | Acceso                              | Área         | Alcance de Permisos                                                            |
-| :----------------------- | :-------- | :---------------------------------- | :----------- | :----------------------------------------------------------------------------- |
-| **Administrador**        | `msalas`  | `Clave privada asignada localmente` | Planeamiento | Gestión total de cartera, reapertura de proyectos, auditoría y control ETL.    |
-| **Responsable Titular**  | `aquispe` | `Clave privada asignada localmente` | TIC          | Registro de avances presupuestales y cierre de hitos en sus proyectos.         |
-| **Responsable Delegado** | `lrojas`  | `Clave privada asignada localmente` | TIC          | Gestión de proyectos asignados bajo su responsabilidad.                        |
-| **Consulta**             | `cgarcia` | `Clave privada asignada localmente` | Comité GD    | Acceso de solo lectura a cartera, tablero analítico y exportación de reportes. |
-
----
-
-## 4. Scripts de Operación y Mantenimiento
-
-Todos los comandos rutinarios están empaquetados en scripts de PowerShell ubicados en `scripts/`:
-
-| Script                        | Propósito y Acción Ejecutada                                                                          |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `scripts/iniciar_mariadb.ps1` | Inicia MariaDB 10.11 en segundo plano en `127.0.0.1:3307` sin colisionar con XAMPP/Laragon.           |
-| `scripts/detener_mariadb.ps1` | Detiene limpiamente el proceso de MariaDB 10.11 en el puerto 3307.                                    |
-| `scripts/instalar.ps1`        | Instalación desde cero: dependencias, base de datos, siembra, Vite y ETL.                             |
-| `scripts/arrancar.ps1`        | Inicia MariaDB y arranca `php artisan serve --port=8000`.                                             |
-| `scripts/probar.ps1`          | Ejecuta la batería completa de pruebas automatizadas (174 pruebas aprobadas, 1,729 aserciones sobre esquemas aislados). |
-| `scripts/respaldo_db.ps1`     | Genera volcados lógicos completos (`seguimiento_gd` y `dw_seguimiento_gd`) en `backups/`.             |
-| `scripts/restaurar_db.ps1`    | Restaura los volcados sobre esquemas nuevos descartables para verificación de recuperación.           |
-
----
-
-## 5. Arquitectura y Cuentas Técnicas de Base de Datos
-
-Cumpliendo con la **Decisión 5** del contrato canónico, el sistema aplica segregación estricta de privilegios. **El uso de `root` en la aplicación web está terminantemente prohibido**:
-
-- **`sig_migrador`:** Migraciones de Laravel, DDL y tareas administrativas de respaldo.
-- **`sig_definer`:** Propietario de rutinas almacenadas y triggers de integridad R1 a R4.
-- **`sig_auth`:** Proveedor de autenticación con `SELECT` limitado sobre la tabla de usuarios.
-- **`sig_lector`:** Conexión de solo lectura para listados y fichas gerenciales (sin acceso a `clave_hash`).
-- **`sig_escritor`:** Conexión transaccional para operaciones de negocio (`bitacora_cambio` y `bitacora_motivo` tienen revocado `UPDATE` y `DELETE`).
-- **`sig_etl`:** Usuario exclusivo para ejecutar la carga transaccional del Data Warehouse (`sp_etl_cargar`).
-- **`bi_lector`:** Conexión de solo lectura sobre las dimensiones y vistas del DW para Power BI y Excel.
-
----
-
-## 6. Estado de las Puertas de Control (Gates) y Batería de Pruebas
-
-Las comprobaciones automatizadas del núcleo se detallan en el [informe de corrección](docs/correcciones_auditoria_2026-11-04.md). No equivalen a aceptación institucional ni a ejecución de Power BI:
-
-- **Gate G1 (Acceso y Seguridad):** Autenticación de tres perfiles, control por políticas de servidor con bloqueo estricto de campos de presupuesto para el Responsable (A01), middleware de usuario activo en cada petición (A09), protección contra fuerza bruta y sesiones aisladas. _(Ratificada)_.
-- **Gate G2 (Operación y Auditoría):** Reglas R1 (límites presupuestales y protección ante reducciones), R2 (monotonicidad devengada), R3 (cierre con hitos LB cerrados, reapertura con motivo obligatorio), R4 (auditoría forzosa en inserción, modificación y eliminación de todas las entidades operativas, protegiendo contraseñas y con inmutabilidad estricta) y pruebas de concurrencia pesimistas/optimistas deterministas (A03, A04, A05). _(Ratificada)_.
-- **Gate G3 (Analítica y Reportes):** Motor de 4 KPIs evaluado contra el oráculo independiente al 30/06/2024 ($\le 0.01$ pp), paridad relacional vs DW respetando filtros dinámicos (A06), semántica estricta «Sin datos» vs «No aplica» (A11), exportación CSV anti-injection y vista A4 imprimible. _(Ratificada)_.
-- **Gate G4 (Entrega y Respaldo):** Restauración comprobada sobre bases nuevas descartables con remapeo de origen en DW y privilegios mínimos reales (A08), conciliación del 100% de conteos y montos, y guion de sustentación preparado. _(Ratificada)_.
-
-```text
-Tests:    151 passed
+```powershell
+cd sistema
+php artisan config:clear
+php artisan rag:indexar
 ```
 
 ---
 
-## 7. Business Intelligence (Power BI) y Extensión de Intercambio de Datos (Cap. 6 y Cap. 9)
+## 4. Perfiles de Acceso
 
-- **Power BI Desktop (`docs/bi/`):** Incluye el tablero interactivo [`docs/bi/Tablero_Seguimiento_GD_FINAL.pbix`](docs/bi/Tablero_Seguimiento_GD_FINAL.pbix), los 8 archivos CSV con marca BOM UTF-8 en `docs/bi/datos/` con su `manifiesto_extraccion.json`, la especificación del modelo en estrella (`docs/bi/modelo_power_bi.md`), el catálogo dinámico de medidas DAX (`docs/bi/medidas_DAX.txt`) y la guía de conciliación (`docs/bi/guia_power_bi.md`).
-- **Extensión controlada de intercambio por lotes con Odoo 16 (`docs/odoo/`):** Conforme a la [decisión de alcance del 24/11/2026](docs/decisiones/2026-11-24_extension_intercambio_odoo.md), el repositorio incorpora una tabla técnica independiente (`abastecimiento_compra`) y un importador CSV transaccional (`/abastecimiento/importar`, `/abastecimiento/plantilla`) que demuestra el intercambio de datos de órdenes y recepciones desde Odoo 16 (`sigelectro_odoo`) hacia un proyecto supervisado (`005`), sin alterar las 6 tablas canónicas ni convertir al SIG en un ERP o sistema en tiempo real.
-- **Modelado de procesos y marco teórico:** Diagramas BPMN 2.0 en `docs/procesos_bpmn/` y trazabilidad calibrada contra la 18.ª edición de Laudon, Laudon y Traver en [`docs/alineamiento_laudon_cap01_10.md`](docs/alineamiento_laudon_cap01_10.md).
+Las contraseñas privadas se asignan localmente (nunca se versionan en Git; las claves públicas legadas están bloqueadas):
+
+| Perfil | Usuario | Área | Alcance |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `msalas` | Planeamiento | Cartera completa, reprogramación de línea base con motivo, usuarios, auditoría, ETL y base documental RAG. |
+| **Responsable** | `aquispe`, `lrojas` | TIC | Registro de hitos y avances presupuestales en sus proyectos asignados (sin alterar monto ni fechas de línea base). |
+| **Consulta** | `cgarcia` | Comité GD | Solo lectura de cartera, tablero, reportes A4/CSV, asistente RAG y agente de decisión. |
+
+Cada usuario autenticado puede cambiar su propia contraseña desde **Mi clave** (`/perfil/clave`), o el operador local mediante `php artisan sig:cambiar-clave <usuario>`.
 
 ---
 
-## 8. Estructura de Directorios del Proyecto
+## 5. Scripts de Operación y Pruebas
+
+| Script | Función |
+| :--- | :--- |
+| `scripts/instalar.ps1` | Instalación completa en limpio (migraciones, `sig:inicializar`, Vite, ETL, RAG y pruebas). |
+| `scripts/arrancar.ps1` | Inicia MariaDB 10.11 (`:3307`) y el servidor web Laravel (`:8000`). |
+| `scripts/iniciar_mariadb.ps1` / `detener_mariadb.ps1` | Control independiente del servicio MariaDB 10.11. |
+| `scripts/respaldo_db.ps1` / `restaurar_db.ps1` | Respaldo lógico completo y restauración verificada sobre esquemas descartables con privilegios mínimos (`scripts/ajustar_permisos.php`). |
+| `scripts/probar.ps1` | Ejecuta la batería completa de pruebas automatizadas (**177 pruebas aprobadas** sobre esquemas aislados `_test`). |
+
+---
+
+## 6. Estructura del Repositorio
 
 ```text
-proyecto team/
-  PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md  # Contrato canónico maestro del proyecto
-  AGENTS.md                               # Reglas de desarrollo del agente
-  README.md                               # Guía principal de instalación y operación
-  scripts/                                # Scripts de gestión, respaldo y arranque
-  backups/                                # Dumps lógicos de base de datos (excluidos de Git)
-  docs/                                   # Documentación técnica y de gestión
-    alineamiento_laudon_cap01_10.md       # Alineamiento y delimitación Laudon 18.ª ed. (Cap. 1–10)
-    manual_usuario.md                     # Manual operativo detallado por perfil
-    manual_tecnico.md                     # Arquitectura, esquema, triggers y seguridad
-    informe_cierre.md                     # Informe de cierre técnico y estado de entrega
-    informe_validacion.md                 # Evaluación de los 8 escenarios canónicos
-    contrato_indicadores.md               # Definición matemática de los 4 KPIs
-    especificacion.md                     # Especificación funcional y reglas R1-R4
-    matriz_trazabilidad.md                # Trazabilidad de requisitos funcionales RF01-RF08
-    entorno.md                            # Comandos comprobados de desarrollo
-    estado_desarrollo.md                  # Matriz de avance y certificación de etapas
-    pruebas_ejecutadas.md                 # Registro histórico de pruebas y evidencias
-    decisiones/                           # Registro formal de decisiones de arquitectura y alcance
-    procesos_bpmn/                        # Modelos de procesos AS-IS y TO-BE en BPMN 2.0
-    odoo/                                 # Exportaciones reales de intercambio por lotes (Odoo 16)
-    bi/                                   # Tablero .pbix, CSVs, modelo estrella y catálogo DAX
-  sistema/                                # Aplicación Laravel 12 (monolito modular)
+SIGELECTRO/
+├── README.md                  # Guía principal del proyecto
+├── scripts/                   # Automatización: instalación, arranque, respaldo y pruebas
+├── backups/                   # Destino local de volcados SQL (excluidos de Git)
+├── docs/                      # Documentación técnica, académica y de sustentación
+│   ├── especificacion.md                  # Especificación funcional y reglas R1–R4
+│   ├── contrato_indicadores.md            # Definición matemática de los 4 KPIs
+│   ├── manual_usuario.md                  # Manual operativo por perfil
+│   ├── manual_tecnico.md                  # Arquitectura, esquema relacional y DW
+│   ├── alineamiento_laudon_cap01_10.md    # Matriz teórica Laudon 18.ª ed. (Cap. 1–11)
+│   ├── marco_institucional_electrocentro.md # Contexto Electrocentro Huancayo y D.L. 1412
+│   ├── informe_cierre.md                  # Informe de cierre, guion y preguntas del jurado
+│   ├── estado_desarrollo.md               # Registro de avance y certificaciones
+│   ├── decisiones/                        # Registro formal de decisiones de arquitectura
+│   ├── procesos_bpmn/                     # 14 procesos de negocio modelados en BPMN 2.0
+│   ├── bi/                                # Tablero Power BI (.pbix), CSVs y catálogo DAX
+│   ├── odoo/                              # Exportación CSV real de intercambio (Odoo 16)
+│   └── presentacion/                      # Tríptico imprimible (INNOVATECH FEST 2026)
+└── sistema/                   # Aplicación Laravel 12 (Blade, Tailwind, Alpine, Chart.js)
 ```
 
-### Acceso privado y renovación de contraseña
+---
 
-En una instalación nueva, `scripts/instalar.ps1` ejecuta `php artisan sig:inicializar` después de migrar. El comando solicita dos veces una contraseña privada para `msalas`, sin mostrarla ni guardarla en archivos o argumentos. Debe tener entre 12 y 72 bytes. No hay contraseñas predeterminadas públicas. El administrador asigna contraseñas privadas a las demás cuentas desde **Usuarios** antes de entregarlas, y cada usuario autenticado puede renovar su propia contraseña privada desde **Mi clave** (`/perfil/clave`).
+## 7. Aviso de Datos Demostrativos
 
-Repetir la inicialización o la siembra conserva las cuentas existentes, incluidas claves, perfil, estado y datos editados. Las claves demostrativas anteriores quedan rechazadas en el login y no pueden volver a asignarse desde Usuarios. En una instalación anterior, el operador debe ejecutar desde `sistema/`: `php artisan sig:cambiar-clave msalas` (y repetir con los demás usuarios que necesiten renovación). El comando pide la contraseña sin mostrarla; conserva perfil/estado y audita el cambio. No escriba contraseñas en argumentos o en el repositorio. Ejecutar `db:seed` directamente en una base nueva genera claves aleatorias no entregadas; utilice el flujo de inicialización interactiva para disponer del acceso administrador.
-
-La sonda pública `/salud` devuelve únicamente `estado` y HTTP 200/503. Los detalles de errores quedan en el registro del servidor.
+Los nombres, códigos y montos de los 10 proyectos corresponden a la cartera pública del PGD 2023–2026 de Electrocentro S. A.; los hitos, fechas de seguimiento y avances presupuestales son **datos demostrativos con fines académicos** y no representan la ejecución financiera real de la empresa.
