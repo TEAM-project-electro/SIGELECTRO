@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/asistente/decidir', [\App\Http\Controllers\AsistenteController::class, 'decidir'])
         ->middleware('throttle:'.config('rag.consultas_por_minuto', 10).',1')
         ->name('asistente.decidir');
+    Route::post('/asistente/documentos', [\App\Http\Controllers\AsistenteController::class, 'subirDocumento'])
+        ->middleware('throttle:'.config('rag.consultas_por_minuto', 10).',1')
+        ->name('asistente.documentos.subir');
 
     // Motor de Indicadores y Consulta (RF04 - Etapa 10)
     Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');

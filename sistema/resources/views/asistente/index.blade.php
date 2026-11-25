@@ -3,7 +3,7 @@
 @section('title', 'Asistente de consulta')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-6" x-data="{ tab: @js($tabActiva), enviando: false, enviandoAgente: false, pregunta: @js($pregunta) }">
+<div class="max-w-5xl mx-auto space-y-6" x-data="{ tab: @js($tabActiva), enviando: false, enviandoAgente: false, enviandoDoc: false, pregunta: @js($pregunta) }">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900">Asistente de consulta y apoyo a decisiones</h1>
@@ -24,6 +24,13 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-energy-500"></span>
                 Agente de Decisión (DSS)
             </button>
+            @if (Auth::user()->esAdmin())
+                <button type="button" role="tab" :aria-selected="tab === 'documentos'" @click="tab = 'documentos'"
+                        :class="tab === 'documentos' ? 'bg-white text-brand-900 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-3.5 py-2 rounded-lg text-xs transition-all">
+                    Base documental ({{ count($documentosIndexados) }})
+                </button>
+            @endif
         </div>
     </div>
 
@@ -300,6 +307,83 @@
             </section>
         @endif
     </div>
+
+    {{-- ============================================================
+         PESTAÑA 3: BASE DOCUMENTAL DEL RAG (SOLO ADMINISTRADOR)
+         ============================================================ --}}
+    @if (Auth::user()->esAdmin())
+        <div x-show="tab === 'documentos'" x-cloak class="space-y-6">
+            @if ($resultadoCarga)
+                <x-alert :type="$resultadoCarga['aceptado'] ? 'success' : 'error'">
+                    <p class="font-semibold">{{ $resultadoCarga['mensaje'] }}</p>
+                    @if ($resultadoCarga['aceptado'])
+                        <p class="text-xs mt-1">
+                            Ruta: <span class="font-mono">{{ $resultadoCarga['ruta'] }}</span> ·
+                            Vectores Gemini: {{ $resultadoCarga['embeddings'] ? 'generados' : 'pendientes (BM25 local activo)' }}
+                        </p>
+                    @endif
+                </x-alert>
+            @endif
+
+            <form method="POST" action="{{ route('asistente.documentos.subir') }}" enctype="multipart/form-data"
+                  @submit="enviandoDoc = true" class="sig-panel p-5 space-y-4">
+                @csrf
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900">Alimentar base documental del RAG (Solo Administrador)</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Suba documentos institucionales en texto plano o Markdown (<code>.md</code>, <code>.txt</code>, máx. 500 KB). Cada fragmento pasa por el escáner anti-inyección indirecta (OWASP LLM01) antes de indexarse.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="titulo_doc" class="block text-xs font-semibold text-slate-700 mb-1.5">Título del documento</label>
+                        <input id="titulo_doc" name="titulo" type="text" required minlength="3" maxlength="180"
+                               placeholder="Ejemplo: Resumen PEI 2022–2026 Electrocentro" class="sig-input">
+                    </div>
+                    <div>
+                        <label for="archivo_doc" class="block text-xs font-semibold text-slate-700 mb-1.5">Archivo (.md o .txt)</label>
+                        <input id="archivo_doc" name="archivo" type="file" accept=".md,.txt,text/plain,text/markdown" required
+                               class="block w-full text-xs text-slate-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-800 hover:file:bg-brand-100 border border-slate-300 rounded-lg p-1 bg-white">
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" :disabled="enviandoDoc" class="sig-btn-primary">
+                        <span x-text="enviandoDoc ? 'Escaneando e indexando…' : 'Escanear e indexar documento'">Escanear e indexar documento</span>
+                    </button>
+                </div>
+            </form>
+
+            <section class="sig-panel p-5 space-y-3">
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Documentos actualmente indexados ({{ count($documentosIndexados) }})</h3>
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="min-w-full text-xs divide-y divide-slate-200">
+                        <thead class="bg-slate-50 text-slate-600">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold">Documento</th>
+                                <th class="px-3 py-2 text-left font-semibold">Ruta</th>
+                                <th class="px-3 py-2 text-right font-semibold">Fragmentos</th>
+                                <th class="px-3 py-2 text-right font-semibold">Bloqueados</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            @foreach ($documentosIndexados as $doc)
+                                <tr>
+                                    <td class="px-3 py-2 font-medium text-slate-800">{{ $doc->titulo }}</td>
+                                    <td class="px-3 py-2 font-mono text-[11px] text-slate-500">{{ $doc->ruta }}</td>
+                                    <td class="px-3 py-2 text-right tabular-nums text-slate-700">{{ $doc->fragmentos }}</td>
+                                    <td class="px-3 py-2 text-right tabular-nums {{ $doc->fragmentos_bloqueados > 0 ? 'text-rose-600 font-semibold' : 'text-slate-400' }}">
+                                        {{ $doc->fragmentos_bloqueados }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    @endif
 
     <p class="text-[11px] text-slate-500">
         El asistente y el agente de decisión operan en modo solo lectura (Human-in-the-Loop): no modifican proyectos, hitos ni avances sin intervención del usuario autorizado.

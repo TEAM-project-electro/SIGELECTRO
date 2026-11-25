@@ -44,21 +44,36 @@ class RagRecuperador
         }
 
         $consulta = array_keys(RagTexto::terminos($pregunta));
-        $bm25 = $this->bm25($consulta, $corpus);
-        $rankings = [$bm25];
+        $bm25 = array_filter($this->bm25($consulta, $corpus), fn ($score) => $score >= 0.8);
+        $rankings = [];
+        if ($bm25 !== []) {
+            $rankings[] = $bm25;
+        }
 
         if (collect($corpus)->contains(fn ($c) => $c['embedding'] !== null)) {
             $vector = $this->gemini->embeddings([$pregunta], 'RETRIEVAL_QUERY')[0] ?? null;
             if ($vector) {
+                // Si no hubo coincidencia léxica en el corpus, exigir alta similitud semántica
+                // para descartar preguntas fuera del dominio del SIG.
+                $umbral = $bm25 === [] ? 0.72 : 0.62;
                 $similitudes = [];
                 foreach ($corpus as $i => $c) {
                     if ($c['embedding']) {
-                        $similitudes[$i] = $this->coseno($vector, $c['embedding']);
+                        $sim = $this->coseno($vector, $c['embedding']);
+                        if ($sim >= $umbral) {
+                            $similitudes[$i] = $sim;
+                        }
                     }
                 }
-                arsort($similitudes);
-                $rankings[] = array_slice($similitudes, 0, 30, true);
+                if ($similitudes !== []) {
+                    arsort($similitudes);
+                    $rankings[] = array_slice($similitudes, 0, 30, true);
+                }
             }
+        }
+
+        if ($rankings === []) {
+            return [];
         }
 
         $fusion = [];

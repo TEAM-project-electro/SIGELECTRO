@@ -83,7 +83,7 @@ El perfil de Consulta tiene acceso de solo lectura orientado a la supervisión e
 El responsable tiene autorización de edición exclusiva sobre los proyectos asignados a su persona:
 
 1. **Actualización de Hitos de Proyecto:**
-   - Ingrese a la ficha de su proyecto asignado (ej. `010 - Solución Integral Cloud ERP`).
+   - Ingrese a la ficha de su proyecto asignado (ej. `010 - Servicio Software Factory (FONAFE 5)`).
    - En la sección **Hitos**, haga clic en **«Editar Hito»**.
    - Para concluir un hito:
      - Marque la casilla **Concluido**.

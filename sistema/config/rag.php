@@ -9,8 +9,10 @@ return [
         'docs/manual_usuario.md',
         'docs/datos_demostracion.md',
         'docs/contexto_validado.md',
+        'docs/marco_institucional_electrocentro.md',
         'docs/procesos_bpmn/README.md',
         'docs/decisiones/*.md',
+        'docs/fuentes/rag_admin/*.md',
     ],
 
     'fragmento_max_caracteres' => 1400,

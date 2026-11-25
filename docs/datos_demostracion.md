@@ -23,12 +23,12 @@
 
 | ID | Código | Descripción |
 | :---: | :---: | :--- |
-| 1 | `OGD 01` | Modernizar la gestión institucional y la infraestructura tecnológica |
-| 2 | `OGD 02` | Fortalecer la seguridad digital y la gobernanza de datos |
-| 3 | `OGD 03` | Digitalizar los servicios y trámites orientados al cliente externo |
-| 4 | `OGD 04` | Optimizar y automatizar los procesos de operación comercial y distribución |
-| 5 | `OGD 05` | Implementar analítica avanzada e inteligencia de negocios gerencial |
-| 6 | `OGD 06` | Promover la cultura digital y el desarrollo de competencias del personal |
+| 1 | `OGD 01` | (Descripcion pendiente de confirmacion documental - PGD p. 25) |
+| 2 | `OGD 02` | Optimizar procesos, establecer politicas, procedimientos, metodologias y estandares |
+| 3 | `OGD 03` | Fortalecer y modernizar la infraestructura tecnologica |
+| 4 | `OGD 04` | Mejora continua del Sistema de Seguridad de la Informacion |
+| 5 | `OGD 05` | Sistemas de informacion con datos de calidad para decidir |
+| 6 | `OGD 06` | (Descripcion pendiente de confirmacion documental - PGD p. 25) |
 
 ---
 
@@ -50,16 +50,16 @@
 
 | ID | PGD | Nombre del Proyecto | Monto (S/) | Años | Estado | Objetivo | Responsable |
 | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| 1 | `005` | Renovación de Plataforma Tecnológica de Servidores | S/ 650,000.00 | 2023–2024 | En curso | OGD 01 | Ana Quispe |
-| 2 | `010` | Sistema de Gestión Comercial y Atención al Cliente | S/ 2,100,000.00 | 2023–2025 | En curso | OGD 03 | Ana Quispe |
-| 3 | `011` | Implementación de Infraestructura de Medición Avanzada (AMI) | S/ 2,850,000.00 | 2023–2025 | En curso | OGD 04 | Luis Rojas |
-| 4 | `013` | Fortalecimiento del Centro de Control SCADA y Redes OT | S/ 1,450,000.00 | 2023–2024 | En curso | OGD 04 | Luis Rojas |
-| 5 | `014` | Actualización de Seguridad Informática Perimetral y SOC | S/ 120,000.00 | 2023–2023 | **Cerrado** | OGD 02 | Ana Quispe |
-| 6 | `017` | Sistema Integrado de Gestión Documental y Firma Digital | S/ 315,000.00 | 2023–2024 | En curso | OGD 01 | Ana Quispe |
-| 7 | `020` | Plataforma de Inteligencia de Negocios y Analítica | S/ 418,550.00 | 2023–2024 | En curso | OGD 05 | Ana Quispe |
-| 8 | `022` | Portal Web Accesible y Trámites Digitales para Clientes | S/ 108,000.00 | 2023–2023 | **Cerrado** | OGD 03 | Luis Rojas |
-| 9 | `023` | Plataforma de Capacitación y Gestión del Talento Digital | S/ 212,000.00 | 2023–2023 | **Cerrado** | OGD 06 | Ana Quispe |
-| 10 | `024` | Solución Móvil para Inspección Técnica y Mantenimiento | S/ 400,000.00 | 2023–2024 | En curso | OGD 04 | Luis Rojas |
+| 1 | `005` | Equipos de ciberseguridad | S/ 500,000.00 | 2023–2024 | En curso | OGD 04 | Ana Quispe |
+| 2 | `010` | Servicio Software Factory (FONAFE 5) | S/ 2,383,550.00 | 2023–2026 | En curso | OGD 05 | Ana Quispe |
+| 3 | `011` | Enlaces de fibra optica en subestaciones | S/ 2,500,000.00 | 2023–2025 | En curso | OGD 03 | Luis Rojas |
+| 4 | `013` | Implementacion de SAP S/4 HANA | S/ 2,000,000.00 | 2023–2026 | En curso | OGD 06 | Luis Rojas |
+| 5 | `014` | Actualizacion del marco de gobierno e incorporacion del Comite de Gobierno Digital | S/ 120,000.00 | 2023–2023 | **Cerrado** | OGD 02 | Ana Quispe |
+| 6 | `017` | Fortalecimiento de las competencias digitales del personal | S/ 300,000.00 | 2023–2026 | En curso | OGD 01 | Ana Quispe |
+| 7 | `020` | Transicion al protocolo IPv6 | S/ 400,000.00 | 2023–2025 | En curso | OGD 03 | Luis Rojas |
+| 8 | `022` | Publicacion de datos abiertos en la Plataforma Nacional de Datos Abiertos | S/ 108,000.00 | 2023–2023 | **Cerrado** | OGD 05 | Ana Quispe |
+| 9 | `023` | Implementacion y certificacion del sistema de gestion de seguridad de la informacion (NTP ISO/IEC 27001:2014) | S/ 212,000.00 | 2023–2023 | **Cerrado** | OGD 04 | Ana Quispe |
+| 10 | `024` | Mesa de partes digital integrada al sistema de gestion documental | S/ 100,000.00 | 2023–2025 | En curso | OGD 05 | Ana Quispe |
 | **TOTAL** | — | **10 Proyectos de Cartera PGD** | **S/ 8,623,550.00** | — | **3 Cerrados / 7 En curso** | — | — |
 
 ---

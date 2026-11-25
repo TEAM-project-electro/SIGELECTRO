@@ -53,7 +53,8 @@ TXT;
             $texto = $this->gemini->generar(self::INSTRUCCION_SISTEMA, $this->ensamblarContenido($pregunta, $fuentes));
             $validada = $texto !== null ? $this->validarSalida($texto, array_column($fuentes, 'id')) : null;
             if ($validada !== null) {
-                $resultado = ['modo' => 'generativo', 'respuesta' => $validada, 'fuentes' => $fuentes, 'motivo' => null];
+                $fuentesFinales = $validada === self::SIN_INFORMACION ? [] : $fuentes;
+                $resultado = ['modo' => 'generativo', 'respuesta' => $validada, 'fuentes' => $fuentesFinales, 'motivo' => null];
             }
         }
 

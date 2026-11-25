@@ -5,7 +5,7 @@
 **Institución Académica:** Universidad Nacional de Huancavelica — Escuela Profesional de Ingeniería de Sistemas  
 **Asignatura:** Sistema de Información Gerencial (8vo Ciclo)  
 **Fecha de Actualización:** 24 de noviembre de 2026  
-**Versión de Entrega:** 1.2 (Cierre técnico Capítulos 1–10 Laudon & Laudon verificado con 151 pruebas; Power BI `.pbix` e integración ERP/SCM Odoo 16 incorporados; guion final pospuesto al cierre del módulo RAG)
+**Versión de Entrega:** 2.1 (Cierre integral Capítulos 1–11 Laudon, Laudon y Traver 18.ª ed. verificado con 174 pruebas / 1,729 aserciones; incluye Power BI `.pbix`, extensión Odoo 16, Asistente RAG + Agente DSS + carga documental Solo Admin y tríptico UNTELS)
 
 ---
 
@@ -70,7 +70,7 @@ De acuerdo con la **Decisión 7** del contrato maestro y las validaciones vigent
 
 > [!IMPORTANT]
 > **ESTADO DE ENTREGA ACTUALIZADO:**  
-> **«Núcleo, seguridad, restauración aislada y extensión controlada de intercambio por lotes verificados con 151 pruebas automatizadas aprobadas; artefactos de Power BI completos en `docs/bi/` incluyendo el archivo `Tablero_Seguimiento_GD_FINAL.pbix`»**
+> **«Núcleo OLTP/DW, seguridad, restauración aislada, extensión Odoo 16, Asistente RAG y Agente de Decisión (DSS) verificados con 174 pruebas automatizadas aprobadas (1,729 aserciones); artefactos de Power BI completos en `docs/bi/` incluyendo `Tablero_Seguimiento_GD_FINAL.pbix`»**
 
 ### Detalle del Componente Power BI
 

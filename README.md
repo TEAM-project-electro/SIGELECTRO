@@ -2,7 +2,7 @@
 
 **Prototipo Académico Local para la Supervisión y Seguimiento Gerencial de la Cartera del Plan de Gobierno Digital (PGD 2023–2026)**  
 **Empresa de Referencia:** Electrocentro S. A. (10 proyectos estratégicos por un monto adjudicado de S/ 8,623,550.00)  
-**Estado actual:** Cierre técnico y conceptual de los capítulos 1 al 10 de Laudon, Laudon y Traver (18.ª ed.) verificado con **151 pruebas automatizadas aprobadas**. Incluye núcleo OLTP/DW/ETL, cambio de contraseña en autoservicio (`/perfil/clave`), programación semanal del ETL, procesos BPMN 2.0 (`docs/procesos_bpmn/`), tablero Power BI (`docs/bi/Tablero_Seguimiento_GD_FINAL.pbix`) y extensión controlada de intercambio por lotes CSV con Odoo 16 (`docs/odoo/`). Ver [alineamiento Laudon Cap. 1–10](docs/alineamiento_laudon_cap01_10.md) y [estado de desarrollo](docs/estado_desarrollo.md).
+**Estado actual:** Proyecto cerrado y verificado con **174 pruebas automatizadas aprobadas (1,729 aserciones)** (Capítulos 1 al 11 de Laudon, Laudon y Traver, 18.ª ed.). Incluye núcleo OLTP/DW/ETL, cambio de contraseña en autoservicio (`/perfil/clave`), programación semanal del ETL, procesos BPMN 2.0 (`docs/procesos_bpmn/`), tablero Power BI (`docs/bi/Tablero_Seguimiento_GD_FINAL.pbix`), extensión controlada por lotes CSV con Odoo 16 (`docs/odoo/`), **Asistente RAG con carga documental Solo Admin** y **Agente de Decisión Gerencial (DSS)** en `/asistente`. Ver [alineamiento Laudon Cap. 1–11](docs/alineamiento_laudon_cap01_10.md) y [estado de desarrollo](docs/estado_desarrollo.md).
 
 ---
 
@@ -74,7 +74,7 @@ Todos los comandos rutinarios están empaquetados en scripts de PowerShell ubica
 | `scripts/detener_mariadb.ps1` | Detiene limpiamente el proceso de MariaDB 10.11 en el puerto 3307.                                    |
 | `scripts/instalar.ps1`        | Instalación desde cero: dependencias, base de datos, siembra, Vite y ETL.                             |
 | `scripts/arrancar.ps1`        | Inicia MariaDB y arranca `php artisan serve --port=8000`.                                             |
-| `scripts/probar.ps1`          | Ejecuta la batería completa de pruebas automatizadas (151 pruebas aprobadas sobre esquemas aislados). |
+| `scripts/probar.ps1`          | Ejecuta la batería completa de pruebas automatizadas (174 pruebas aprobadas, 1,729 aserciones sobre esquemas aislados). |
 | `scripts/respaldo_db.ps1`     | Genera volcados lógicos completos (`seguimiento_gd` y `dw_seguimiento_gd`) en `backups/`.             |
 | `scripts/restaurar_db.ps1`    | Restaura los volcados sobre esquemas nuevos descartables para verificación de recuperación.           |
 

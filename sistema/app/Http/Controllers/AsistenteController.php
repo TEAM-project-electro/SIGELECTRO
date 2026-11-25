@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\Rag\RagAgenteDecision;
 use App\Services\Rag\RagAsistente;
+use App\Services\Rag\RagIndexador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AsistenteController extends Controller
@@ -66,6 +68,32 @@ class AsistenteController extends Controller
         ]));
     }
 
+    public function subirDocumento(Request $request, RagIndexador $indexador)
+    {
+        abort_unless(Auth::user()->esAdmin(), 403, 'Solo el perfil Administrador puede alimentar la base documental del RAG.');
+
+        $datos = $request->validate([
+            'titulo' => ['required', 'string', 'min:3', 'max:180'],
+            'archivo' => ['required', 'file', 'max:512', 'extensions:md,txt'],
+        ]);
+
+        $archivo = $request->file('archivo');
+        $contenido = (string) file_get_contents($archivo->getRealPath());
+        $slug = Str::slug(pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME));
+        if ($slug === '') {
+            $slug = Str::slug($datos['titulo']) ?: 'documento-rag';
+        }
+
+        $resultadoCarga = $indexador->indexarDocumentoSubido($slug, $datos['titulo'], $contenido);
+
+        if ($request->expectsJson()) {
+            return response()->json($resultadoCarga, $resultadoCarga['aceptado'] ? 201 : 422);
+        }
+        return view('asistente.index', $this->datosVista('documentos', [
+            'resultadoCarga' => $resultadoCarga,
+        ]));
+    }
+
     private function datosVista(string $tab, array $extra = []): array
     {
         $proyectos = DB::connection('lector')->table('proyecto')
@@ -73,17 +101,24 @@ class AsistenteController extends Controller
             ->orderBy('codigo_pgd')
             ->get();
 
+        $documentosIndexados = DB::connection('lector')->table('rag_documento')
+            ->select('ruta', 'titulo', 'fragmentos', 'fragmentos_bloqueados', 'fecha_indexacion')
+            ->orderBy('ruta')
+            ->get();
+
         return array_merge([
             'tabActiva' => $tab,
             'sugerencias' => self::SUGERENCIAS,
             'escenarios' => RagAgenteDecision::ESCENARIOS,
             'proyectos' => $proyectos,
+            'documentosIndexados' => $documentosIndexados,
             'resultado' => null,
             'pregunta' => '',
             'decision' => null,
             'escenarioSeleccionado' => 'priorizar_cartera',
             'proyectoSeleccionado' => null,
             'objetivoDecision' => '',
+            'resultadoCarga' => null,
         ], $extra);
     }
 }

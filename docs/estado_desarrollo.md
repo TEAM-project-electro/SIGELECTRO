@@ -5,7 +5,7 @@
 Contrato maestro `PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md` intacto y modelo nuclear de 6 tablas operativas (41 columnas) preservado; extensiones técnicas aisladas en `control_revision`, `bitacora_motivo` y `abastecimiento_compra`.
 
 - **Entorno comprobado:** Laravel 12.71.0 / PHP 8.3.28 / MariaDB 10.11 en `127.0.0.1:3307` / Vite local sin CDNs externos / Odoo 16 Community en `http://localhost:8069` (`sigelectro_odoo` sobre PostgreSQL `127.0.0.1:5432`).
-- **Suite automatizada vigente:** **151 pruebas aprobadas** (`GateG1` a `GateG4`, concurrencia determinista, seguridad de acceso, integración Odoo ERP/SCM y cierre Laudon Cap. 1–10).
+- **Suite automatizada vigente:** **174 pruebas aprobadas (1,729 aserciones)** (`GateG1` a `GateG4`, concurrencia determinista, seguridad de acceso, integración Odoo por lotes, cierre Laudon Cap. 1–11, Asistente RAG, Agente de Decisión DSS, carga documental Solo Admin y pruebas *red team* OWASP LLM01/02/06).
 - **Seguridad y operación (Cap. 6 y Cap. 8):**
   - Renovación de contraseña privada en autoservicio web autenticada (`GET/PUT /perfil/clave`, enlace **Mi clave** en barra lateral) con verificación de clave actual, longitud de 12 a 72 bytes, bloqueo de `ClavesPublicasLegadas`, auditoría transaccional y regeneración de sesión.
   - Sonda pública `/salud` mínima (`{"estado":"OPERATIVO"}` / HTTP 200 o 503) sin exposición de versiones ni puertos internos.
