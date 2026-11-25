@@ -66,43 +66,51 @@ class TableroController extends Controller
         if ($origen === 'DW') {
             $datos = $this->etlService->consultarDw($filtros);
             $metricasDw = $this->etlService->obtenerMetricas();
-            $alertas = $metricasDw['alertas'];
+            $codigosVisibles = collect($datos['proyectos'])->pluck('codigo_pgd')->all();
+            $alertas = collect($metricasDw['alertas'])->filter(fn ($a) => in_array($a->codigo_pgd, $codigosVisibles, true))->values();
             $evolucionCortes = $metricasDw['evolucion_por_corte'];
         } else {
             // Cargar datos en vivo desde el motor operativo de la Etapa 10
             $datos = $this->indicadoresService->calcularCartera($filtros);
+            $idsVisibles = collect($datos['proyectos'])->pluck('id_proyecto')->all();
 
-            // Obtener alertas de calidad operativa
-            $alertas = DB::table('hito as h')
-                ->join('proyecto as p', 'h.id_proyecto', '=', 'p.id_proyecto')
-                ->join('responsable as r', 'p.id_responsable', '=', 'r.id_responsable')
-                ->where('h.en_linea_base', 1)
-                ->where('h.fecha_prevista', '<', $fechaCorte)
-                ->where(function ($q) use ($fechaCorte) {
-                    $q->whereNull('h.fecha_cierre')->orWhere('h.fecha_cierre', '>', $fechaCorte);
-                })
-                ->select(
-                    DB::raw("'Hito vencido' as tipo_alerta"),
-                    DB::raw("'ALTA' as severidad"),
-                    DB::raw("CONCAT('Hito \"', h.descripcion, '\" venció el ', h.fecha_prevista, ' y sigue sin cierre') as detalle"),
-                    'p.codigo_pgd',
-                    'p.nombre as proyecto',
-                    'r.nombre as responsable'
-                )
-                ->get();
+            // Obtener alertas de calidad operativa respetando los filtros activos del tablero (P0-2)
+            $alertas = $idsVisibles === []
+                ? collect()
+                : DB::table('hito as h')
+                    ->join('proyecto as p', 'h.id_proyecto', '=', 'p.id_proyecto')
+                    ->join('responsable as r', 'p.id_responsable', '=', 'r.id_responsable')
+                    ->whereIn('p.id_proyecto', $idsVisibles)
+                    ->where('h.en_linea_base', 1)
+                    ->where('h.fecha_prevista', '<', $fechaCorte)
+                    ->where(function ($q) use ($fechaCorte) {
+                        $q->whereNull('h.fecha_cierre')->orWhere('h.fecha_cierre', '>', $fechaCorte);
+                    })
+                    ->select(
+                        DB::raw("'Hito vencido' as tipo_alerta"),
+                        DB::raw("'ALTA' as severidad"),
+                        DB::raw("CONCAT('Hito \"', h.descripcion, '\" venció el ', h.fecha_prevista, ' y sigue sin cierre') as detalle"),
+                        'p.codigo_pgd',
+                        'p.nombre as proyecto',
+                        'r.nombre as responsable'
+                    )
+                    ->get();
 
-            // Serie temporal para gráfico de evolución (cortes históricos en orden cronológico)
-            $evolucionCortes = DB::table('avance_presupuestal')
-                ->select(
-                    'fecha_reporte',
-                    DB::raw('COUNT(DISTINCT id_proyecto) as proyectos_reportados'),
-                    DB::raw('SUM(presupuesto_planificado) as total_planificado'),
-                    DB::raw('SUM(gasto_acumulado) as total_gasto'),
-                    DB::raw('SUM(gasto_acumulado - presupuesto_planificado) as diferencia')
-                )
-                ->groupBy('fecha_reporte')
-                ->orderBy('fecha_reporte', 'asc')
-                ->get();
+            // Serie temporal para gráfico de evolución filtrada por los proyectos visibles (P0-2)
+            $evolucionCortes = $idsVisibles === []
+                ? collect()
+                : DB::table('avance_presupuestal')
+                    ->whereIn('id_proyecto', $idsVisibles)
+                    ->select(
+                        'fecha_reporte',
+                        DB::raw('COUNT(DISTINCT id_proyecto) as proyectos_reportados'),
+                        DB::raw('SUM(presupuesto_planificado) as total_planificado'),
+                        DB::raw('SUM(gasto_acumulado) as total_gasto'),
+                        DB::raw('SUM(gasto_acumulado - presupuesto_planificado) as diferencia')
+                    )
+                    ->groupBy('fecha_reporte')
+                    ->orderBy('fecha_reporte', 'asc')
+                    ->get();
         }
 
         return view('tablero', [

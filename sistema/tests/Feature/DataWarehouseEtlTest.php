@@ -71,11 +71,12 @@ class DataWarehouseEtlTest extends TestCase
      */
     public function test_dim_responsable_no_contiene_usuario_ni_clave(): void
     {
+        $esquemaDw = DB::connection('dw_lector')->getDatabaseName();
         $columnas = DB::connection('dw_lector')->select("
             SELECT COLUMN_NAME
             FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = 'dw_seguimiento_gd' AND TABLE_NAME = 'dim_responsable'
-        ");
+            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'dim_responsable'
+        ", [$esquemaDw]);
 
         $nombres = array_map(fn($col) => $col->COLUMN_NAME, $columnas);
 

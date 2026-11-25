@@ -187,7 +187,7 @@
         </div>
     </div>
     <p class="text-[11px] text-slate-500 mt-2">
-        Desviación positiva indica gasto superior al plan acumulado al mismo corte. “Sin datos” o “No aplica” señalan ausencia de registros evaluables o denominador cero.
+        Una desviación presupuestal negativa (gasto menor al plan) indica desfase en el devengado, no ahorro; una desviación positiva indica gasto superior al plan acumulado al mismo corte. “Sin datos” o “No aplica” señalan ausencia de registros evaluables o denominador cero.
     </p>
 </section>
 
@@ -199,7 +199,7 @@
                 <div class="flex items-center justify-between gap-2 mb-4">
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Planificado y gasto acumulado por corte</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Importes expresados en soles (PEN)</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Importes en soles (PEN); cada barra suma únicamente los proyectos con reporte en esa fecha.</p>
                     </div>
                     <div class="flex items-center gap-3 text-[11px] text-slate-600">
                         <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-slate-300" aria-hidden="true"></span>Planificado</span>
@@ -327,7 +327,7 @@
         new window.Chart(lienzo, {
             type: 'bar',
             data: {
-                labels: cortes.map(c => c.fecha_reporte),
+                labels: cortes.map(c => c.fecha_reporte + ' (' + c.proyectos_reportados + ' proy.)'),
                 datasets: [
                     {
                         label: 'Planificado',
@@ -360,6 +360,10 @@
                         padding: 10,
                         cornerRadius: 8,
                         callbacks: {
+                            afterTitle: items => {
+                                const c = cortes[items[0]?.dataIndex];
+                                return c ? 'Proyectos reportados en este corte: ' + c.proyectos_reportados : '';
+                            },
                             label: c => ' ' + c.dataset.label + ': S/ ' + soles.format(c.raw)
                         }
                     }

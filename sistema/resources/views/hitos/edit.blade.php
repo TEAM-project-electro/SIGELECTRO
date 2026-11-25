@@ -39,12 +39,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label for="fecha_prevista" class="block text-xs font-semibold text-slate-700 mb-1.5">Fecha prevista</label>
-                <input type="date" name="fecha_prevista" id="fecha_prevista" value="{{ old('fecha_prevista', $hito->fecha_prevista) }}" required
-                       class="sig-input font-mono">
+                @php $bloquearFechaLb = $hito->en_linea_base && !Auth::user()->esAdmin(); @endphp
+                <input type="date" name="fecha_prevista" id="fecha_prevista"
+                       value="{{ old('fecha_prevista', $hito->fecha_prevista instanceof \DateTimeInterface ? $hito->fecha_prevista->format('Y-m-d') : $hito->fecha_prevista) }}"
+                       required @if($bloquearFechaLb) readonly @endif
+                       class="sig-input font-mono {{ $bloquearFechaLb ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : '' }}">
+                @if($bloquearFechaLb)
+                    <p class="text-[11px] text-slate-500 mt-1">La fecha prevista de línea base solo puede ser reprogramada por un Administrador.</p>
+                @endif
             </div>
             <div>
                 <label for="fecha_cierre" class="block text-xs font-semibold text-slate-700 mb-1.5">Fecha de cierre</label>
-                <input type="date" name="fecha_cierre" id="fecha_cierre" value="{{ old('fecha_cierre', $hito->fecha_cierre) }}"
+                <input type="date" name="fecha_cierre" id="fecha_cierre"
+                       value="{{ old('fecha_cierre', $hito->fecha_cierre instanceof \DateTimeInterface ? $hito->fecha_cierre->format('Y-m-d') : $hito->fecha_cierre) }}"
                        class="sig-input font-mono">
             </div>
         </div>

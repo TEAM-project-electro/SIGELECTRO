@@ -103,8 +103,13 @@ class HitoController extends Controller
 
         $nuevaLb = $request->boolean('en_linea_base') ? 1 : 0;
         $cambioLb = (int) $hito->en_linea_base !== $nuevaLb;
+        $fechaOriginal = $hito->fecha_prevista instanceof \DateTimeInterface
+            ? $hito->fecha_prevista->format('Y-m-d')
+            : (string) $hito->fecha_prevista;
+        $fechaNueva = substr(trim((string) $request->fecha_prevista), 0, 10);
+        $cambioFechaLb = (int) $hito->en_linea_base === 1 && $fechaNueva !== $fechaOriginal;
 
-        if ($cambioLb && $request->filled('motivo_cambio')) {
+        if (($cambioLb || $cambioFechaLb) && $request->filled('motivo_cambio')) {
             $motivo = mb_substr(trim((string) $request->motivo_cambio), 0, 200);
         } else {
             $motivo = mb_substr("Actualización de hito #{$hito->id_hito} en proyecto {$proyecto->codigo_pgd}", 0, 200);
