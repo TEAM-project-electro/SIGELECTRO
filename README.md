@@ -16,7 +16,7 @@ Prototipo funcional de **Sistema de Información Gerencial (SIG)** desarrollado 
 
 | Módulo | Qué resuelve | Destacado técnico |
 | :--- | :--- | :--- |
-| **Cartera, Hitos y Presupuesto (OLTP)** | Registro centralizado de proyectos PGD, hitos de línea base y cortes trimestrales de avance financiero. | Reglas **R1–R4** en triggers y procedimientos MariaDB; protección de fecha prevista en línea base (solo Administrador con motivo obligatorio). |
+| **Cartera, Hitos y Presupuesto (OLTP)** | Registro centralizado de proyectos PGD, hitos de línea base y cortes trimestrales de avance financiero. | Reglas **R1–R4** en triggers y procedimientos MariaDB; línea base protegida y versionada (solo el Administrador, con motivo, incorpora, retira o reprograma hitos; cada cambio queda en `hito_linea_base_version`). |
 | **Tablero Gerencial y 4 KPIs** | Supervisión en tiempo real en dos modalidades (*Corte Común* y *Último Reporte*) y alertas filtrables. | Paridad matemática **0.00 pp** entre base operativa y Data Warehouse; gráfico con cobertura de proyectos por corte y explicación de desviación presupuestal. |
 | **Data Warehouse, ETL y Power BI** | Analítica histórica para el Comité de Gobierno Digital. | Esquema estrella (`dw_seguimiento_gd`: 4 dimensiones, 2 hechos, 6 vistas), ETL atómico con *mutex* y programación semanal, y tablero nativo `Tablero_Seguimiento_GD_FINAL.pbix`. |
 | **Asistente RAG y Agente de Decisión (DSS)** | Consulta documental con citas `[F#]` y priorización gerencial paso a paso (0–100) con opciones comparadas. | Recuperación híbrida **BM25 + embeddings Gemini (RRF)**, umbral anti-temas irrelevantes, carga documental controlada (Solo Admin), degradación offline automática y **8 capas OWASP LLM01/02/06** (*Human-in-the-Loop*). |
@@ -79,7 +79,7 @@ Las contraseñas privadas se asignan localmente (nunca se versionan en Git; las 
 | Perfil | Usuario | Área | Alcance |
 | :--- | :--- | :--- | :--- |
 | **Administrador** | `msalas` | Planeamiento | Cartera completa, reprogramación de línea base con motivo, usuarios, auditoría, ETL y base documental RAG. |
-| **Responsable** | `aquispe`, `lrojas` | TIC | Registro de hitos y avances presupuestales en sus proyectos asignados (sin alterar monto ni fechas de línea base). |
+| **Responsable** | `aquispe`, `lrojas` | TIC | Registro de hitos y avances presupuestales en sus proyectos asignados (sin alterar el monto ni la línea base: fechas, incorporación o retiro de hitos). |
 | **Consulta** | `cgarcia` | Comité GD | Solo lectura de cartera, tablero, reportes A4/CSV, asistente RAG y agente de decisión. |
 
 Cada usuario autenticado puede cambiar su propia contraseña desde **Mi clave** (`/perfil/clave`), o el operador local mediante `php artisan sig:cambiar-clave <usuario>`.
