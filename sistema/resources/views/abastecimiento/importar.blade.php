@@ -17,9 +17,14 @@
             </p>
         </div>
 
-        <a href="{{ $proyecto ? route('proyectos.show', $proyecto) : route('proyectos.index') }}" class="sig-btn-secondary self-start">
-            Volver
-        </a>
+        <div class="flex items-center gap-2 self-start">
+            <a href="{{ route('abastecimiento.plantilla') }}" class="sig-btn-secondary">
+                Descargar plantilla CSV
+            </a>
+            <a href="{{ $proyecto ? route('proyectos.show', $proyecto) : route('proyectos.index') }}" class="sig-btn-secondary">
+                Volver
+            </a>
+        </div>
     </div>
 
     @if ($errors->any())

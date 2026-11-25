@@ -262,7 +262,8 @@
                         <th class="px-4 py-3 font-semibold text-right">Recibida</th>
                         <th class="px-4 py-3 font-semibold text-right">Pendiente</th>
                         <th class="px-4 py-3 font-semibold text-right">Total (S/)</th>
-                        <th class="px-5 py-3 font-semibold">ID externo</th>
+                        <th class="px-4 py-3 font-semibold">ID externo</th>
+                        <th class="px-5 py-3 font-semibold">Control de carga</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -286,10 +287,14 @@
                             <td class="px-4 py-3 text-right tabular-nums font-medium text-slate-900">
                                 {{ $compra->importe_total !== null ? number_format((float)$compra->importe_total, 2) : '—' }}
                             </td>
-                            <td translate="no" class="px-5 py-3 font-mono text-[11px] text-slate-500">{{ $compra->id_externo_linea }}</td>
+                            <td translate="no" class="px-4 py-3 font-mono text-[11px] text-slate-500">{{ $compra->id_externo_linea }}</td>
+                            <td class="px-5 py-3 text-xs text-slate-600 whitespace-nowrap">
+                                <span class="font-medium text-slate-800 block">{{ $compra->responsableCarga?->usuario ?? 'ID ' . $compra->id_responsable_carga }}</span>
+                                <span class="font-mono text-[11px] text-slate-500">{{ $compra->fecha_carga?->format('Y-m-d H:i') }}</span>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="px-5 py-10 text-center text-sm text-slate-500">No se registran compras o recepciones importadas para este proyecto.</td></tr>
+                        <tr><td colspan="9" class="px-5 py-10 text-center text-sm text-slate-500">No se registran compras o recepciones importadas para este proyecto.</td></tr>
                     @endforelse
                 </tbody>
             </table>

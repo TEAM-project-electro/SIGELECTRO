@@ -1,6 +1,29 @@
 # Estado de Desarrollo del SIG de Electrocentro
 
-## Estado vigente — corrección independiente del 04/11/2026
+## Estado vigente — Cierre Capítulos 1 al 10 (Laudon & Laudon) del 24/11/2026
+
+Contrato maestro `PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md` intacto y modelo nuclear de 6 tablas operativas (41 columnas) preservado; extensiones técnicas aisladas en `control_revision`, `bitacora_motivo` y `abastecimiento_compra`.
+
+- **Entorno comprobado:** Laravel 12.71.0 / PHP 8.3.28 / MariaDB 10.11 en `127.0.0.1:3307` / Vite local sin CDNs externos / Odoo 16 Community en `http://localhost:8069` (`sigelectro_odoo` sobre PostgreSQL `127.0.0.1:5432`).
+- **Suite automatizada vigente:** **151 pruebas aprobadas** (`GateG1` a `GateG4`, concurrencia determinista, seguridad de acceso, integración Odoo ERP/SCM y cierre Laudon Cap. 1–10).
+- **Seguridad y operación (Cap. 6 y Cap. 8):**
+  - Renovación de contraseña privada en autoservicio web autenticada (`GET/PUT /perfil/clave`, enlace **Mi clave** en barra lateral) con verificación de clave actual, longitud de 12 a 72 bytes, bloqueo de `ClavesPublicasLegadas`, auditoría transaccional y regeneración de sesión.
+  - Sonda pública `/salud` mínima (`{"estado":"OPERATIVO"}` / HTTP 200 o 503) sin exposición de versiones ni puertos internos.
+  - Login institucional endurecido sin previsualización de contraseña ni autocompletado de credenciales en navegador.
+  - Programación automática semanal del Data Warehouse registrada en `sistema/routes/console.php` (`Schedule::command('etl:cargar')->weeklyOn(0, '02:00')->withoutOverlapping()`).
+- **Business Intelligence (Cap. 6 y Cap. 12 base):**
+  - Tablero nativo entregado en `docs/bi/Tablero_Seguimiento_GD_FINAL.pbix`, acompañado de los 8 CSV UTF-8 con BOM, `manifiesto_extraccion.json`, `modelo_power_bi.md` y catálogo `medidas_DAX.txt`.
+- **Extensión controlada de intercambio de datos con Odoo 16 (Cap. 9) y delimitación frente a Cap. 10:**
+  - Formalizada en [2026-11-24_extension_intercambio_odoo.md](decisiones/2026-11-24_extension_intercambio_odoo.md): intercambio de datos por lotes mediante CSV exportado de Odoo 16 (`sigelectro_odoo`: orden `P00001` por `S/ 70,800.00` vinculada a `PROYGD-005`, recepción `WH/IN/00001` = `done` y backorder `WH/IN/00002` = `assigned`) hacia la tabla técnica independiente `abastecimiento_compra`, sin alterar el núcleo de 6 tablas ni convertir a SIGELECTRO en un ERP en tiempo real ni en comercio electrónico (Cap. 10 delimitado fuera de alcance).
+  - Importador transaccional idempotente (`/abastecimiento/importar`), descarga de plantilla estructurada (`/abastecimiento/plantilla`), columna de trazabilidad de carga (usuario y fecha/hora) en `proyectos/show.blade.php`, y reconciliación automática de privilegios mínimos sobre `abastecimiento_compra` en `scripts/ajustar_permisos.php`.
+- **Procesos y Trazabilidad Académica (Laudon, Laudon y Traver, 18.ª ed., Cap. 1 al 10):**
+  - Modelado BPMN 2.0 AS-IS y TO-BE en `docs/procesos_bpmn/`.
+  - Matriz calibrada por nivel de pertinencia (sustento fuerte en Cap. 2, 6 y 8 apoyados en Cap. 1, 3 y 4) en [alineamiento_laudon_cap01_10.md](alineamiento_laudon_cap01_10.md), dejando lista la frontera hacia el **Capítulo 11 (Gestión del Conocimiento e IA — módulo RAG)**.
+  - El guion final de sustentación y el banco de preguntas quedan programados para el cierre posterior a la implementación del módulo RAG.
+
+---
+
+## Registro previo — corrección independiente del 04/11/2026
 
 Asistente: ChatGPT/Codex, PowerShell local. Etapa 20 completada para las falencias verificadas del núcleo; etapa 21 revalidada mediante pruebas. Contrato maestro sin cambios.
 
@@ -108,6 +131,7 @@ Las certificaciones y cifras de sesiones anteriores que siguen a continuación s
     - **Dictamen Final:** Compuertas Gate G1, Gate G2, Gate G3 y Gate G4 **Superadas y Ratificadas**. Núcleo Académico 100% verificado.
 
 ## Corrección de seguridad — 2026-11-06
+
 - Aplicados los dos hallazgos confirmados: siembra de identidades sin sobrescritura ni claves públicas predeterminadas; rechazo de contraseñas legadas en login y administración; sonda `/salud` mínima, incluidos fallos de conexión.
 - Instalación nueva mediante `sig:inicializar`; renovación privada de cuentas anteriores mediante `sig:cambiar-clave {usuario}`. Sin cambios automáticos de claves operativas, perfiles ni estados.
 - Decisión y operación: [Seguridad de acceso](decisiones/2026-11-06_seguridad_acceso.md).

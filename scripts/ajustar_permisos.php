@@ -15,6 +15,14 @@ $op = $argv[1] ?? $cfg['database'];
 $dw = $argv[2] ?? config('database.connections.dw_migrador.database');
 foreach ([$op,$dw] as $schema) if (!preg_match('/\A[a-z][a-z0-9_]*\z/D', $schema)) throw new RuntimeException('Esquema inválido.');
 $tablas = ['proyecto','hito','avance_presupuestal','objetivo_gd','responsable','control_revision','bitacora_cambio','bitacora_motivo'];
+$stmtExt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'abastecimiento_compra'");
+$stmtExt->execute([$op]);
+$tieneAbastecimiento = ((int) $stmtExt->fetchColumn()) > 0;
+$tablasConExtensiones = $tieneAbastecimiento ? array_merge($tablas, ['abastecimiento_compra']) : $tablas;
+$stmtRag = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'rag_consulta'");
+$stmtRag->execute([$op]);
+$tieneRag = ((int) $stmtRag->fetchColumn()) > 0;
+if ($tieneRag) $tablasConExtensiones = array_merge($tablasConExtensiones, ['rag_documento','rag_fragmento','rag_consulta']);
 foreach (['localhost','127.0.0.1'] as $host) {
     foreach (['sig_auth','sig_lector','sig_escritor','sig_etl','bi_lector','sig_definer'] as $cuenta) {
         $user = "'{$cuenta}'@'{$host}'";
@@ -23,7 +31,7 @@ foreach (['localhost','127.0.0.1'] as $host) {
             try { $pdo->exec("REVOKE ALL PRIVILEGES ON `{$schema}`.* FROM {$user}"); }
             catch (PDOException $e) { if (!in_array(($e->errorInfo[1] ?? 0), [1141,1147], true)) throw $e; }
         }
-        foreach ($tablas as $tabla) {
+        foreach ($tablasConExtensiones as $tabla) {
             try { $pdo->exec("REVOKE ALL PRIVILEGES ON `{$op}`.`{$tabla}` FROM {$user}"); }
             catch (PDOException $e) { if (!in_array(($e->errorInfo[1] ?? 0), [1141,1147], true)) throw $e; }
         }
@@ -32,16 +40,18 @@ foreach (['localhost','127.0.0.1'] as $host) {
     $grant('SELECT (id_responsable,usuario,clave_hash,activo,perfil,nombre)', "`$op`.responsable", 'sig_auth');
     $safe = 'SELECT (id_responsable,usuario,activo,perfil,nombre,area)';
     foreach (['sig_lector','sig_escritor','sig_etl'] as $user) {
-        foreach ($tablas as $tabla) {
+        foreach ($tablasConExtensiones as $tabla) {
             $grant($tabla==='responsable' ? $safe : 'SELECT', "`$op`.`$tabla`", $user);
         }
         $grant('SELECT', "`$op`.v_indicadores_proyecto", $user);
     }
     foreach (['proyecto','hito','avance_presupuestal'] as $tabla) $grant('INSERT,UPDATE,DELETE', "`$op`.`$tabla`", 'sig_escritor');
     foreach (['responsable','objetivo_gd'] as $tabla) $grant('INSERT,UPDATE', "`$op`.`$tabla`", 'sig_escritor');
+    if ($tieneAbastecimiento) $grant('INSERT,UPDATE', "`$op`.abastecimiento_compra", 'sig_escritor');
+    if ($tieneRag) $grant('INSERT', "`$op`.rag_consulta", 'sig_escritor');
     $grant('UPDATE', "`$op`.control_revision", 'sig_escritor');
     // Sólo los triggers/rutinas del definer escriben auditoría y gestionan el DW.
-    foreach ($tablas as $tabla) $grant($tabla==='responsable' ? 'SELECT (id_responsable,usuario,activo,perfil,nombre,area,clave_hash)' : 'SELECT', "`$op`.`$tabla`", 'sig_definer');
+    foreach ($tablasConExtensiones as $tabla) $grant($tabla==='responsable' ? 'SELECT (id_responsable,usuario,activo,perfil,nombre,area,clave_hash)' : 'SELECT', "`$op`.`$tabla`", 'sig_definer');
     foreach (['bitacora_cambio','bitacora_motivo'] as $tabla) $grant('INSERT', "`$op`.`$tabla`", 'sig_definer');
     $grant('UPDATE', "`$op`.control_revision", 'sig_definer');
     $grant('EXECUTE', "`$op`.*", 'sig_definer');

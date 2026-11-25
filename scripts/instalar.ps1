@@ -125,11 +125,18 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# 7. Carga de Data Warehouse
+# 7. Carga de Data Warehouse e indexacion RAG
 Write-Host "7. Ejecutando carga inicial de Data Warehouse (ETL)..." -ForegroundColor Yellow
 & php artisan etl:cargar
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Fallo la ejecucion inicial de sp_etl_cargar."
+    exit 1
+}
+
+Write-Host " - Indexando fuentes autorizadas del Asistente RAG..." -ForegroundColor Yellow
+& php artisan rag:indexar
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Fallo la indexacion inicial del Asistente RAG."
     exit 1
 }
 

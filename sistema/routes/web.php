@@ -39,7 +39,17 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
+    // Autoservicio de cambio de contraseña propia (todos los perfiles autenticados)
+    Route::get('/perfil/clave', [\App\Http\Controllers\PerfilClaveController::class, 'edit'])->name('perfil.clave.edit');
+    Route::put('/perfil/clave', [\App\Http\Controllers\PerfilClaveController::class, 'update'])->name('perfil.clave.update');
+
     Route::get('/tablero', [\App\Http\Controllers\TableroController::class, 'index'])->name('tablero');
+
+    // Asistente RAG de consulta (Laudon Cap. 11) — solo lectura, con límite de consultas por usuario
+    Route::get('/asistente', [\App\Http\Controllers\AsistenteController::class, 'index'])->name('asistente.index');
+    Route::post('/asistente/preguntar', [\App\Http\Controllers\AsistenteController::class, 'preguntar'])
+        ->middleware('throttle:'.config('rag.consultas_por_minuto', 10).',1')
+        ->name('asistente.preguntar');
 
     // Motor de Indicadores y Consulta (RF04 - Etapa 10)
     Route::get('/indicadores/consulta', [\App\Http\Controllers\IndicadorController::class, 'consultar'])->name('indicadores.consulta');
@@ -95,6 +105,7 @@ Route::middleware('auth')->group(function () {
 
     // Integración de Compras y Recepciones Odoo (CSV controlado)
     Route::get('/abastecimiento/importar', [\App\Http\Controllers\AbastecimientoController::class, 'importar'])->name('abastecimiento.importar');
+    Route::get('/abastecimiento/plantilla', [\App\Http\Controllers\AbastecimientoController::class, 'descargarPlantilla'])->name('abastecimiento.plantilla');
     Route::post('/abastecimiento/previsualizar', [\App\Http\Controllers\AbastecimientoController::class, 'previsualizar'])->name('abastecimiento.previsualizar');
     Route::post('/abastecimiento/confirmar', [\App\Http\Controllers\AbastecimientoController::class, 'confirmar'])->name('abastecimiento.confirmar');
 });

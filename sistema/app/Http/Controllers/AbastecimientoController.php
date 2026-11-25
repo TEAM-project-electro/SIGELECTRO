@@ -17,6 +17,41 @@ class AbastecimientoController extends Controller
     {
     }
 
+    public function descargarPlantilla(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        Gate::authorize('import', AbastecimientoCompra::class);
+
+        return response()->streamDownload(function () {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, [
+                'ID externo',
+                'Referencia de pedido',
+                'Fecha de orden',
+                'Proveedor',
+                'Producto',
+                'Descripción',
+                'Cantidad',
+                'Cantidad recibida',
+                'Total',
+            ]);
+            fputcsv($out, [
+                '__export__.purchase_order_line_1_ejemplo',
+                'P00001',
+                '2026-11-18',
+                'Grupo Electrodata S.A.C.',
+                '[FW-001] Firewall de seguridad perimetral',
+                '[FW-001] Firewall de seguridad perimetral - Proyecto PROYGD-005',
+                '2.00',
+                '1.00',
+                '70800.00',
+            ]);
+            fclose($out);
+        }, 'plantilla_odoo_abastecimiento.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function importar(Request $request): View
     {
         Gate::authorize('import', AbastecimientoCompra::class);
