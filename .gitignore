@@ -19,3 +19,4 @@ sistema/storage/paridad_corregida.jsonl
 docs/sistemas de informacion gerencial 18 edicion.pdf
 PROMPT_SIG_ELECTROCENTRO_COMPARTIDO.md
 AGENTS.md
+sistema/.env.testing
