@@ -115,7 +115,7 @@
     @endif
 
     {{-- Hitos del proyecto --}}
-    <section class="sig-panel overflow-hidden">
+    <section id="hitos" class="sig-panel overflow-hidden scroll-mt-6">
         <div class="px-5 py-3.5 border-b border-slate-200/80 flex items-center justify-between gap-2">
             <h2 class="text-sm font-bold text-slate-900">Hitos del Proyecto ({{ $proyecto->hitos->count() }})</h2>
             @if($proyecto->estado !== 'Cerrado')
@@ -253,7 +253,7 @@
     </section>
 
     {{-- Cortes presupuestales --}}
-    <section class="sig-panel overflow-hidden">
+    <section id="cortes" class="sig-panel overflow-hidden scroll-mt-6">
         <div class="px-5 py-3.5 border-b border-slate-200/80 flex items-center justify-between gap-2">
             <h2 class="text-sm font-bold text-slate-900">Historial de Cortes Presupuestales ({{ $proyecto->avances->count() }})</h2>
             @if($proyecto->estado !== 'Cerrado')
@@ -371,6 +371,11 @@
             </table>
         </div>
     </section>
+
+    {{-- Gestión gerencial: presupuesto, valor ganado, riesgos, documentos, beneficios e historial --}}
+    @if (($gestion['disponible'] ?? false))
+        @include('proyectos.partials.gestion', ['gestion' => $gestion, 'proyecto' => $proyecto])
+    @endif
 
     {{-- Modal de reapertura --}}
     <div x-show="modalReabrir" x-cloak

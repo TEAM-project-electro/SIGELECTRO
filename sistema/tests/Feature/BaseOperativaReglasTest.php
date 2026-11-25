@@ -34,8 +34,12 @@ class BaseOperativaReglasTest extends TestCase
         // TRUNCATE (cuenta migradora, solo esquemas _test) no dispara triggers: el borrado de hitos de línea base
         // exige un Administrador como actor, y aquí el actor 1 de la siembra de prueba es un Responsable.
         $db->statement('TRUNCATE TABLE hito;');
-        if ($db->getSchemaBuilder()->hasTable('hito_linea_base_version')) {
-            $db->statement('TRUNCATE TABLE hito_linea_base_version;');
+        // Tablas técnicas que dependen de proyectos e hitos (línea base y gestión gerencial).
+        foreach (['hito_linea_base_version', 'hito_peso', 'evaluacion_priorizacion', 'riesgo_proyecto', 'compromiso_presupuestal',
+            'proyecto_presupuesto_version', 'documento_proyecto', 'beneficio_proyecto'] as $tabla) {
+            if ($db->getSchemaBuilder()->hasTable($tabla)) {
+                $db->statement("TRUNCATE TABLE {$tabla};");
+            }
         }
         $db->statement('DELETE FROM proyecto;');
         $db->statement('DELETE FROM responsable;');

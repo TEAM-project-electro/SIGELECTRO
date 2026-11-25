@@ -39,5 +39,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(AvancePresupuestal::class, AvancePresupuestalPolicy::class);
         Gate::policy(ObjetivoGd::class, ObjetivoGdPolicy::class);
         Gate::policy(BitacoraCambio::class, BitacoraCambioPolicy::class);
+
+        // Gestión gerencial: el Administrador ejerce el rol de PMO hasta que exista ese perfil.
+        Gate::define('administrar-cartera', fn (\App\Models\Responsable $u) => $u->esAdmin());
+        // Riesgos, documentos y beneficios: Administrador o Responsable titular (también lo valida la base de datos).
+        Gate::define('gestionar-proyecto', fn (\App\Models\Responsable $u, Proyecto $p) => $u->esAdmin()
+            || ($u->esResponsable() && (int) $p->id_responsable === (int) $u->id_responsable));
     }
 }

@@ -109,6 +109,26 @@ Route::middleware('auth')->group(function () {
     Route::put('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'update'])->name('avances.update');
     Route::delete('/avances/{avance}', [\App\Http\Controllers\AvancePresupuestalController::class, 'destroy'])->name('avances.destroy');
 
+    // Gestión gerencial de la cartera (prioridad 2 de la auditoría)
+    Route::get('/priorizacion', [\App\Http\Controllers\PriorizacionController::class, 'index'])->name('priorizacion.index');
+    Route::put('/priorizacion/pesos', [\App\Http\Controllers\PriorizacionController::class, 'guardarPesos'])->name('priorizacion.pesos');
+    Route::post('/priorizacion/proyectos/{proyecto}', [\App\Http\Controllers\PriorizacionController::class, 'evaluar'])->name('priorizacion.evaluar');
+
+    Route::get('/riesgos', [\App\Http\Controllers\RiesgoController::class, 'index'])->name('riesgos.index');
+    Route::post('/proyectos/{proyecto}/riesgos', [\App\Http\Controllers\RiesgoController::class, 'store'])->name('proyectos.riesgos.store');
+    Route::put('/riesgos/{riesgo}', [\App\Http\Controllers\RiesgoController::class, 'update'])->whereNumber('riesgo')->name('riesgos.update');
+
+    Route::get('/alertas', [\App\Http\Controllers\AlertaController::class, 'index'])->name('alertas.index');
+    Route::put('/alertas/parametros', [\App\Http\Controllers\AlertaController::class, 'actualizarParametros'])->name('alertas.parametros');
+
+    Route::put('/proyectos/{proyecto}/pesos-hitos', [\App\Http\Controllers\GestionProyectoController::class, 'ponderarHitos'])->name('proyectos.pesos');
+    Route::post('/proyectos/{proyecto}/compromisos', [\App\Http\Controllers\GestionProyectoController::class, 'registrarCompromiso'])->name('proyectos.compromisos.store');
+    Route::patch('/compromisos/{compromiso}/anular', [\App\Http\Controllers\GestionProyectoController::class, 'anularCompromiso'])->whereNumber('compromiso')->name('compromisos.anular');
+    Route::post('/proyectos/{proyecto}/documentos', [\App\Http\Controllers\GestionProyectoController::class, 'subirDocumento'])->name('proyectos.documentos.store');
+    Route::get('/documentos/{documento}', [\App\Http\Controllers\GestionProyectoController::class, 'descargarDocumento'])->whereNumber('documento')->name('documentos.descargar');
+    Route::post('/proyectos/{proyecto}/beneficios', [\App\Http\Controllers\GestionProyectoController::class, 'registrarBeneficio'])->name('proyectos.beneficios.store');
+    Route::patch('/beneficios/{beneficio}/medicion', [\App\Http\Controllers\GestionProyectoController::class, 'medirBeneficio'])->whereNumber('beneficio')->name('beneficios.medir');
+
     // Integración de Compras y Recepciones Odoo (CSV controlado)
     Route::get('/abastecimiento/importar', [\App\Http\Controllers\AbastecimientoController::class, 'importar'])->name('abastecimiento.importar');
     Route::get('/abastecimiento/plantilla', [\App\Http\Controllers\AbastecimientoController::class, 'descargarPlantilla'])->name('abastecimiento.plantilla');

@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 ObjetivoGdSeeder::class,
                 ProyectoSeeder::class,
                 SeguimientoSeeder::class,
+                GestionGerencialSeeder::class,
             ]);
         } finally {
             // Limpieza estricta del contexto tras sembrar

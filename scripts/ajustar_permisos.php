@@ -27,6 +27,16 @@ $stmtLb = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE ta
 $stmtLb->execute([$op]);
 $tieneVersionesLb = ((int) $stmtLb->fetchColumn()) > 0;
 if ($tieneVersionesLb) $tablasConExtensiones = array_merge($tablasConExtensiones, ['hito_linea_base_version']);
+// Gestión gerencial (prioridad 2): tablas técnicas y privilegios de escritura de la aplicación.
+$escrituraGestion = [
+    'criterio_priorizacion' => 'INSERT,UPDATE', 'evaluacion_priorizacion' => 'INSERT,UPDATE', 'riesgo_proyecto' => 'INSERT,UPDATE',
+    'hito_peso' => 'INSERT,UPDATE', 'compromiso_presupuestal' => 'INSERT,UPDATE', 'parametro_alerta' => 'INSERT,UPDATE',
+    'documento_proyecto' => 'INSERT', 'beneficio_proyecto' => 'INSERT,UPDATE', 'proyecto_presupuesto_version' => null,
+];
+$stmtGestion = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'riesgo_proyecto'");
+$stmtGestion->execute([$op]);
+$tieneGestion = ((int) $stmtGestion->fetchColumn()) > 0;
+if ($tieneGestion) $tablasConExtensiones = array_merge($tablasConExtensiones, array_keys($escrituraGestion));
 foreach (['localhost','127.0.0.1'] as $host) {
     foreach (['sig_auth','sig_lector','sig_escritor','sig_etl','bi_lector','sig_definer'] as $cuenta) {
         $user = "'{$cuenta}'@'{$host}'";
@@ -59,6 +69,17 @@ foreach (['localhost','127.0.0.1'] as $host) {
     foreach (['bitacora_cambio','bitacora_motivo'] as $tabla) $grant('INSERT', "`$op`.`$tabla`", 'sig_definer');
     // Versiones de línea base: inmutables, solo las escriben los triggers del definer.
     if ($tieneVersionesLb) $grant('INSERT', "`$op`.hito_linea_base_version", 'sig_definer');
+    if ($tieneGestion) {
+        foreach ($escrituraGestion as $tabla => $privilegios) {
+            if ($privilegios !== null) $grant($privilegios, "`$op`.`$tabla`", 'sig_escritor');
+        }
+        $grant('INSERT', "`$op`.proyecto_presupuesto_version", 'sig_definer');
+        // Columnas que los triggers fijan con SET NEW (actor real y fecha de cierre).
+        foreach (['evaluacion_priorizacion' => 'id_responsable', 'compromiso_presupuestal' => 'id_responsable',
+            'documento_proyecto' => 'id_responsable', 'riesgo_proyecto' => 'fecha_cierre'] as $tabla => $columna) {
+            $grant("UPDATE ({$columna})", "`$op`.`$tabla`", 'sig_definer');
+        }
+    }
     $grant('UPDATE', "`$op`.control_revision", 'sig_definer');
     $grant('EXECUTE', "`$op`.*", 'sig_definer');
     $grant('TRIGGER', "`$op`.*", 'sig_definer');

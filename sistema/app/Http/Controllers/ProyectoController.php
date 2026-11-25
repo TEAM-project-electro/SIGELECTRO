@@ -162,7 +162,9 @@ class ProyectoController extends Controller
             'reprogramaciones' => $vs->where('accion', 'REPROGRAMACION')->count(),
         ]);
 
-        return view('proyectos.show', compact('proyecto', 'indicador', 'versionesLb', 'resumenLb'));
+        $gestion = app(\App\Services\Gestion\FichaGerencialService::class)->datos($proyecto->id_proyecto);
+
+        return view('proyectos.show', compact('proyecto', 'indicador', 'versionesLb', 'resumenLb', 'gestion'));
     }
 
     /**
@@ -262,6 +264,14 @@ class ProyectoController extends Controller
         $idResponsable = Auth::id();
         $motivo = "Cierre formal de proyecto PGD {$proyecto->codigo_pgd}";
 
+        // Regla configurable: sin acta adjunta y beneficios planificados no se cierra (parámetro exigir_acta_cierre).
+        if (($faltante = $this->requisitoCierreFaltante($proyecto)) !== null) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $faltante], 422);
+            }
+            return redirect()->route('proyectos.show', $proyecto)->with('error', 'No se pudo cerrar el proyecto: '.$faltante);
+        }
+
         try {
             DatabaseTransactionService::run($idResponsable, function () use ($proyecto) {
                 Gate::authorize('cerrar', Proyecto::on('escritor')->findOrFail($proyecto->id_proyecto));
@@ -320,5 +330,21 @@ class ProyectoController extends Controller
 
         return redirect()->route('proyectos.show', $proyecto)
             ->with('success', "El proyecto {$proyecto->codigo_pgd} ha sido reabierto exitosamente. Motivo registrado en la bitácora.");
+    }
+
+    private function requisitoCierreFaltante(Proyecto $proyecto): ?string
+    {
+        if ((int) (\App\Services\Gestion\AlertasService::parametros()['exigir_acta_cierre'] ?? 0) !== 1) {
+            return null;
+        }
+        $db = DB::connection('lector');
+        $faltan = [];
+        if (!$db->table('documento_proyecto')->where('id_proyecto', $proyecto->id_proyecto)->where('tipo', 'Acta')->exists()) {
+            $faltan[] = 'un acta adjunta';
+        }
+        if (!$db->table('beneficio_proyecto')->where('id_proyecto', $proyecto->id_proyecto)->exists()) {
+            $faltan[] = 'al menos un beneficio planificado';
+        }
+        return $faltan === [] ? null : 'falta '.implode(' y ', $faltan).'.';
     }
 }
