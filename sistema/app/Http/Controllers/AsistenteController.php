@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Rag\RagAgenteDecision;
 use App\Services\Rag\RagAsistente;
+use App\Services\Rag\RagGemini;
 use App\Services\Rag\RagIndexador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,9 @@ class AsistenteController extends Controller
         if ($request->expectsJson()) {
             return response()->json($resultado);
         }
+        if ($this->esParcial($request)) {
+            return view('asistente.partials.respuesta', ['resultado' => $resultado]);
+        }
         return view('asistente.index', $this->datosVista('consulta', [
             'resultado' => $resultado,
             'pregunta' => $datos['pregunta'],
@@ -59,6 +63,9 @@ class AsistenteController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json($decision);
+        }
+        if ($this->esParcial($request)) {
+            return view('asistente.partials.dictamen', ['decision' => $decision]);
         }
         return view('asistente.index', $this->datosVista('decision', [
             'decision' => $decision,
@@ -94,6 +101,12 @@ class AsistenteController extends Controller
         ]));
     }
 
+    /** Petición del chat sin recarga: devuelve solo el fragmento HTML ya escapado en servidor. */
+    private function esParcial(Request $request): bool
+    {
+        return $request->header('X-Asistente-Parcial') === '1';
+    }
+
     private function datosVista(string $tab, array $extra = []): array
     {
         $proyectos = DB::connection('lector')->table('proyecto')
@@ -108,6 +121,7 @@ class AsistenteController extends Controller
 
         return array_merge([
             'tabActiva' => $tab,
+            'iaDisponible' => app(RagGemini::class)->disponible(),
             'sugerencias' => self::SUGERENCIAS,
             'escenarios' => RagAgenteDecision::ESCENARIOS,
             'proyectos' => $proyectos,
